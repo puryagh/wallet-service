@@ -1,0 +1,145 @@
+Project wallet_service {
+  database_type: 'PostgreSQL'
+  Note: '''
+  # Liveutil Sessions Service Database Model
+  '''
+}
+
+// users table contains SMD for users
+Table users {
+  id bigserial [pk, note: 'user unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  approved boolean [not null, default: false, note: 'is user approved or no']
+  banned boolean [not null, default: false, note: 'is user banned or no']
+
+  meta_data jsonb [not null, default: '{}', note: 'user meta data']
+
+  roles text[] [not null, default: '{USER}', note: 'user assigned roles for permission controls']
+
+  expires_at timestamptz [note: 'expire time of user, if not sets then user valid for unlimited time']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when user was created']
+  updated_at timestamptz [note: 'when user was updated']
+  deleted_at timestamptz [note: 'when user was deleted']
+
+  Indexes {
+    id
+    identifier
+    deleted_at
+    (id, identifier, deleted_at)
+    (id, identifier, banned, approved, deleted_at)
+    (banned, approved)
+  }
+
+}
+
+// user related primary contact record type enum
+Enum contact_type {
+  EMAIL [note: 'contact primary type is Email']
+  MOBILE [note: 'contact primary type is Mobile']
+}
+
+// contacts table contains related user registered contacts
+Table contacts {
+  id bigserial [pk, note: 'contact unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  contact_type contact_type [not null, default: 'MOBILE', note: 'contact primary type']
+  user_id bigserial [not null, ref: > users.id, note: 'related user id to determining session owner account']
+
+  mobile varchar(16) [not null, unique, note: 'contact primary mobile phone number for authorization use']
+  mobile_totp varchar(256) [note: 'holds TOTP bcrypted pass code']
+  is_mobile_verified boolean [not null, default: false, note: 'sets to true if user verified his mobile by first time otp verification']
+  mobile_totp_expires_at timestamptz [note: 'holds by mobile OTP verification code expire time']
+
+  email varchar(256) [not null, unique, note: 'contact primary e-mail address']
+  email_totp varchar(256) [note: 'holds TOTP bcrypted pass code']
+  is_email_verified boolean [not null, default: false, note: 'sets to true if user verified his email by first time otp verification']
+  email_totp_expires_at timestamptz [note: 'holds by e-mail OTP verification code expire time']
+
+  meta_data jsonb [not null, default: '{}', note: 'contact meta data']
+
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when contact was created']
+  updated_at timestamptz [note: 'when contact was updated']
+  deleted_at timestamptz [note: 'when contact was deleted']
+
+  Indexes {
+    id
+    identifier
+    deleted_at
+    (id, identifier, deleted_at)
+    (id, identifier, contact_type, mobile, email)
+  }
+
+}
+
+// user related profile status enum
+Enum profile_status {
+  PENDING [note: 'profile pending for user to fill']
+  FILLED [note: 'user filled profile and pended to approve by system']
+  REJECTED [note: 'profile info rejected by system']
+  APPROVED [note: 'profile approved by system']
+  LOCKED [note: 'profile locked by system']
+}
+
+// profile type defines (Legal or Natural) person type
+Enum profile_type {
+  NATURAL [note: 'natural person type']
+  LEGAL [note: 'legal person type']
+}
+
+// profile table contains user related profiles
+Table profiles {
+  id bigserial [pk, note: 'profile unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  user_id bigserial [not null, ref: > users.id, note: 'related user id to determining session owner account']
+
+  profile_type profile_type [not null, note: 'legal or natural person type definition']
+
+  first_name varchar(128) [not null, note: 'user first name']
+  last_name varchar(128) [not null, note: 'user last name']
+  national_id varchar(32) [not null, unique, note: 'user unique personal national id-code']
+  status profile_status [not null, default: 'PENDING', note: 'profile control status']
+
+  meta_data jsonb [not null, default: '{}', note: 'profile meta data']
+  birth_date timestamptz [note: 'user birth date information']
+
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when profile was created']
+  updated_at timestamptz [note: 'when profile was updated']
+  deleted_at timestamptz [note: 'when profile was deleted']
+
+  Indexes {
+    id
+    identifier
+    deleted_at
+    (id, identifier, deleted_at)
+    (id, identifier, profile_type, status, national_id)
+  }
+
+}
+
+Table sessions {
+  id bigserial [not null, pk, note: 'session unique id']
+  host varchar(256) [not null, note: 'session creation request host name (for SSO use)']
+
+  device_id varchar(128) [not null, note: 'device unique identifier for device recognition']
+  device_name varchar(256) [not null, note: 'device human friendly name']
+  device_user_agent jsonb [not null, note: 'device user agent info in json format']
+  device_notification_token varchar(256) [note: 'device notification token for push notification sending']
+
+  identifier varchar(64) [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  user_id bigserial [not null, ref: > users.id, note: 'related user id to determining session owner account']
+
+  expires_in timestamptz [not null, note: 'when session expires (only refresh token would updates this field)']
+  notification varchar(256) [default: '', note: 'notification provider token for sending notifications by device']
+  meta_data jsonb [default: '{}', note: 'meta data of session like IP, UserAgent etc...']
+
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when session created']
+  deleted_at timestamptz [note: 'when session deleted']
+  updated_at timestamptz [note: 'when session updated']
+
+  Indexes {
+    deleted_at
+    host
+    (id, deleted_at)
+    (user_id, deleted_at)
+  }
+}

@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+import "rpc_wallet.model.proto";
+import "rpc_transaction.model.proto";
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+// model that contains context user wallet response properties.
+message ContextUserWalletResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// wallet data
+	Wallet wallet = 3;
+}
+
+// model that contains context user transaction list response properties.
+message ContextUserWalletTransactionsResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// transaction list
+	repeated Transaction transactions = 3;
+}
+
+// model that contains DepositeAsset request properties.
+message DepositeAssetRequest {
+	// asset type
+	string asset = 1;
+	// asset amount
+	float amount = 2;
+}
+
+// model that contains DepositeAsset response properties.
+message DepositeAssetResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// transaction data
+	Transaction transaction = 3;
+}
+
+// model that contains WithdrawAsset request properties.
+message WithdrawAssetRequest {
+	// asset type
+	string asset = 1;
+	// asset amount
+	float amount = 2;
+}
+
+// model that contains WithdrawAsset response properties.
+message WithdrawAssetResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// transaction data
+	Transaction transaction = 3;
+}
+
+// model that contains TransferAsset request properties.
+message TransferAssetRequest {
+	// asset type
+	string asset = 1;
+	// asset amount
+	float amount = 2;
+	// receiver wallet identifier
+	string receiver_wallet_identifier = 3;
+}
+
+// model that contains TransferAsset response properties.
+message TransferAssetResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// transaction data
+	Transaction transaction = 3;
+}
+
+// model that contains ExchangeAsset request properties.
+message ExchangeAssetRequest {
+	// asset type
+	string asset = 1;
+	// asset amount
+	float amount = 2;
+	// receiver wallet identifier
+	string receiver_wallet_identifier = 3;
+}
+
+// model that contains ExchangeAsset response properties.
+message ExchangeAssetResponse {
+	// error sets true if processing failed otherwise sets false
+	bool error = 1;
+	// message contains error message if error is true or helper message if error is false
+	string message = 2;
+	// transaction data
+	Transaction transaction = 3;
+}

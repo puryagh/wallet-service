@@ -1,0 +1,45 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "SignInRequest",
+    "$protected": true,
+    "title": "SignInRequest",
+    "description": "Request to sign in with mobile or email",
+    "type": "object",
+    "required": [
+        "role"
+    ],
+    "oneOf": [
+        {
+            "required": [
+                "mobile"
+            ]
+        },
+        {
+            "required": [
+                "email"
+            ]
+        }
+    ],
+    "properties": {
+        "mobile": {
+            "type": "string",
+            "description": "mobile phone number",
+            "pattern": "^\\+98[0-9]{10}$",
+            "minLength": 13,
+            "maxLength": 16
+        },
+        "email": {
+            "type": "string",
+            "description": "email address",
+            "format": "email",
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            "maxLength": 256
+        },
+        "role": {
+            "type": "string",
+            "description": "expected role of user to sign in",
+            "pattern": "^[A-Z_]{4,64}$"
+        }
+    },
+    "additionalProperties": false
+}

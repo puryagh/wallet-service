@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "RefreshTokenRequest",
+    "$protected": true,
+    "title": "RefreshTokenRequest",
+    "description": "refresh token request",
+    "type": "object",
+    "required": [
+        "refresh_token"
+    ],
+    "properties": {
+        "refresh_token": {
+            "type": "string",
+            "description": "refresh token",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^v2\\.local\\.([A-Za-z0-9_-]+)(?:\\.([A-Za-z0-9_-]+))?$"
+        }
+    },
+    "additionalProperties": false
+}

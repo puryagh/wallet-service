@@ -1,0 +1,30 @@
+Project wallet_service {
+  database_type: 'PostgreSQL'
+  Note: '''
+  # Liveutil Multi Asset Core Wallet Service Database Model
+  '''
+}
+
+// wallets table contains SMD for wallets
+Table wallets {
+  id bigserial [pk, note: 'wallet unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  banned boolean [not null, default: false, note: 'is wallet banned or no']
+
+  meta_data jsonb [not null, default: '{}', note: 'wallet meta data']
+
+  expires_at timestamptz [note: 'expire time of wallet, if not sets then user valid for unlimited time']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet was created']
+  updated_at timestamptz [note: 'when wallet was updated']
+  deleted_at timestamptz [note: 'when wallet was deleted']
+
+  Indexes {
+    id
+    identifier
+    deleted_at
+    (id, identifier, deleted_at)
+    (id, identifier, banned, deleted_at)
+    (banned)
+  }
+
+}

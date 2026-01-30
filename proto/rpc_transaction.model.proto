@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+// Transaction message containing all transaction data and nested entities
+message Transaction {
+    // transaction public identifier to hide real database id of transaction
+    string identifier = 1;
+    // transaction type
+    string transaction_type = 2;
+    // transaction asset type
+    string asset = 3;
+    // transaction amount
+    float amount = 4;
+    // transaction fee
+    float fee = 5;
+    // transaction status
+    string status = 6;
+    // transaction creation time
+    google.protobuf.Timestamp created_at = 7;
+}

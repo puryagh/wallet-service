@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "rpc_dto.proto";
+import "rpc_transaction.model.proto";
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title      : "Wallet Service API";
+    version    : "1.0.0";
+    description: "Wallet Service API for user wallet management";
+    contact    : {
+      name : "Wallet Service API Support";
+      email: "liveutil@icloud.com";
+    };
+  };
+  schemes             : HTTP;
+  schemes             : HTTPS;
+  consumes            : "application/json";
+  produces            : "application/json";
+  security_definitions: {
+    security: {
+      key  : "Bearer";
+      value: {
+        type       : TYPE_API_KEY;
+        in         : IN_HEADER;
+        name       : "Authorization";
+        description: "Authentication token, prefixed by Bearer: Bearer <token>";
+      };
+    };
+  };
+  security: {
+    security_requirement: {
+      key  : "Bearer";
+      value: {};
+    };
+  };
+};
+
+// WalletService service provides user wallet management endpoints
+service WalletService {
+  // Deposite asset to user wallet.
+  rpc DepositeAsset(DepositeAssetRequest) returns (DepositeAssetResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/deposite_asset"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Deposite Asset";
+      description: "Deposite asset to user wallet";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // Withdraw asset from user wallet.
+  rpc WithdrawAsset(WithdrawAssetRequest) returns (WithdrawAssetResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/withdraw_asset"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Withdraw Asset";
+      description: "Withdraw asset from user wallet";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // Transfer asset from user wallet to another user wallet.
+  rpc TransferAsset(TransferAssetRequest) returns (TransferAssetResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/transfer_asset"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Transfer Asset";
+      description: "Transfer asset from user wallet to another user wallet";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // Exchange asset from user wallet to another asset.
+  rpc ExcahngeAsset(ExchangeAssetRequest) returns (ExchangeAssetResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/exchange_asset"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Exchange Asset";
+      description: "Exchange asset from user wallet to another asset";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // Get context user wallet data.
+  rpc ContextUserWallet(google.protobuf.Empty) returns (ContextUserWalletResponse) {
+    option (google.api.http) = {
+      get: "/v1/wallet/context_user_wallet"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Context User Wallet";
+      description: "Get context user wallet data";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+    option (google.api.cache) = {
+      enabled    : true
+      ttl_seconds: 120
+      key_prefix : "wallet"
+    };
+  }
+
+  // Get context user wallet transaction list.
+  rpc ContextUserWalletTransactions(google.protobuf.Empty) returns (ContextUserWalletTransactionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/wallet/context_user_wallet_transactions"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Context User Wallet Transactions";
+      description: "Get context user wallet transaction list";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+    option (google.api.cache) = {
+      enabled    : true
+      ttl_seconds: 120
+      key_prefix : "wallet"
+    };
+  }
+}

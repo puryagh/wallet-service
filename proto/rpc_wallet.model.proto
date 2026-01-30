@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+// Wallet message containing all wallet data and nested entities
+message Wallet {
+	// wallet public identifier to hide real database id of wallet
+	string identifier = 1;
+	// wallet ban status
+	bool banned = 2;
+  // metadata contains wallet meta data
+  map<string, string> meta_data = 3;
+  // wallet expiration time
+  google.protobuf.Timestamp expires_at = 4;
+	// wallet creation time
+	google.protobuf.Timestamp created_at = 5;
+  // wallet update time
+  google.protobuf.Timestamp updated_at = 6;
+  // wallet deletion time
+  google.protobuf.Timestamp deleted_at = 7;
+}

@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch noghrestan backend wallet service (multi-env)",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/wallet-service/main.go",
+            "env": {},
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "envFile": [
+                "${workspaceFolder}/dev.env"
+            ]
+        }
+    ]
+}

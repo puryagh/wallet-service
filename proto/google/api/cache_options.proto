@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package google.api;
+
+option cc_enable_arenas = true;
+option go_package = "google.golang.org/genproto/googleapis/api/annotations;annotations";
+option java_multiple_files = true;
+option java_outer_classname = "HttpProto";
+option java_package = "com.google.api";
+option objc_class_prefix = "GAPI";
+
+// Configuration message for cache behavior
+message CacheOptions {
+  bool enabled = 1;          // Should this RPC be cached?
+  int32 ttl_seconds = 2;     // Cache TTL duration
+  string key_prefix = 3;     // Optional prefix for cache key namespace
+}

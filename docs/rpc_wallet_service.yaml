@@ -1,0 +1,548 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Wallet Service API",
+    "description": "Wallet Service API for user wallet management",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Wallet Service API Support",
+      "email": "liveutil@icloud.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "WalletService"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/wallet/context_user_wallet": {
+      "get": {
+        "summary": "Context User Wallet",
+        "description": "Get context user wallet data",
+        "operationId": "WalletService_ContextUserWallet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoContextUserWalletResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/context_user_wallet_transactions": {
+      "get": {
+        "summary": "Context User Wallet Transactions",
+        "description": "Get context user wallet transaction list",
+        "operationId": "WalletService_ContextUserWalletTransactions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoContextUserWalletTransactionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/deposite_asset": {
+      "post": {
+        "summary": "Deposite Asset",
+        "description": "Deposite asset to user wallet",
+        "operationId": "WalletService_DepositeAsset",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoDepositeAssetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "model that contains DepositeAsset request properties.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDepositeAssetRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/exchange_asset": {
+      "post": {
+        "summary": "Exchange Asset",
+        "description": "Exchange asset from user wallet to another asset",
+        "operationId": "WalletService_ExcahngeAsset",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoExchangeAssetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "model that contains ExchangeAsset request properties.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoExchangeAssetRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/transfer_asset": {
+      "post": {
+        "summary": "Transfer Asset",
+        "description": "Transfer asset from user wallet to another user wallet",
+        "operationId": "WalletService_TransferAsset",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoTransferAssetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "model that contains TransferAsset request properties.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoTransferAssetRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/withdraw_asset": {
+      "post": {
+        "summary": "Withdraw Asset",
+        "description": "Withdraw asset from user wallet",
+        "operationId": "WalletService_WithdrawAsset",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoWithdrawAssetResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "model that contains WithdrawAsset request properties.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoWithdrawAssetRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protoContextUserWalletResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "wallet": {
+          "$ref": "#/definitions/protoWallet",
+          "title": "wallet data"
+        }
+      },
+      "description": "model that contains context user wallet response properties."
+    },
+    "protoContextUserWalletTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTransaction"
+          },
+          "title": "transaction list"
+        }
+      },
+      "description": "model that contains context user transaction list response properties."
+    },
+    "protoDepositeAssetRequest": {
+      "type": "object",
+      "properties": {
+        "asset": {
+          "type": "string",
+          "title": "asset type"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "title": "asset amount"
+        }
+      },
+      "description": "model that contains DepositeAsset request properties."
+    },
+    "protoDepositeAssetResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "transaction": {
+          "$ref": "#/definitions/protoTransaction",
+          "title": "transaction data"
+        }
+      },
+      "description": "model that contains DepositeAsset response properties."
+    },
+    "protoExchangeAssetRequest": {
+      "type": "object",
+      "properties": {
+        "asset": {
+          "type": "string",
+          "title": "asset type"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "title": "asset amount"
+        },
+        "receiver_wallet_identifier": {
+          "type": "string",
+          "title": "receiver wallet identifier"
+        }
+      },
+      "description": "model that contains ExchangeAsset request properties."
+    },
+    "protoExchangeAssetResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "transaction": {
+          "$ref": "#/definitions/protoTransaction",
+          "title": "transaction data"
+        }
+      },
+      "description": "model that contains ExchangeAsset response properties."
+    },
+    "protoTransaction": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "title": "transaction public identifier to hide real database id of transaction"
+        },
+        "transaction_type": {
+          "type": "string",
+          "title": "transaction type"
+        },
+        "asset": {
+          "type": "string",
+          "title": "transaction asset type"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "title": "transaction amount"
+        },
+        "fee": {
+          "type": "number",
+          "format": "float",
+          "title": "transaction fee"
+        },
+        "status": {
+          "type": "string",
+          "title": "transaction status"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "transaction creation time"
+        }
+      },
+      "title": "Transaction message containing all transaction data and nested entities"
+    },
+    "protoTransferAssetRequest": {
+      "type": "object",
+      "properties": {
+        "asset": {
+          "type": "string",
+          "title": "asset type"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "title": "asset amount"
+        },
+        "receiver_wallet_identifier": {
+          "type": "string",
+          "title": "receiver wallet identifier"
+        }
+      },
+      "description": "model that contains TransferAsset request properties."
+    },
+    "protoTransferAssetResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "transaction": {
+          "$ref": "#/definitions/protoTransaction",
+          "title": "transaction data"
+        }
+      },
+      "description": "model that contains TransferAsset response properties."
+    },
+    "protoWallet": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "title": "wallet public identifier to hide real database id of wallet"
+        },
+        "banned": {
+          "type": "boolean",
+          "title": "wallet ban status"
+        },
+        "meta_data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "metadata contains wallet meta data"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "wallet expiration time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "wallet creation time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "wallet update time"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "wallet deletion time"
+        }
+      },
+      "title": "Wallet message containing all wallet data and nested entities"
+    },
+    "protoWithdrawAssetRequest": {
+      "type": "object",
+      "properties": {
+        "asset": {
+          "type": "string",
+          "title": "asset type"
+        },
+        "amount": {
+          "type": "number",
+          "format": "float",
+          "title": "asset amount"
+        }
+      },
+      "description": "model that contains WithdrawAsset request properties."
+    },
+    "protoWithdrawAssetResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "boolean",
+          "title": "error sets true if processing failed otherwise sets false"
+        },
+        "message": {
+          "type": "string",
+          "title": "message contains error message if error is true or helper message if error is false"
+        },
+        "transaction": {
+          "$ref": "#/definitions/protoTransaction",
+          "title": "transaction data"
+        }
+      },
+      "description": "model that contains WithdrawAsset response properties."
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "description": "Authentication token, prefixed by Bearer: Bearer <token>",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}

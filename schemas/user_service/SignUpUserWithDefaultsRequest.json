@@ -1,0 +1,70 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "SignUpUserWithDefaultsRequest",
+    "$protected": true,
+    "title": "SignUpUserWithDefaultsRequest",
+    "description": "Request to sign up user with default contact and profile",
+    "type": "object",
+    "required": [
+        "profile_type",
+        "first_name",
+        "last_name",
+        "national_id"
+    ],
+    "oneOf": [
+        {
+            "required": [
+                "mobile"
+            ]
+        },
+        {
+            "required": [
+                "email"
+            ]
+        }
+    ],
+    "properties": {
+        "mobile": {
+            "type": "string",
+            "description": "Mobile phone number",
+            "pattern": "^\\+98[0-9]{10}$",
+            "minLength": 13,
+            "maxLength": 16
+        },
+        "email": {
+            "type": "string",
+            "description": "Email address",
+            "format": "email",
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            "maxLength": 256
+        },
+        "profile_type": {
+            "type": "string",
+            "description": "Type of profile",
+            "enum": [
+                "NATURAL",
+                "LEGAL"
+            ]
+        },
+        "first_name": {
+            "type": "string",
+            "description": "User's first name",
+            "minLength": 1,
+            "maxLength": 128
+        },
+        "last_name": {
+            "type": "string",
+            "description": "User's last name",
+            "minLength": 1,
+            "maxLength": 128
+        },
+        "national_id": {
+            "type": "string",
+            "description": "National ID number",
+            "minLength": 1,
+            "pattern": "^[0-9]{10}$",
+            "maxLength": 10
+        }
+    },
+    "additionalProperties": false
+}
