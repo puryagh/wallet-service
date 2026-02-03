@@ -1,6 +1,6 @@
-DB_URL ?= postgresql://noghrestan:noghrestan_postgres_pass@localhost:6633/noghrestan?sslmode=disable
-PG_CONTAINER ?= noghrestan-postgres
-PG_USER ?= noghrestan
+DB_URL ?= postgresql://liveutil:liveutil_postgres_pass@localhost:6633/liveutil?sslmode=disable
+PG_CONTAINER ?= liveutil-postgres
+PG_USER ?= liveutil
 APPLICATION_NAME ?= wallet-service
 ENV_DIR := ./env
 CONSUL_HTTP_ADDR := localhost:8501
@@ -119,9 +119,64 @@ schema: ## Generate SQL schema from DBML file located at internal/infra/db/diagr
 	@echo "Copying database diagram to postgres database design directory..."
 	@cp internal/infra/db/postgres/database.dbml ./docs/database.dbml
 	@cp internal/infra/db/postgres/database.dbml ./postgres/design/database.dbml
-	@cp internal/infra/db/postgres/database.dbml ../../noghrestan-stack/postgres/schemas/$(APPLICATION_NAME).dbml
-	@cp internal/infra/db/postgres/schema.sql ../../noghrestan-stack/postgres/schemas/$(APPLICATION_NAME).sql
+	@cp internal/infra/db/postgres/database.dbml ../../liveutil-stack/postgres/schemas/$(APPLICATION_NAME).dbml
+	@cp internal/infra/db/postgres/schema.sql ../../liveutil-stack/postgres/schemas/$(APPLICATION_NAME).sql
 	@echo "Schema generation complete."
+
+.PHONY: compose-tb-build
+compose-tb-build: ## Build custom TigerBeetle image with healthcheck support
+	@echo "Building custom TigerBeetle image..."
+	docker build -t tigerbeetle-custom:latest ./tigerbeetle
+	@echo "Custom TigerBeetle image built successfully."
+
+.PHONY: compose-tb-format
+compose-tb-format: ## Format TigerBeetle data files for the cluster (required before first start)
+	@echo "Formatting TigerBeetle data files..."
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env run --rm tigerbeetle-0 format --cluster=0 --replica=0 --replica-count=3 /data/0_0.tigerbeetle
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env run --rm tigerbeetle-1 format --cluster=0 --replica=1 --replica-count=3 /data/0_1.tigerbeetle
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env run --rm tigerbeetle-2 format --cluster=0 --replica=2 --replica-count=3 /data/0_2.tigerbeetle
+	@echo "TigerBeetle data files formatted successfully."
+
+.PHONY: compose-tb-up
+compose-tb-up: ## Start development TigerBittle cluster containers
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env up -d
+
+.PHONY: compose-tb-down
+compose-tb-down: ## Stop development TigerBittle cluster containers
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env down
+
+.PHONY: compose-tb-down-volumes
+compose-tb-down-volumes: ## Stop development TigerBittle cluster containers and remove volumes
+	docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env down -v
+
+.PHONY: compose-tb-init
+compose-tb-init: ## Initialize TigerBeetle cluster from scratch (build, format and start)
+	compose-tb-build compose-tb-down-volumes compose-tb-format compose-tb-up 
+
+.PHONY: compose-tb-status
+compose-tb-status: ## Show TigerBeetle cluster containers health status
+	@echo "=== TigerBeetle Cluster Status ==="
+	@docker ps --filter "name=tigerbeetle" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "No TigerBeetle containers running"
+	@echo ""
+	@echo "=== Detailed Health Information ==="
+	@for container in tigerbeetle-0 tigerbeetle-1 tigerbeetle-2; do \
+		if docker ps --filter "name=$$container" --format "{{.Names}}" 2>/dev/null | grep -q "$$container"; then \
+			echo "--- $$container ---"; \
+			docker inspect $$container --format='Status: {{.State.Health.Status}}' 2>/dev/null || echo "Status: No healthcheck configured"; \
+			docker inspect $$container --format='Last Check: {{if .State.Health.Log}}{{(index .State.Health.Log 0).Output}}{{else}}N/A{{end}}' 2>/dev/null | head -1; \
+			echo ""; \
+		fi \
+	done
+
+.PHONY: compose-tb-logs
+compose-tb-logs: ## Show TigerBeetle cluster logs (use CONTAINER=tigerbeetle-0 for specific container)
+	@if [ -z "$(CONTAINER)" ]; then \
+		echo "=== Showing logs for all TigerBeetle containers ==="; \
+		docker compose -f docker-compose.tb.yaml --env-file $(ENV_DIR)/tigerbittle.env logs --tail=50 -f; \
+	else \
+		echo "=== Showing logs for $(CONTAINER) ==="; \
+		docker logs -f $(CONTAINER); \
+	fi
 
 .PHONY: compose-dev-up
 compose-dev-up: ## Start development containers
@@ -186,12 +241,12 @@ validate-openapi: ## Validate the generated OpenAPI specification files
 	bash "$(CURDIR)/scripts/validate-openapi.sh" "$$APP_NAME"
 
 .PHONY: init-db
-init-db: ## Initialize the 'noghrestan' database in the Postgres container
-	@echo "initializing the 'noghrestan' database in the Postgres container..."
+init-db: ## Initialize the 'liveutil' database in the Postgres container
+	@echo "initializing the 'liveutil' database in the Postgres container..."
 	@echo "Input directory: postgres/schemas"
 	@echo ""
 	for file in postgres/schemas/*.sql; do \
 		base=$$(basename $$file .sql); \
-		docker exec -it noghrestan-postgres bash -c "psql -h localhost -p 6633 -U postgres -d noghrestan -f /docker-entrypoint-initdb.d/schemas/$$base.sql"; \
+		docker exec -it liveutil-postgres bash -c "psql -h localhost -p 6633 -U postgres -d liveutil -f /docker-entrypoint-initdb.d/schemas/$$base.sql"; \
 	done
-	@echo "'noghrestan' database initialization completed."
+	@echo "'liveutil' database initialization completed."

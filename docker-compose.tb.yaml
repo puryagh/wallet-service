@@ -1,0 +1,89 @@
+services:
+  tigerbeetle-0:
+    image: tigerbeetle-custom:latest
+    container_name: ${LU_CFG_TIGERBEETLE_0_CONTAINER_NAME:-tigerbeetle-0}
+    command: start --addresses=${LU_CFG_TIGERBEETLE_0_IP:-172.20.0.10}:3000,${LU_CFG_TIGERBEETLE_1_IP:-172.20.0.11}:3001,${LU_CFG_TIGERBEETLE_2_IP:-172.20.0.12}:3002 --cache-grid=512MiB /data/0_0.tigerbeetle
+    volumes:
+      - tigerbeetle-data-0:/data
+    ports:
+      - "${LU_CFG_TIGERBEETLE_0_PORT:-3000}:3000"
+    networks:
+      tigerbeetle-net:
+        ipv4_address: ${LU_CFG_TIGERBEETLE_0_IP:-172.20.0.10}
+    environment:
+      - TIGERBEETLE_AUTH_TOKEN=${LU_CFG_TIGERBEETLE_AUTH_TOKEN:-your-secure-token-here}
+    restart: unless-stopped
+    security_opt:
+      - seccomp=unconfined
+    healthcheck:
+      test: ["CMD", "nc", "-z", "172.20.0.10", "3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  tigerbeetle-1:
+    image: tigerbeetle-custom:latest
+    container_name: ${LU_CFG_TIGERBEETLE_1_CONTAINER_NAME:-tigerbeetle-1}
+    command: start --addresses=${LU_CFG_TIGERBEETLE_0_IP:-172.20.0.10}:3000,${LU_CFG_TIGERBEETLE_1_IP:-172.20.0.11}:3001,${LU_CFG_TIGERBEETLE_2_IP:-172.20.0.12}:3002 --cache-grid=512MiB /data/0_1.tigerbeetle
+    volumes:
+      - tigerbeetle-data-1:/data
+    ports:
+      - "${LU_CFG_TIGERBEETLE_1_PORT:-3001}:3001"
+    networks:
+      tigerbeetle-net:
+        ipv4_address: ${LU_CFG_TIGERBEETLE_1_IP:-172.20.0.11}
+    environment:
+      - TIGERBEETLE_AUTH_TOKEN=${LU_CFG_TIGERBEETLE_AUTH_TOKEN:-your-secure-token-here}
+    restart: unless-stopped
+    security_opt:
+      - seccomp=unconfined
+    depends_on:
+      - tigerbeetle-0
+    healthcheck:
+      test: ["CMD", "nc", "-z", "172.20.0.11", "3001"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  tigerbeetle-2:
+    image: tigerbeetle-custom:latest
+    container_name: ${LU_CFG_TIGERBEETLE_2_CONTAINER_NAME:-tigerbeetle-2}
+    command: start --addresses=${LU_CFG_TIGERBEETLE_0_IP:-172.20.0.10}:3000,${LU_CFG_TIGERBEETLE_1_IP:-172.20.0.11}:3001,${LU_CFG_TIGERBEETLE_2_IP:-172.20.0.12}:3002 --cache-grid=512MiB /data/0_2.tigerbeetle
+    volumes:
+      - tigerbeetle-data-2:/data
+    ports:
+      - "${LU_CFG_TIGERBEETLE_2_PORT:-3002}:3002"
+    networks:
+      tigerbeetle-net:
+        ipv4_address: ${LU_CFG_TIGERBEETLE_2_IP:-172.20.0.12}
+    environment:
+      - TIGERBEETLE_AUTH_TOKEN=${LU_CFG_TIGERBEETLE_AUTH_TOKEN:-your-secure-token-here}
+    restart: unless-stopped
+    security_opt:
+      - seccomp=unconfined
+    depends_on:
+      - tigerbeetle-0
+      - tigerbeetle-1
+    healthcheck:
+      test: ["CMD", "nc", "-z", "172.20.0.12", "3002"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  tigerbeetle-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${LU_CFG_TIGERBEETLE_SUBNET:-172.20.0.0/24}
+
+volumes:
+  tigerbeetle-data-0:
+    driver: local
+  tigerbeetle-data-1:
+    driver: local
+  tigerbeetle-data-2:
+    driver: local

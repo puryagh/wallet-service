@@ -26,7 +26,7 @@ RUN GOPRIVATE=git.iranpishran.com/* go mod tidy
 COPY . .
 
 # Build the application
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /app/bin/noghrestan-be ./cmd/noghrestan-be
+RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /app/bin/liveutil-be ./cmd/liveutil-be
 
 
 
@@ -47,7 +47,7 @@ RUN adduser -D -H -h /app appuser
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/bin/noghrestan-be .
+COPY --from=builder /app/bin/liveutil-be .
 COPY --from=builder /app/schemas .
 
 # Set ownership
@@ -64,4 +64,4 @@ ENV TZ=UTC \
     GO_ENV=production
 
 # Run the application
-ENTRYPOINT ["./noghrestan-be"]
+ENTRYPOINT ["./liveutil-be"]

@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch noghrestan backend wallet service (multi-env)",
+            "name": "Launch liveutil backend wallet service (multi-env)",
             "type": "go",
             "request": "launch",
             "mode": "debug",
