@@ -6,20 +6,83 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
 
-// Wallet message containing all wallet data and nested entities
+// Wallet represents a user's wallet container that holds multiple asset accounts.
+// A wallet is the top-level entity that groups related wallet accounts for a single user.
+// Field ordering optimized for Go memory alignment: pointers/timestamps → bools → strings → maps.
 message Wallet {
-	// wallet public identifier to hide real database id of wallet
-	string identifier = 1;
-	// wallet ban status
-	bool banned = 2;
-  // metadata contains wallet meta data
-  map<string, string> meta_data = 3;
-  // wallet expiration time
+  // Timestamp when the wallet was created in the system
+  google.protobuf.Timestamp created_at = 1; // 8 bytes (pointer)
+
+  // Timestamp when the wallet was last updated (null if never updated)
+  google.protobuf.Timestamp updated_at = 2; // 8 bytes (pointer)
+
+  // Timestamp when the wallet was soft-deleted (null if active)
+  google.protobuf.Timestamp deleted_at = 3; // 8 bytes (pointer)
+
+  // Expiration timestamp for temporary or time-limited wallets (null if permanent)
+  google.protobuf.Timestamp expires_at = 4; // 8 bytes (pointer)
+
+  // Indicates whether the wallet is banned due to policy violations or fraud
+  bool banned = 5; // 1 byte
+
+  // Unique external identifier for the wallet (ULID format for sortable, globally unique IDs)
+  string identifier = 6;
+
+  // Human-readable name or label for the wallet (e.g., "Main Wallet", "Savings")
+  string title = 7;
+
+  // Optional description providing additional context about the wallet's purpose
+  string description = 8;
+
+  // Current lifecycle status of the wallet (PENDING, ISSUED, ACTIVE)
+  string status = 9;
+
+  // External identifier of the user who owns this wallet
+  string user_identifier = 10;
+
+  // External identifier of the primary/base asset for this wallet (e.g., default currency)
+  string base_asset_identifier = 11;
+
+  // Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)
+  map<string, string> meta_data = 12;
+}
+
+// WalletResponse is an alias for Wallet used in API responses for clarity.
+// Maintains backward compatibility with existing API contracts.
+message WalletResponse {
+  // Timestamp when the wallet was created in the system
+  google.protobuf.Timestamp created_at = 1;
+
+  // Timestamp when the wallet was last updated (null if never updated)
+  google.protobuf.Timestamp updated_at = 2;
+
+  // Timestamp when the wallet was soft-deleted (null if active)
+  google.protobuf.Timestamp deleted_at = 3;
+
+  // Expiration timestamp for temporary or time-limited wallets (null if permanent)
   google.protobuf.Timestamp expires_at = 4;
-	// wallet creation time
-	google.protobuf.Timestamp created_at = 5;
-  // wallet update time
-  google.protobuf.Timestamp updated_at = 6;
-  // wallet deletion time
-  google.protobuf.Timestamp deleted_at = 7;
+
+  // Indicates whether the wallet is banned due to policy violations or fraud
+  bool banned = 5;
+
+  // Unique external identifier for the wallet (ULID format)
+  string identifier = 6;
+
+  // Human-readable name or label for the wallet
+  string title = 7;
+
+  // Optional description providing additional context about the wallet's purpose
+  string description = 8;
+
+  // Current lifecycle status of the wallet (PENDING, ISSUED, ACTIVE)
+  string status = 9;
+
+  // External identifier of the user who owns this wallet
+  string user_identifier = 10;
+
+  // External identifier of the primary/base asset for this wallet
+  string base_asset_identifier = 11;
+
+  // Flexible key-value metadata for storing custom attributes
+  map<string, string> meta_data = 12;
 }

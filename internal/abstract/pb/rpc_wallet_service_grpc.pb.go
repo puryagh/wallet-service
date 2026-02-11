@@ -20,32 +20,51 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WalletService_DepositeAsset_FullMethodName                 = "/proto.WalletService/DepositeAsset"
+	WalletService_DepositAsset_FullMethodName                  = "/proto.WalletService/DepositAsset"
 	WalletService_WithdrawAsset_FullMethodName                 = "/proto.WalletService/WithdrawAsset"
 	WalletService_TransferAsset_FullMethodName                 = "/proto.WalletService/TransferAsset"
-	WalletService_ExcahngeAsset_FullMethodName                 = "/proto.WalletService/ExcahngeAsset"
+	WalletService_ExchangeAsset_FullMethodName                 = "/proto.WalletService/ExchangeAsset"
 	WalletService_ContextUserWallet_FullMethodName             = "/proto.WalletService/ContextUserWallet"
 	WalletService_ContextUserWalletTransactions_FullMethodName = "/proto.WalletService/ContextUserWalletTransactions"
+	WalletService_GetAccountTransfers_FullMethodName           = "/proto.WalletService/GetAccountTransfers"
+	WalletService_QueryTransfers_FullMethodName                = "/proto.WalletService/QueryTransfers"
+	WalletService_LookupTransfers_FullMethodName               = "/proto.WalletService/LookupTransfers"
 )
 
 // WalletServiceClient is the client API for WalletService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// WalletService service provides user wallet management endpoints
+// WalletService provides comprehensive wallet management endpoints for asset operations.
+// All endpoints require Bearer token authentication and support both gRPC and HTTP/JSON.
 type WalletServiceClient interface {
-	// Deposite asset to user wallet.
-	DepositeAsset(ctx context.Context, in *DepositeAssetRequest, opts ...grpc.CallOption) (*DepositeAssetResponse, error)
-	// Withdraw asset from user wallet.
+	// DepositAsset adds funds to the authenticated user's wallet account for a specific asset.
+	// This operation creates a credit transfer in TigerBeetle from a system account to the user's account.
+	DepositAsset(ctx context.Context, in *DepositAssetRequest, opts ...grpc.CallOption) (*DepositAssetResponse, error)
+	// WithdrawAsset removes funds from the authenticated user's wallet account for a specific asset.
+	// This operation creates a debit transfer in TigerBeetle from the user's account to a system account.
 	WithdrawAsset(ctx context.Context, in *WithdrawAssetRequest, opts ...grpc.CallOption) (*WithdrawAssetResponse, error)
-	// Transfer asset from user wallet to another user wallet.
+	// TransferAsset moves funds from the authenticated user's wallet to another user's wallet.
+	// This operation creates a transfer in TigerBeetle between two user accounts.
 	TransferAsset(ctx context.Context, in *TransferAssetRequest, opts ...grpc.CallOption) (*TransferAssetResponse, error)
-	// Exchange asset from user wallet to another asset.
-	ExcahngeAsset(ctx context.Context, in *ExchangeAssetRequest, opts ...grpc.CallOption) (*ExchangeAssetResponse, error)
-	// Get context user wallet data.
+	// ExchangeAsset converts one asset to another within the authenticated user's wallet.
+	// This operation creates two linked transfers in TigerBeetle for atomic exchange.
+	ExchangeAsset(ctx context.Context, in *ExchangeAssetRequest, opts ...grpc.CallOption) (*ExchangeAssetResponse, error)
+	// ContextUserWallet retrieves the authenticated user's wallet information.
+	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWallet(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletResponse, error)
-	// Get context user wallet transaction list.
+	// ContextUserWalletTransactions retrieves the authenticated user's transaction history.
+	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWalletTransactions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletTransactionsResponse, error)
+	// GetAccountTransfers queries TigerBeetle transfers for a specific account.
+	// This is a low-level endpoint for direct TigerBeetle transfer queries.
+	GetAccountTransfers(ctx context.Context, in *GetAccountTransfersRequest, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error)
+	// QueryTransfers queries TigerBeetle transfers by metadata and filter criteria.
+	// This is a low-level endpoint for advanced transfer queries.
+	QueryTransfers(ctx context.Context, in *QueryTransfersRequest, opts ...grpc.CallOption) (*QueryTransfersResponse, error)
+	// LookupTransfers fetches specific TigerBeetle transfers by their IDs.
+	// This is the most efficient way to retrieve known transfers.
+	LookupTransfers(ctx context.Context, in *LookupTransfersRequest, opts ...grpc.CallOption) (*LookupTransfersResponse, error)
 }
 
 type walletServiceClient struct {
@@ -56,10 +75,10 @@ func NewWalletServiceClient(cc grpc.ClientConnInterface) WalletServiceClient {
 	return &walletServiceClient{cc}
 }
 
-func (c *walletServiceClient) DepositeAsset(ctx context.Context, in *DepositeAssetRequest, opts ...grpc.CallOption) (*DepositeAssetResponse, error) {
+func (c *walletServiceClient) DepositAsset(ctx context.Context, in *DepositAssetRequest, opts ...grpc.CallOption) (*DepositAssetResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DepositeAssetResponse)
-	err := c.cc.Invoke(ctx, WalletService_DepositeAsset_FullMethodName, in, out, cOpts...)
+	out := new(DepositAssetResponse)
+	err := c.cc.Invoke(ctx, WalletService_DepositAsset_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,10 +105,10 @@ func (c *walletServiceClient) TransferAsset(ctx context.Context, in *TransferAss
 	return out, nil
 }
 
-func (c *walletServiceClient) ExcahngeAsset(ctx context.Context, in *ExchangeAssetRequest, opts ...grpc.CallOption) (*ExchangeAssetResponse, error) {
+func (c *walletServiceClient) ExchangeAsset(ctx context.Context, in *ExchangeAssetRequest, opts ...grpc.CallOption) (*ExchangeAssetResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExchangeAssetResponse)
-	err := c.cc.Invoke(ctx, WalletService_ExcahngeAsset_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, WalletService_ExchangeAsset_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -116,24 +135,70 @@ func (c *walletServiceClient) ContextUserWalletTransactions(ctx context.Context,
 	return out, nil
 }
 
+func (c *walletServiceClient) GetAccountTransfers(ctx context.Context, in *GetAccountTransfersRequest, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAccountTransfersResponse)
+	err := c.cc.Invoke(ctx, WalletService_GetAccountTransfers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) QueryTransfers(ctx context.Context, in *QueryTransfersRequest, opts ...grpc.CallOption) (*QueryTransfersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryTransfersResponse)
+	err := c.cc.Invoke(ctx, WalletService_QueryTransfers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *walletServiceClient) LookupTransfers(ctx context.Context, in *LookupTransfersRequest, opts ...grpc.CallOption) (*LookupTransfersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LookupTransfersResponse)
+	err := c.cc.Invoke(ctx, WalletService_LookupTransfers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WalletServiceServer is the server API for WalletService service.
 // All implementations must embed UnimplementedWalletServiceServer
 // for forward compatibility.
 //
-// WalletService service provides user wallet management endpoints
+// WalletService provides comprehensive wallet management endpoints for asset operations.
+// All endpoints require Bearer token authentication and support both gRPC and HTTP/JSON.
 type WalletServiceServer interface {
-	// Deposite asset to user wallet.
-	DepositeAsset(context.Context, *DepositeAssetRequest) (*DepositeAssetResponse, error)
-	// Withdraw asset from user wallet.
+	// DepositAsset adds funds to the authenticated user's wallet account for a specific asset.
+	// This operation creates a credit transfer in TigerBeetle from a system account to the user's account.
+	DepositAsset(context.Context, *DepositAssetRequest) (*DepositAssetResponse, error)
+	// WithdrawAsset removes funds from the authenticated user's wallet account for a specific asset.
+	// This operation creates a debit transfer in TigerBeetle from the user's account to a system account.
 	WithdrawAsset(context.Context, *WithdrawAssetRequest) (*WithdrawAssetResponse, error)
-	// Transfer asset from user wallet to another user wallet.
+	// TransferAsset moves funds from the authenticated user's wallet to another user's wallet.
+	// This operation creates a transfer in TigerBeetle between two user accounts.
 	TransferAsset(context.Context, *TransferAssetRequest) (*TransferAssetResponse, error)
-	// Exchange asset from user wallet to another asset.
-	ExcahngeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error)
-	// Get context user wallet data.
+	// ExchangeAsset converts one asset to another within the authenticated user's wallet.
+	// This operation creates two linked transfers in TigerBeetle for atomic exchange.
+	ExchangeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error)
+	// ContextUserWallet retrieves the authenticated user's wallet information.
+	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWallet(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error)
-	// Get context user wallet transaction list.
+	// ContextUserWalletTransactions retrieves the authenticated user's transaction history.
+	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error)
+	// GetAccountTransfers queries TigerBeetle transfers for a specific account.
+	// This is a low-level endpoint for direct TigerBeetle transfer queries.
+	GetAccountTransfers(context.Context, *GetAccountTransfersRequest) (*GetAccountTransfersResponse, error)
+	// QueryTransfers queries TigerBeetle transfers by metadata and filter criteria.
+	// This is a low-level endpoint for advanced transfer queries.
+	QueryTransfers(context.Context, *QueryTransfersRequest) (*QueryTransfersResponse, error)
+	// LookupTransfers fetches specific TigerBeetle transfers by their IDs.
+	// This is the most efficient way to retrieve known transfers.
+	LookupTransfers(context.Context, *LookupTransfersRequest) (*LookupTransfersResponse, error)
 	mustEmbedUnimplementedWalletServiceServer()
 }
 
@@ -144,8 +209,8 @@ type WalletServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedWalletServiceServer struct{}
 
-func (UnimplementedWalletServiceServer) DepositeAsset(context.Context, *DepositeAssetRequest) (*DepositeAssetResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DepositeAsset not implemented")
+func (UnimplementedWalletServiceServer) DepositAsset(context.Context, *DepositAssetRequest) (*DepositAssetResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DepositAsset not implemented")
 }
 func (UnimplementedWalletServiceServer) WithdrawAsset(context.Context, *WithdrawAssetRequest) (*WithdrawAssetResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method WithdrawAsset not implemented")
@@ -153,14 +218,23 @@ func (UnimplementedWalletServiceServer) WithdrawAsset(context.Context, *Withdraw
 func (UnimplementedWalletServiceServer) TransferAsset(context.Context, *TransferAssetRequest) (*TransferAssetResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method TransferAsset not implemented")
 }
-func (UnimplementedWalletServiceServer) ExcahngeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ExcahngeAsset not implemented")
+func (UnimplementedWalletServiceServer) ExchangeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExchangeAsset not implemented")
 }
 func (UnimplementedWalletServiceServer) ContextUserWallet(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ContextUserWallet not implemented")
 }
 func (UnimplementedWalletServiceServer) ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ContextUserWalletTransactions not implemented")
+}
+func (UnimplementedWalletServiceServer) GetAccountTransfers(context.Context, *GetAccountTransfersRequest) (*GetAccountTransfersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAccountTransfers not implemented")
+}
+func (UnimplementedWalletServiceServer) QueryTransfers(context.Context, *QueryTransfersRequest) (*QueryTransfersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method QueryTransfers not implemented")
+}
+func (UnimplementedWalletServiceServer) LookupTransfers(context.Context, *LookupTransfersRequest) (*LookupTransfersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LookupTransfers not implemented")
 }
 func (UnimplementedWalletServiceServer) mustEmbedUnimplementedWalletServiceServer() {}
 func (UnimplementedWalletServiceServer) testEmbeddedByValue()                       {}
@@ -183,20 +257,20 @@ func RegisterWalletServiceServer(s grpc.ServiceRegistrar, srv WalletServiceServe
 	s.RegisterService(&WalletService_ServiceDesc, srv)
 }
 
-func _WalletService_DepositeAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DepositeAssetRequest)
+func _WalletService_DepositAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositAssetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServiceServer).DepositeAsset(ctx, in)
+		return srv.(WalletServiceServer).DepositAsset(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: WalletService_DepositeAsset_FullMethodName,
+		FullMethod: WalletService_DepositAsset_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServiceServer).DepositeAsset(ctx, req.(*DepositeAssetRequest))
+		return srv.(WalletServiceServer).DepositAsset(ctx, req.(*DepositAssetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -237,20 +311,20 @@ func _WalletService_TransferAsset_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WalletService_ExcahngeAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WalletService_ExchangeAsset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExchangeAssetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServiceServer).ExcahngeAsset(ctx, in)
+		return srv.(WalletServiceServer).ExchangeAsset(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: WalletService_ExcahngeAsset_FullMethodName,
+		FullMethod: WalletService_ExchangeAsset_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServiceServer).ExcahngeAsset(ctx, req.(*ExchangeAssetRequest))
+		return srv.(WalletServiceServer).ExchangeAsset(ctx, req.(*ExchangeAssetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -291,6 +365,60 @@ func _WalletService_ContextUserWalletTransactions_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WalletService_GetAccountTransfers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountTransfersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).GetAccountTransfers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_GetAccountTransfers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).GetAccountTransfers(ctx, req.(*GetAccountTransfersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_QueryTransfers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryTransfersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).QueryTransfers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_QueryTransfers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).QueryTransfers(ctx, req.(*QueryTransfersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WalletService_LookupTransfers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LookupTransfersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).LookupTransfers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WalletService_LookupTransfers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).LookupTransfers(ctx, req.(*LookupTransfersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WalletService_ServiceDesc is the grpc.ServiceDesc for WalletService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -299,8 +427,8 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*WalletServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DepositeAsset",
-			Handler:    _WalletService_DepositeAsset_Handler,
+			MethodName: "DepositAsset",
+			Handler:    _WalletService_DepositAsset_Handler,
 		},
 		{
 			MethodName: "WithdrawAsset",
@@ -311,8 +439,8 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _WalletService_TransferAsset_Handler,
 		},
 		{
-			MethodName: "ExcahngeAsset",
-			Handler:    _WalletService_ExcahngeAsset_Handler,
+			MethodName: "ExchangeAsset",
+			Handler:    _WalletService_ExchangeAsset_Handler,
 		},
 		{
 			MethodName: "ContextUserWallet",
@@ -321,6 +449,18 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ContextUserWalletTransactions",
 			Handler:    _WalletService_ContextUserWalletTransactions_Handler,
+		},
+		{
+			MethodName: "GetAccountTransfers",
+			Handler:    _WalletService_GetAccountTransfers_Handler,
+		},
+		{
+			MethodName: "QueryTransfers",
+			Handler:    _WalletService_QueryTransfers_Handler,
+		},
+		{
+			MethodName: "LookupTransfers",
+			Handler:    _WalletService_LookupTransfers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -13,249 +13,184 @@ import (
 	ulid "github.com/oklog/ulid/v2"
 )
 
-type ContactType string
+type AccountStatus string
 
 const (
-	ContactTypeEMAIL  ContactType = "EMAIL"
-	ContactTypeMOBILE ContactType = "MOBILE"
+	AccountStatusPENDING AccountStatus = "PENDING"
+	AccountStatusISSUED  AccountStatus = "ISSUED"
+	AccountStatusACTIVE  AccountStatus = "ACTIVE"
 )
 
-func (e *ContactType) Scan(src interface{}) error {
+func (e *AccountStatus) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = ContactType(s)
+		*e = AccountStatus(s)
 	case string:
-		*e = ContactType(s)
+		*e = AccountStatus(s)
 	default:
-		return fmt.Errorf("unsupported scan type for ContactType: %T", src)
+		return fmt.Errorf("unsupported scan type for AccountStatus: %T", src)
 	}
 	return nil
 }
 
-type NullContactType struct {
-	ContactType ContactType `json:"contact_type"`
-	Valid       bool        `json:"valid"` // Valid is true if ContactType is not NULL
+type NullAccountStatus struct {
+	AccountStatus AccountStatus `json:"account_status"`
+	Valid         bool          `json:"valid"` // Valid is true if AccountStatus is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullContactType) Scan(value interface{}) error {
+func (ns *NullAccountStatus) Scan(value interface{}) error {
 	if value == nil {
-		ns.ContactType, ns.Valid = "", false
+		ns.AccountStatus, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.ContactType.Scan(value)
+	return ns.AccountStatus.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullContactType) Value() (driver.Value, error) {
+func (ns NullAccountStatus) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.ContactType), nil
+	return string(ns.AccountStatus), nil
 }
 
-type ProfileStatus string
+type WalletAccountStatus string
 
 const (
-	ProfileStatusPENDING  ProfileStatus = "PENDING"
-	ProfileStatusFILLED   ProfileStatus = "FILLED"
-	ProfileStatusREJECTED ProfileStatus = "REJECTED"
-	ProfileStatusAPPROVED ProfileStatus = "APPROVED"
-	ProfileStatusLOCKED   ProfileStatus = "LOCKED"
+	WalletAccountStatusPENDING      WalletAccountStatus = "PENDING"
+	WalletAccountStatusACTIVE       WalletAccountStatus = "ACTIVE"
+	WalletAccountStatusINACTIVE     WalletAccountStatus = "INACTIVE"
+	WalletAccountStatusBANNED       WalletAccountStatus = "BANNED"
+	WalletAccountStatusLOCKED       WalletAccountStatus = "LOCKED"
+	WalletAccountStatusLINKEDLOCKED WalletAccountStatus = "LINKED_LOCKED"
 )
 
-func (e *ProfileStatus) Scan(src interface{}) error {
+func (e *WalletAccountStatus) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = ProfileStatus(s)
+		*e = WalletAccountStatus(s)
 	case string:
-		*e = ProfileStatus(s)
+		*e = WalletAccountStatus(s)
 	default:
-		return fmt.Errorf("unsupported scan type for ProfileStatus: %T", src)
+		return fmt.Errorf("unsupported scan type for WalletAccountStatus: %T", src)
 	}
 	return nil
 }
 
-type NullProfileStatus struct {
-	ProfileStatus ProfileStatus `json:"profile_status"`
-	Valid         bool          `json:"valid"` // Valid is true if ProfileStatus is not NULL
+type NullWalletAccountStatus struct {
+	WalletAccountStatus WalletAccountStatus `json:"wallet_account_status"`
+	Valid               bool                `json:"valid"` // Valid is true if WalletAccountStatus is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullProfileStatus) Scan(value interface{}) error {
+func (ns *NullWalletAccountStatus) Scan(value interface{}) error {
 	if value == nil {
-		ns.ProfileStatus, ns.Valid = "", false
+		ns.WalletAccountStatus, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.ProfileStatus.Scan(value)
+	return ns.WalletAccountStatus.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullProfileStatus) Value() (driver.Value, error) {
+func (ns NullWalletAccountStatus) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.ProfileStatus), nil
+	return string(ns.WalletAccountStatus), nil
 }
 
-type ProfileType string
-
-const (
-	ProfileTypeNATURAL ProfileType = "NATURAL"
-	ProfileTypeLEGAL   ProfileType = "LEGAL"
-)
-
-func (e *ProfileType) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = ProfileType(s)
-	case string:
-		*e = ProfileType(s)
-	default:
-		return fmt.Errorf("unsupported scan type for ProfileType: %T", src)
-	}
-	return nil
-}
-
-type NullProfileType struct {
-	ProfileType ProfileType `json:"profile_type"`
-	Valid       bool        `json:"valid"` // Valid is true if ProfileType is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullProfileType) Scan(value interface{}) error {
-	if value == nil {
-		ns.ProfileType, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.ProfileType.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullProfileType) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.ProfileType), nil
-}
-
-type Contact struct {
-	// contact unique id
-	ID int64 `json:"id"`
+type Account struct {
 	// unique external identifier for inter system internal-external identifier separation
 	Identifier ulid.ULID `json:"identifier"`
-	// contact primary type
-	ContactType ContactType `json:"contact_type"`
-	// related user id to determining session owner account
-	UserID int64 `json:"user_id"`
-	// contact primary mobile phone number for authorization use
-	Mobile string `json:"mobile"`
-	// holds TOTP bcrypted pass code
-	MobileTotp pgtype.Text `json:"mobile_totp"`
-	// sets to true if user verified his mobile by first time otp verification
-	IsMobileVerified bool `json:"is_mobile_verified"`
-	// holds by mobile OTP verification code expire time
-	MobileTotpExpiresAt pgtype.Timestamptz `json:"mobile_totp_expires_at"`
-	// contact primary e-mail address
-	Email string `json:"email"`
-	// holds TOTP bcrypted pass code
-	EmailTotp pgtype.Text `json:"email_totp"`
-	// sets to true if user verified his email by first time otp verification
-	IsEmailVerified bool `json:"is_email_verified"`
-	// holds by e-mail OTP verification code expire time
-	EmailTotpExpiresAt pgtype.Timestamptz `json:"email_totp_expires_at"`
-	// contact meta data
-	MetaData []byte `json:"meta_data"`
-	// when contact was created
-	CreatedAt time.Time `json:"created_at"`
-	// when contact was updated
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	// when contact was deleted
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
-}
-
-type Profile struct {
-	// profile unique id
-	ID int64 `json:"id"`
-	// unique external identifier for inter system internal-external identifier separation
-	Identifier ulid.ULID `json:"identifier"`
-	// related user id to determining session owner account
-	UserID int64 `json:"user_id"`
-	// legal or natural person type definition
-	ProfileType ProfileType `json:"profile_type"`
-	// user first name
-	FirstName string `json:"first_name"`
-	// user last name
-	LastName string `json:"last_name"`
-	// user unique personal national id-code
-	NationalID string `json:"national_id"`
-	// profile control status
-	Status ProfileStatus `json:"status"`
-	// profile meta data
-	MetaData []byte `json:"meta_data"`
-	// user birth date information
-	BirthDate pgtype.Timestamptz `json:"birth_date"`
-	// when profile was created
-	CreatedAt time.Time `json:"created_at"`
-	// when profile was updated
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	// when profile was deleted
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
-}
-
-type Session struct {
-	// session unique id
-	ID int64 `json:"id"`
-	// session creation request host name (for SSO use)
-	Host string `json:"host"`
-	// device unique identifier for device recognition
-	DeviceID string `json:"device_id"`
-	// device human friendly name
-	DeviceName string `json:"device_name"`
-	// device user agent info in json format
-	DeviceUserAgent []byte `json:"device_user_agent"`
-	// device notification token for push notification sending
-	DeviceNotificationToken pgtype.Text `json:"device_notification_token"`
-	// unique external identifier for inter system internal-external identifier separation
-	Identifier string `json:"identifier"`
-	// related user id to determining session owner account
-	UserID int64 `json:"user_id"`
-	// when session expires (only refresh token would updates this field)
-	ExpiresIn time.Time `json:"expires_in"`
-	// notification provider token for sending notifications by device
-	Notification pgtype.Text `json:"notification"`
-	// meta data of session like IP, UserAgent etc...
-	MetaData []byte `json:"meta_data"`
-	// when session created
-	CreatedAt time.Time `json:"created_at"`
-	// when session deleted
-	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
-	// when session updated
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-}
-
-type User struct {
-	// user unique id
-	ID int64 `json:"id"`
-	// unique external identifier for inter system internal-external identifier separation
-	Identifier ulid.ULID `json:"identifier"`
-	// is user approved or no
-	Approved bool `json:"approved"`
-	// is user banned or no
+	// account title
+	Title string `json:"title"`
+	// account description
+	Description pgtype.Text `json:"description"`
+	// account status
+	Status AccountStatus `json:"status"`
+	// is account banned or no
 	Banned bool `json:"banned"`
-	// user meta data
+	// related user identifier to determining account owner account
+	UserIdentifier ulid.ULID `json:"user_identifier"`
+	// related base asset identifier to determining account base asset
+	BaseAssetIdentifier ulid.ULID `json:"base_asset_identifier"`
+	// account meta data
 	MetaData []byte `json:"meta_data"`
-	// user assigned roles for permission controls
-	Roles []string `json:"roles"`
-	// expire time of user, if not sets then user valid for unlimited time
+	// expire time of account, if not sets then user valid for unlimited time
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	// when user was created
+	// when account was created
 	CreatedAt time.Time `json:"created_at"`
-	// when user was updated
+	// when account was updated
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	// when user was deleted
+	// when account was deleted
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type Wallet struct {
+	// unique external identifier for inter system internal-external identifier separation
+	Identifier ulid.ULID `json:"identifier"`
+	// related user identifier to determining account owner
+	UserIdentifier ulid.ULID `json:"user_identifier"`
+	// related account identifier to determining account of wallet
+	AccountIdentifier ulid.ULID `json:"account_identifier"`
+	// related asset identifier to determining asset of wallet
+	AssetIdentifier int64 `json:"asset_identifier"`
+	// wallet account meta data
+	MetaData []byte `json:"meta_data"`
+	// related ledger account id to determining "ledger account" of wallet in ledger core
+	LedgerAccountID interface{} `json:"ledger_account_id"`
+	// related ledger account code to determining service code for wallet in ledger core
+	LedgerAccountCode int32 `json:"ledger_account_code"`
+	// primary account number of wallet account
+	PrimaryAccountNumber string `json:"primary_account_number"`
+	// IBAN of wallet account
+	Iban pgtype.Text `json:"iban"`
+	// CVV of wallet account
+	Cvv pgtype.Text `json:"cvv"`
+	// CVV2 of wallet account
+	CvvTwo pgtype.Text `json:"cvv_two"`
+	// expire date of wallet account
+	ExpireDate pgtype.Text `json:"expire_date"`
+	// PIN code of wallet account (bcrypted)
+	PinCode pgtype.Text `json:"pin_code"`
+	// wallet account status
+	Status WalletAccountStatus `json:"status"`
+	// transaction TOTP secret for wallet account (bcrypted)
+	TransactionTotpSecret pgtype.Text `json:"transaction_totp_secret"`
+	// transaction TOTP secret expire time for wallet account
+	TransactionTotpExpiresAt pgtype.Timestamptz `json:"transaction_totp_expires_at"`
+	// when wallet account was created
+	CreatedAt time.Time `json:"created_at"`
+	// when wallet account was updated
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	// when wallet account was deleted
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type WalletAsset struct {
+	// unique external identifier for inter system internal-external identifier separation
+	Identifier ulid.ULID `json:"identifier"`
+	// is wallet asset active or no
+	Active bool `json:"active"`
+	// asset code of wallet asset
+	Code string `json:"code"`
+	// asset symbol of wallet asset
+	Symbol string `json:"symbol"`
+	// wallet asset title
+	Title string `json:"title"`
+	// wallet asset description
+	Description pgtype.Text `json:"description"`
+	// wallet asset meta data
+	MetaData []byte `json:"meta_data"`
+	// related ledger code to determining wallet in ledger
+	LedgerCode int32 `json:"ledger_code"`
+	// when wallet asset was created
+	CreatedAt time.Time `json:"created_at"`
+	// when wallet asset was updated
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	// when wallet asset was deleted
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
 }

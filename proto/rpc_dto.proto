@@ -8,98 +8,312 @@ import "rpc_transaction.model.proto";
 
 option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
 
-// model that contains context user wallet response properties.
+// ============================================================================
+// Wallet Service API Request/Response Messages
+// ============================================================================
+
+// ContextUserWalletResponse returns the authenticated user's wallet information.
+// Field ordering optimized for Go memory alignment: bool → Wallet (pointer) → string.
 message ContextUserWalletResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// wallet data
-	Wallet wallet = 3;
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// Wallet data for the authenticated user (null if error is true)
+	Wallet wallet = 2; // pointer
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
 }
 
-// model that contains context user transaction list response properties.
+// ContextUserWalletTransactionsResponse returns the authenticated user's transaction history.
+// Field ordering optimized for Go memory alignment: bool → repeated (slice) → string.
 message ContextUserWalletTransactionsResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// transaction list
-	repeated Transaction transactions = 3;
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// List of transactions for the authenticated user (empty if error is true)
+	repeated Transaction transactions = 2; // slice
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
 }
 
-// model that contains DepositeAsset request properties.
-message DepositeAssetRequest {
-	// asset type
+// DepositAssetRequest initiates a deposit of assets into the user's wallet account.
+// Note: Using string for amount to avoid floating-point precision issues in financial calculations.
+message DepositAssetRequest {
+	// Asset code to deposit (e.g., "USD", "EUR", "BTC")
 	string asset = 1;
-	// asset amount
-	float amount = 2;
+
+	// Amount to deposit as a decimal string (e.g., "100.50")
+	// Use string instead of float to maintain precision
+	string amount = 2;
 }
 
-// model that contains DepositeAsset response properties.
-message DepositeAssetResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// transaction data
-	Transaction transaction = 3;
+// DepositAssetResponse returns the result of a deposit operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
+message DepositAssetResponse {
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// Transaction record for the deposit (null if error is true)
+	Transaction transaction = 2; // pointer
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
 }
 
-// model that contains WithdrawAsset request properties.
+// WithdrawAssetRequest initiates a withdrawal of assets from the user's wallet account.
 message WithdrawAssetRequest {
-	// asset type
+	// Asset code to withdraw (e.g., "USD", "EUR", "BTC")
 	string asset = 1;
-	// asset amount
-	float amount = 2;
+
+	// Amount to withdraw as a decimal string (e.g., "50.25")
+	// Use string instead of float to maintain precision
+	string amount = 2;
 }
 
-// model that contains WithdrawAsset response properties.
+// WithdrawAssetResponse returns the result of a withdrawal operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 message WithdrawAssetResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// transaction data
-	Transaction transaction = 3;
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// Transaction record for the withdrawal (null if error is true)
+	Transaction transaction = 2; // pointer
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
 }
 
-// model that contains TransferAsset request properties.
+// TransferAssetRequest initiates a transfer of assets from the user's wallet to another user's wallet.
 message TransferAssetRequest {
-	// asset type
+	// Asset code to transfer (e.g., "USD", "EUR", "BTC")
 	string asset = 1;
-	// asset amount
-	float amount = 2;
-	// receiver wallet identifier
+
+	// Amount to transfer as a decimal string (e.g., "25.00")
+	// Use string instead of float to maintain precision
+	string amount = 2;
+
+	// External identifier (ULID) of the recipient's wallet
 	string receiver_wallet_identifier = 3;
 }
 
-// model that contains TransferAsset response properties.
+// TransferAssetResponse returns the result of a transfer operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 message TransferAssetResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// transaction data
-	Transaction transaction = 3;
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// Transaction record for the transfer (null if error is true)
+	Transaction transaction = 2; // pointer
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
 }
 
-// model that contains ExchangeAsset request properties.
+// ExchangeAssetRequest initiates an exchange of one asset for another within the user's wallet.
 message ExchangeAssetRequest {
-	// asset type
-	string asset = 1;
-	// asset amount
-	float amount = 2;
-	// receiver wallet identifier
-	string receiver_wallet_identifier = 3;
+	// Source asset code to exchange from (e.g., "USD")
+	string from_asset = 1;
+
+	// Amount of source asset to exchange as a decimal string (e.g., "100.00")
+	string amount = 2;
+
+	// Target asset code to exchange to (e.g., "EUR")
+	string to_asset = 3;
 }
 
-// model that contains ExchangeAsset response properties.
+// ExchangeAssetResponse returns the result of an exchange operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 message ExchangeAssetResponse {
-	// error sets true if processing failed otherwise sets false
-	bool error = 1;
-	// message contains error message if error is true or helper message if error is false
-	string message = 2;
-	// transaction data
-	Transaction transaction = 3;
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
+	// Transaction record for the exchange (null if error is true)
+	Transaction transaction = 2; // pointer
+
+	// Human-readable message: error description if error=true, success message if error=false
+	string message = 3;
+}
+
+// ============================================================================
+// TigerBeetle Transfer Query Messages
+// ============================================================================
+
+// GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.
+// This is the primary method for retrieving transaction history for an account.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.
+message GetAccountTransfersRequest {
+  // TigerBeetle account ID (128-bit, 16 bytes) to query transfers for
+  bytes account_id = 1; // 16 bytes
+
+  // Minimum timestamp filter (nanoseconds since epoch, inclusive, 0 = no lower bound)
+  uint64 timestamp_min = 2; // 8 bytes
+
+  // Maximum timestamp filter (nanoseconds since epoch, inclusive, 0 = no upper bound)
+  uint64 timestamp_max = 3; // 8 bytes
+
+  // Maximum number of results to return (default: 8190, TigerBeetle's max batch size)
+  uint32 limit = 4; // 4 bytes
+
+  // Optional filter by transfer code (0 = no filter)
+  uint32 code = 5; // 4 bytes
+
+  // Include debit transfers (money leaving the account)
+  bool debits = 6; // 1 byte
+
+  // Include credit transfers (money entering the account)
+  bool credits = 7; // 1 byte
+
+  // Return results in reverse chronological order (newest first)
+  bool reversed = 8; // 1 byte
+}
+
+// GetAccountTransfersResponse returns transfers matching the query criteria.
+// Field ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated.
+message GetAccountTransfersResponse {
+  // Timestamp of the next page for pagination (0 if no more results)
+  uint64 next_timestamp = 1; // 8 bytes
+
+  // Total number of transfers returned in this response
+  uint32 total_count = 2; // 4 bytes
+
+  // Indicates whether more results are available beyond this page
+  bool has_more = 3; // 1 byte
+
+  // List of transfers matching the query criteria
+  repeated Transfer transfers = 4; // slice
+}
+
+// QueryTransfersRequest queries transfers by metadata and other filter criteria.
+// Useful for finding transfers by custom user_data fields or ledger/code combinations.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.
+message QueryTransfersRequest {
+  // Filter by custom 128-bit metadata (16 bytes, 0 = no filter)
+  bytes user_data_128 = 1; // 16 bytes
+
+  // Minimum timestamp filter (nanoseconds since epoch, 0 = no lower bound)
+  uint64 timestamp_min = 2; // 8 bytes
+
+  // Maximum timestamp filter (nanoseconds since epoch, 0 = no upper bound)
+  uint64 timestamp_max = 3; // 8 bytes
+
+  // Filter by custom 64-bit metadata (0 = no filter)
+  uint64 user_data_64 = 4; // 8 bytes
+
+  // Maximum number of results to return
+  uint32 limit = 5; // 4 bytes
+
+  // Filter by ledger identifier (0 = no filter)
+  uint32 ledger = 6; // 4 bytes
+
+  // Filter by transfer code (0 = no filter)
+  uint32 code = 7; // 4 bytes
+
+  // Filter by custom 32-bit metadata (0 = no filter)
+  uint32 user_data_32 = 8; // 4 bytes
+
+  // Return results in reverse chronological order (newest first)
+  bool reversed = 9; // 1 byte
+}
+
+// QueryTransfersResponse returns transfers matching the query criteria.
+// Field ordering optimized for Go memory alignment: uint32 → bool → repeated.
+message QueryTransfersResponse {
+  // Total number of transfers returned in this response
+  uint32 total_count = 1; // 4 bytes
+
+  // Indicates whether more results are available beyond this page
+  bool has_more = 2; // 1 byte
+
+  // List of transfers matching the query criteria
+  repeated Transfer transfers = 3; // slice
+}
+
+// LookupTransfersRequest fetches specific transfers by their IDs.
+// This is the most efficient way to retrieve known transfers.
+message LookupTransfersRequest {
+  // List of transfer IDs (128-bit, 16 bytes each) to look up
+  repeated bytes ids = 1;
+}
+
+// LookupTransfersResponse returns the requested transfers.
+message LookupTransfersResponse {
+  // List of transfers matching the requested IDs (order may differ from request)
+  repeated Transfer transfers = 1;
+}
+
+// AccountFilter provides advanced filtering for account-based transfer queries.
+// This is a lower-level filter that maps directly to TigerBeetle's AccountFilter.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32.
+message AccountFilter {
+  // TigerBeetle account ID (128-bit, 16 bytes) to query transfers for
+  bytes account_id = 1; // 16 bytes
+
+  // Filter by custom 128-bit metadata (16 bytes, 0 = no filter)
+  bytes user_data_128 = 2; // 16 bytes
+
+  // Minimum timestamp filter (nanoseconds since epoch, 0 = no lower bound)
+  uint64 timestamp_min = 3; // 8 bytes
+
+  // Maximum timestamp filter (nanoseconds since epoch, 0 = no upper bound)
+  uint64 timestamp_max = 4; // 8 bytes
+
+  // Filter by custom 64-bit metadata (0 = no filter)
+  uint64 user_data_64 = 5; // 8 bytes
+
+  // Maximum number of results to return
+  uint32 limit = 6; // 4 bytes
+
+  // Bitfield flags for filter behavior (debits, credits, reversed)
+  uint32 flags = 7; // 4 bytes
+
+  // Filter by transfer code (0 = no filter)
+  uint32 code = 8; // 4 bytes
+
+  // Filter by custom 32-bit metadata (0 = no filter)
+  uint32 user_data_32 = 9; // 4 bytes
+}
+
+// ============================================================================
+// High-Level Transaction Query Messages (Application Layer)
+// ============================================================================
+
+// GetTransactionsRequest queries high-level transactions from the wallet service.
+// This provides a user-friendly interface with timestamp-based filtering.
+// Field ordering optimized for Go memory alignment: Timestamp (pointer) → uint32 → bool.
+message GetTransactionsRequest {
+  // Minimum timestamp filter (inclusive, null = no lower bound)
+  google.protobuf.Timestamp timestamp_min = 1; // 8 bytes (pointer)
+
+  // Maximum timestamp filter (inclusive, null = no upper bound)
+  google.protobuf.Timestamp timestamp_max = 2; // 8 bytes (pointer)
+
+  // Maximum number of transactions to return in the response
+  uint32 limit = 3; // 4 bytes
+
+  // Include debit transactions (money leaving accounts)
+  bool include_debits = 4; // 1 byte
+
+  // Include credit transactions (money entering accounts)
+  bool include_credits = 5; // 1 byte
+
+  // Return results in reverse chronological order (newest first)
+  bool reverse_order = 6; // 1 byte
+
+  // External identifier (ULID) of the account to query transactions for
+  string account_id = 7;
+}
+
+// GetTransactionsResponse returns high-level transactions matching the query criteria.
+// Field ordering optimized for Go memory alignment: bool → repeated → string.
+message GetTransactionsResponse {
+  // Indicates whether an error occurred during processing
+  bool error = 1; // 1 byte
+
+  // List of transactions matching the query criteria (empty if error is true)
+  repeated Transaction transactions = 2; // slice
+
+  // Human-readable message: error description if error=true, success message if error=false
+  string message = 3;
 }

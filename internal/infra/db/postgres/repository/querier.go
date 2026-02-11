@@ -11,30 +11,21 @@ import (
 )
 
 type Querier interface {
-	CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error)
-	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	CreateUserAndRelations(ctx context.Context, arg CreateUserAndRelationsParams) (CreateUserAndRelationsRow, error)
-	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) (Session, error)
-	FindActiveEmailContact(ctx context.Context, arg FindActiveEmailContactParams) (FindActiveEmailContactRow, error)
-	FindActiveMobileContact(ctx context.Context, arg FindActiveMobileContactParams) (FindActiveMobileContactRow, error)
-	GetActiveUserById(ctx context.Context, id int64) (User, error)
-	GetActiveUserByIdentifier(ctx context.Context, identifier ulid.ULID) (User, error)
-	GetContactByEmail(ctx context.Context, email string) (Contact, error)
-	GetContactById(ctx context.Context, id int64) (Contact, error)
-	GetContactByMobile(ctx context.Context, mobile string) (Contact, error)
-	GetContactByUserID(ctx context.Context, userID int64) (Contact, error)
-	GetContactByUserId(ctx context.Context, userID int64) (Contact, error)
-	GetProfileByUserID(ctx context.Context, userID int64) (Profile, error)
-	GetSafeUserById(ctx context.Context, id int64) (GetSafeUserByIdRow, error)
-	GetSessionById(ctx context.Context, arg GetSessionByIdParams) (Session, error)
-	GetUserById(ctx context.Context, id int64) (User, error)
-	GetUserByIdentifier(ctx context.Context, identifier ulid.ULID) (User, error)
-	RenewUserSession(ctx context.Context, arg RenewUserSessionParams) (Session, error)
-	SafeDeleteContact(ctx context.Context, id int64) error
-	SetEmailOTP(ctx context.Context, arg SetEmailOTPParams) (Contact, error)
-	SetMobileOTP(ctx context.Context, arg SetMobileOTPParams) (Contact, error)
-	UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error)
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
+	GetAccountByIdentifier(ctx context.Context, identifier ulid.ULID) (Account, error)
+	GetAllWalletAssets(ctx context.Context, arg GetAllWalletAssetsParams) ([]WalletAsset, error)
+	GetUserAccounts(ctx context.Context, arg GetUserAccountsParams) ([]Account, error)
+	// join accounts, wallets and wallet_assets tables to get wallet and base asset information
+	// 1: select account with specified user identifier if it status that is enum is not 'PENDING' , deleted_at IS NULL and banned is FALSE and expires_at after now
+	// 2 : get wallet asset by symbol if active field IS TRUE and deleted_at IS NULL
+	// 3 : get wallet by user identifier and base asset identifier that match with input user identifier and base asset identifier selected in step 2
+	//  3-1: selected wallet asset deleted_at IS NULL
+	//  3-3: selected wallet deleted_at IS NULL
+	GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (GetUserAssetWalletRow, error)
+	GetUserWallets(ctx context.Context, arg GetUserWalletsParams) ([]Wallet, error)
+	GetWalletAssetByIdentifier(ctx context.Context, identifier ulid.ULID) (WalletAsset, error)
+	GetWalletAssetBySymbol(ctx context.Context, symbol string) (WalletAsset, error)
+	GetWalletByIdentifier(ctx context.Context, identifier ulid.ULID) (Wallet, error)
 }
 
 var _ Querier = (*Queries)(nil)

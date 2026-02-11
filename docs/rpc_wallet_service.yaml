@@ -27,8 +27,8 @@
   "paths": {
     "/v1/wallet/context_user_wallet": {
       "get": {
-        "summary": "Context User Wallet",
-        "description": "Get context user wallet data",
+        "summary": "Get Authenticated User Wallet",
+        "description": "Retrieve wallet information for the authenticated user",
         "operationId": "WalletService_ContextUserWallet",
         "responses": {
           "200": {
@@ -56,8 +56,8 @@
     },
     "/v1/wallet/context_user_wallet_transactions": {
       "get": {
-        "summary": "Context User Wallet Transactions",
-        "description": "Get context user wallet transaction list",
+        "summary": "Get Authenticated User Transactions",
+        "description": "Retrieve transaction history for the authenticated user's wallet",
         "operationId": "WalletService_ContextUserWalletTransactions",
         "responses": {
           "200": {
@@ -83,16 +83,16 @@
         ]
       }
     },
-    "/v1/wallet/deposite_asset": {
+    "/v1/wallet/deposit_asset": {
       "post": {
-        "summary": "Deposite Asset",
-        "description": "Deposite asset to user wallet",
-        "operationId": "WalletService_DepositeAsset",
+        "summary": "Deposit Asset",
+        "description": "Deposit asset to authenticated user's wallet account",
+        "operationId": "WalletService_DepositAsset",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/protoDepositeAssetResponse"
+              "$ref": "#/definitions/protoDepositAssetResponse"
             }
           },
           "default": {
@@ -105,11 +105,11 @@
         "parameters": [
           {
             "name": "body",
-            "description": "model that contains DepositeAsset request properties.",
+            "description": "DepositAssetRequest initiates a deposit of assets into the user's wallet account.\nNote: Using string for amount to avoid floating-point precision issues in financial calculations.",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/protoDepositeAssetRequest"
+              "$ref": "#/definitions/protoDepositAssetRequest"
             }
           }
         ],
@@ -126,8 +126,8 @@
     "/v1/wallet/exchange_asset": {
       "post": {
         "summary": "Exchange Asset",
-        "description": "Exchange asset from user wallet to another asset",
-        "operationId": "WalletService_ExcahngeAsset",
+        "description": "Exchange one asset for another within authenticated user's wallet",
+        "operationId": "WalletService_ExchangeAsset",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -145,7 +145,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "model that contains ExchangeAsset request properties.",
+            "description": "ExchangeAssetRequest initiates an exchange of one asset for another within the user's wallet.",
             "in": "body",
             "required": true,
             "schema": {
@@ -163,10 +163,130 @@
         ]
       }
     },
+    "/v1/wallet/get_account_transfers": {
+      "post": {
+        "summary": "Get Account Transfers",
+        "description": "Query TigerBeetle transfers for a specific account with filtering options",
+        "operationId": "WalletService_GetAccountTransfers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetAccountTransfersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.\nThis is the primary method for retrieving transaction history for an account.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetAccountTransfersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/lookup_transfers": {
+      "post": {
+        "summary": "Lookup Transfers",
+        "description": "Fetch specific TigerBeetle transfers by their IDs",
+        "operationId": "WalletService_LookupTransfers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoLookupTransfersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "LookupTransfersRequest fetches specific transfers by their IDs.\nThis is the most efficient way to retrieve known transfers.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoLookupTransfersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/v1/wallet/query_transfers": {
+      "post": {
+        "summary": "Query Transfers",
+        "description": "Query TigerBeetle transfers by metadata, ledger, code, and other criteria",
+        "operationId": "WalletService_QueryTransfers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoQueryTransfersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": "QueryTransfersRequest queries transfers by metadata and other filter criteria.\nUseful for finding transfers by custom user_data fields or ledger/code combinations.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoQueryTransfersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "WalletService"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/v1/wallet/transfer_asset": {
       "post": {
         "summary": "Transfer Asset",
-        "description": "Transfer asset from user wallet to another user wallet",
+        "description": "Transfer asset from authenticated user's wallet to another user's wallet",
         "operationId": "WalletService_TransferAsset",
         "responses": {
           "200": {
@@ -185,7 +305,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "model that contains TransferAsset request properties.",
+            "description": "TransferAssetRequest initiates a transfer of assets from the user's wallet to another user's wallet.",
             "in": "body",
             "required": true,
             "schema": {
@@ -206,7 +326,7 @@
     "/v1/wallet/withdraw_asset": {
       "post": {
         "summary": "Withdraw Asset",
-        "description": "Withdraw asset from user wallet",
+        "description": "Withdraw asset from authenticated user's wallet account",
         "operationId": "WalletService_WithdrawAsset",
         "responses": {
           "200": {
@@ -225,7 +345,7 @@
         "parameters": [
           {
             "name": "body",
-            "description": "model that contains WithdrawAsset request properties.",
+            "description": "WithdrawAssetRequest initiates a withdrawal of assets from the user's wallet account.",
             "in": "body",
             "required": true,
             "schema": {
@@ -250,29 +370,28 @@
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "wallet": {
           "$ref": "#/definitions/protoWallet",
-          "title": "wallet data"
+          "description": "pointer",
+          "title": "Wallet data for the authenticated user (null if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains context user wallet response properties."
+      "description": "ContextUserWalletResponse returns the authenticated user's wallet information.\nField ordering optimized for Go memory alignment: bool → Wallet (pointer) → string."
     },
     "protoContextUserWalletTransactionsResponse": {
       "type": "object",
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "transactions": {
           "type": "array",
@@ -280,228 +399,565 @@
             "type": "object",
             "$ref": "#/definitions/protoTransaction"
           },
-          "title": "transaction list"
+          "description": "slice",
+          "title": "List of transactions for the authenticated user (empty if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains context user transaction list response properties."
+      "description": "ContextUserWalletTransactionsResponse returns the authenticated user's transaction history.\nField ordering optimized for Go memory alignment: bool → repeated (slice) → string."
     },
-    "protoDepositeAssetRequest": {
+    "protoDepositAssetRequest": {
       "type": "object",
       "properties": {
         "asset": {
           "type": "string",
-          "title": "asset type"
+          "title": "Asset code to deposit (e.g., \"USD\", \"EUR\", \"BTC\")"
         },
         "amount": {
-          "type": "number",
-          "format": "float",
-          "title": "asset amount"
+          "type": "string",
+          "title": "Amount to deposit as a decimal string (e.g., \"100.50\")\nUse string instead of float to maintain precision"
         }
       },
-      "description": "model that contains DepositeAsset request properties."
+      "description": "DepositAssetRequest initiates a deposit of assets into the user's wallet account.\nNote: Using string for amount to avoid floating-point precision issues in financial calculations."
     },
-    "protoDepositeAssetResponse": {
+    "protoDepositAssetResponse": {
       "type": "object",
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "transaction": {
           "$ref": "#/definitions/protoTransaction",
-          "title": "transaction data"
+          "description": "pointer",
+          "title": "Transaction record for the deposit (null if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains DepositeAsset response properties."
+      "description": "DepositAssetResponse returns the result of a deposit operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
     },
     "protoExchangeAssetRequest": {
       "type": "object",
       "properties": {
-        "asset": {
+        "from_asset": {
           "type": "string",
-          "title": "asset type"
+          "title": "Source asset code to exchange from (e.g., \"USD\")"
         },
         "amount": {
-          "type": "number",
-          "format": "float",
-          "title": "asset amount"
-        },
-        "receiver_wallet_identifier": {
           "type": "string",
-          "title": "receiver wallet identifier"
+          "title": "Amount of source asset to exchange as a decimal string (e.g., \"100.00\")"
+        },
+        "to_asset": {
+          "type": "string",
+          "title": "Target asset code to exchange to (e.g., \"EUR\")"
         }
       },
-      "description": "model that contains ExchangeAsset request properties."
+      "description": "ExchangeAssetRequest initiates an exchange of one asset for another within the user's wallet."
     },
     "protoExchangeAssetResponse": {
       "type": "object",
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "transaction": {
           "$ref": "#/definitions/protoTransaction",
-          "title": "transaction data"
+          "description": "pointer",
+          "title": "Transaction record for the exchange (null if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains ExchangeAsset response properties."
+      "description": "ExchangeAssetResponse returns the result of an exchange operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
+    },
+    "protoGetAccountTransfersRequest": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "TigerBeetle account ID (128-bit, 16 bytes) to query transfers for"
+        },
+        "timestamp_min": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Minimum timestamp filter (nanoseconds since epoch, inclusive, 0 = no lower bound)"
+        },
+        "timestamp_max": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Maximum timestamp filter (nanoseconds since epoch, inclusive, 0 = no upper bound)"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Maximum number of results to return (default: 8190, TigerBeetle's max batch size)"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Optional filter by transfer code (0 = no filter)"
+        },
+        "debits": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Include debit transfers (money leaving the account)"
+        },
+        "credits": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Include credit transfers (money entering the account)"
+        },
+        "reversed": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Return results in reverse chronological order (newest first)"
+        }
+      },
+      "description": "GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.\nThis is the primary method for retrieving transaction history for an account.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool."
+    },
+    "protoGetAccountTransfersResponse": {
+      "type": "object",
+      "properties": {
+        "next_timestamp": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Timestamp of the next page for pagination (0 if no more results)"
+        },
+        "total_count": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Total number of transfers returned in this response"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Indicates whether more results are available beyond this page"
+        },
+        "transfers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTransfer"
+          },
+          "description": "slice",
+          "title": "List of transfers matching the query criteria"
+        }
+      },
+      "description": "GetAccountTransfersResponse returns transfers matching the query criteria.\nField ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated."
+    },
+    "protoLookupTransfersRequest": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "byte"
+          },
+          "title": "List of transfer IDs (128-bit, 16 bytes each) to look up"
+        }
+      },
+      "description": "LookupTransfersRequest fetches specific transfers by their IDs.\nThis is the most efficient way to retrieve known transfers."
+    },
+    "protoLookupTransfersResponse": {
+      "type": "object",
+      "properties": {
+        "transfers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTransfer"
+          },
+          "title": "List of transfers matching the requested IDs (order may differ from request)"
+        }
+      },
+      "description": "LookupTransfersResponse returns the requested transfers."
+    },
+    "protoQueryTransfersRequest": {
+      "type": "object",
+      "properties": {
+        "user_data_128": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Filter by custom 128-bit metadata (16 bytes, 0 = no filter)"
+        },
+        "timestamp_min": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Minimum timestamp filter (nanoseconds since epoch, 0 = no lower bound)"
+        },
+        "timestamp_max": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Maximum timestamp filter (nanoseconds since epoch, 0 = no upper bound)"
+        },
+        "user_data_64": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Filter by custom 64-bit metadata (0 = no filter)"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Maximum number of results to return"
+        },
+        "ledger": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Filter by ledger identifier (0 = no filter)"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Filter by transfer code (0 = no filter)"
+        },
+        "user_data_32": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Filter by custom 32-bit metadata (0 = no filter)"
+        },
+        "reversed": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Return results in reverse chronological order (newest first)"
+        }
+      },
+      "description": "QueryTransfersRequest queries transfers by metadata and other filter criteria.\nUseful for finding transfers by custom user_data fields or ledger/code combinations.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool."
+    },
+    "protoQueryTransfersResponse": {
+      "type": "object",
+      "properties": {
+        "total_count": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Total number of transfers returned in this response"
+        },
+        "has_more": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Indicates whether more results are available beyond this page"
+        },
+        "transfers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTransfer"
+          },
+          "description": "slice",
+          "title": "List of transfers matching the query criteria"
+        }
+      },
+      "description": "QueryTransfersResponse returns transfers matching the query criteria.\nField ordering optimized for Go memory alignment: uint32 → bool → repeated."
     },
     "protoTransaction": {
       "type": "object",
       "properties": {
-        "identifier": {
-          "type": "string",
-          "title": "transaction public identifier to hide real database id of transaction"
-        },
-        "transaction_type": {
-          "type": "string",
-          "title": "transaction type"
-        },
-        "asset": {
-          "type": "string",
-          "title": "transaction asset type"
-        },
-        "amount": {
-          "type": "number",
-          "format": "float",
-          "title": "transaction amount"
-        },
-        "fee": {
-          "type": "number",
-          "format": "float",
-          "title": "transaction fee"
-        },
-        "status": {
-          "type": "string",
-          "title": "transaction status"
-        },
         "created_at": {
           "type": "string",
           "format": "date-time",
-          "title": "transaction creation time"
+          "description": "8 bytes (pointer)",
+          "title": "Timestamp when the transaction was created in the wallet service"
+        },
+        "ledger": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Ledger identifier for asset isolation (matches Transfer.ledger)"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Transaction type code (matches Transfer.code)"
+        },
+        "identifier": {
+          "type": "string",
+          "title": "Unique external identifier for the transaction (ULID format)"
+        },
+        "transaction_type": {
+          "type": "string",
+          "title": "Transaction type classification (e.g., \"deposit\", \"withdrawal\", \"transfer\", \"exchange\")"
+        },
+        "asset": {
+          "type": "string",
+          "title": "Asset code involved in the transaction (e.g., \"USD\", \"EUR\", \"BTC\")"
+        },
+        "debit_account_id": {
+          "type": "string",
+          "title": "External identifier of the debit account (maps to wallet_account.identifier)"
+        },
+        "credit_account_id": {
+          "type": "string",
+          "title": "External identifier of the credit account (maps to wallet_account.identifier)"
+        },
+        "flags": {
+          "type": "string",
+          "title": "Human-readable flags describing transaction state (e.g., \"pending,linked\")"
+        },
+        "amount": {
+          "type": "string",
+          "title": "Transaction amount as a decimal string for precision (e.g., \"100.50\")\nNote: Use string instead of float to avoid precision loss in financial calculations"
+        },
+        "fee": {
+          "type": "string",
+          "title": "Transaction fee as a decimal string for precision (e.g., \"1.50\")"
+        },
+        "status": {
+          "type": "string",
+          "title": "Current status of the transaction (e.g., \"pending\", \"completed\", \"failed\", \"reversed\")"
         }
       },
-      "title": "Transaction message containing all transaction data and nested entities"
+      "description": "Transaction represents a high-level financial transaction in the wallet service.\nThis is the application-layer representation that maps to one or more TigerBeetle transfers.\nField ordering optimized for Go memory alignment."
+    },
+    "protoTransfer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Unique identifier for this transfer (128-bit, immutable)"
+        },
+        "debit_account_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Account from which funds are debited (128-bit account ID)"
+        },
+        "credit_account_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Account to which funds are credited (128-bit account ID)"
+        },
+        "amount": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Amount to transfer in the smallest unit of the asset (128-bit for precision)"
+        },
+        "pending_id": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)"
+        },
+        "user_data_128": {
+          "type": "string",
+          "format": "byte",
+          "description": "16 bytes",
+          "title": "Custom 128-bit metadata field for application-specific data (e.g., transaction reference)"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)"
+        },
+        "user_data_64": {
+          "type": "string",
+          "format": "uint64",
+          "description": "8 bytes",
+          "title": "Custom 64-bit metadata field for application-specific data (e.g., user ID)"
+        },
+        "timeout": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Timeout for pending transfers in seconds (0 for immediate transfers)"
+        },
+        "ledger": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Ledger identifier to isolate different asset types or business domains"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Transfer code for categorizing transaction types (e.g., 718 for payment)\nNote: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility"
+        },
+        "flags": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)\nNote: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility"
+        },
+        "user_data_32": {
+          "type": "integer",
+          "format": "int64",
+          "description": "4 bytes",
+          "title": "Custom 32-bit metadata field for application-specific data (e.g., transaction type)"
+        }
+      },
+      "description": "Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.\nField ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.\nThis message directly maps to TigerBeetle's Transfer structure for ledger operations."
     },
     "protoTransferAssetRequest": {
       "type": "object",
       "properties": {
         "asset": {
           "type": "string",
-          "title": "asset type"
+          "title": "Asset code to transfer (e.g., \"USD\", \"EUR\", \"BTC\")"
         },
         "amount": {
-          "type": "number",
-          "format": "float",
-          "title": "asset amount"
+          "type": "string",
+          "title": "Amount to transfer as a decimal string (e.g., \"25.00\")\nUse string instead of float to maintain precision"
         },
         "receiver_wallet_identifier": {
           "type": "string",
-          "title": "receiver wallet identifier"
+          "title": "External identifier (ULID) of the recipient's wallet"
         }
       },
-      "description": "model that contains TransferAsset request properties."
+      "description": "TransferAssetRequest initiates a transfer of assets from the user's wallet to another user's wallet."
     },
     "protoTransferAssetResponse": {
       "type": "object",
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "transaction": {
           "$ref": "#/definitions/protoTransaction",
-          "title": "transaction data"
+          "description": "pointer",
+          "title": "Transaction record for the transfer (null if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains TransferAsset response properties."
+      "description": "TransferAssetResponse returns the result of a transfer operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
     },
     "protoWallet": {
       "type": "object",
       "properties": {
-        "identifier": {
+        "created_at": {
           "type": "string",
-          "title": "wallet public identifier to hide real database id of wallet"
+          "format": "date-time",
+          "description": "8 bytes (pointer)",
+          "title": "Timestamp when the wallet was created in the system"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "8 bytes (pointer)",
+          "title": "Timestamp when the wallet was last updated (null if never updated)"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "8 bytes (pointer)",
+          "title": "Timestamp when the wallet was soft-deleted (null if active)"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "8 bytes (pointer)",
+          "title": "Expiration timestamp for temporary or time-limited wallets (null if permanent)"
         },
         "banned": {
           "type": "boolean",
-          "title": "wallet ban status"
+          "description": "1 byte",
+          "title": "Indicates whether the wallet is banned due to policy violations or fraud"
+        },
+        "identifier": {
+          "type": "string",
+          "title": "Unique external identifier for the wallet (ULID format for sortable, globally unique IDs)"
+        },
+        "title": {
+          "type": "string",
+          "title": "Human-readable name or label for the wallet (e.g., \"Main Wallet\", \"Savings\")"
+        },
+        "description": {
+          "type": "string",
+          "title": "Optional description providing additional context about the wallet's purpose"
+        },
+        "status": {
+          "type": "string",
+          "title": "Current lifecycle status of the wallet (PENDING, ISSUED, ACTIVE)"
+        },
+        "user_identifier": {
+          "type": "string",
+          "title": "External identifier of the user who owns this wallet"
+        },
+        "base_asset_identifier": {
+          "type": "string",
+          "title": "External identifier of the primary/base asset for this wallet (e.g., default currency)"
         },
         "meta_data": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           },
-          "title": "metadata contains wallet meta data"
-        },
-        "expires_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "wallet expiration time"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "wallet creation time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "wallet update time"
-        },
-        "deleted_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "wallet deletion time"
+          "title": "Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)"
         }
       },
-      "title": "Wallet message containing all wallet data and nested entities"
+      "description": "Wallet represents a user's wallet container that holds multiple asset accounts.\nA wallet is the top-level entity that groups related wallet accounts for a single user.\nField ordering optimized for Go memory alignment: pointers/timestamps → bools → strings → maps."
     },
     "protoWithdrawAssetRequest": {
       "type": "object",
       "properties": {
         "asset": {
           "type": "string",
-          "title": "asset type"
+          "title": "Asset code to withdraw (e.g., \"USD\", \"EUR\", \"BTC\")"
         },
         "amount": {
-          "type": "number",
-          "format": "float",
-          "title": "asset amount"
+          "type": "string",
+          "title": "Amount to withdraw as a decimal string (e.g., \"50.25\")\nUse string instead of float to maintain precision"
         }
       },
-      "description": "model that contains WithdrawAsset request properties."
+      "description": "WithdrawAssetRequest initiates a withdrawal of assets from the user's wallet account."
     },
     "protoWithdrawAssetResponse": {
       "type": "object",
       "properties": {
         "error": {
           "type": "boolean",
-          "title": "error sets true if processing failed otherwise sets false"
-        },
-        "message": {
-          "type": "string",
-          "title": "message contains error message if error is true or helper message if error is false"
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
         },
         "transaction": {
           "$ref": "#/definitions/protoTransaction",
-          "title": "transaction data"
+          "description": "pointer",
+          "title": "Transaction record for the withdrawal (null if error is true)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
-      "description": "model that contains WithdrawAsset response properties."
+      "description": "WithdrawAssetResponse returns the result of a withdrawal operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
     },
     "protobufAny": {
       "type": "object",

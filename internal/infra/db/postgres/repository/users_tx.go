@@ -2,30 +2,30 @@ package repository
 
 import "context"
 
-// CreateUserTxParams is the params for CreateUserTx.
-type CreateUserTxParams struct {
-	CreateUserParams
-	AfterCreate func(user User) error
+// AccountsTxParams is the params for CreateUserTx.
+type AccountsTxParams struct {
+	CreateAccountParams
+	AfterCreate func(account Account) error
 }
 
-// UserTxResult is the result for CreateUserTx.
-type UserTxResult struct {
-	User User
+// AccountsTxResult is the result for CreateUserTx.
+type AccountsTxResult struct {
+	Account Account
 }
 
-// CreateUserTx implements Store.CreateUserTx
-func (store *SQLStore) CreateUserTx(ctx context.Context, arg CreateUserTxParams) (UserTxResult, error) {
-	var result UserTxResult
+// CreateAccountTx implements Store.CreateAccountTx
+func (store *SQLStore) CreateAccountTx(ctx context.Context, arg AccountsTxParams) (AccountsTxResult, error) {
+	var result AccountsTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		result.User, err = q.CreateUser(ctx, arg.CreateUserParams)
+		result.Account, err = q.CreateAccount(ctx, arg.CreateAccountParams)
 		if err != nil {
 			return err
 		}
 
-		return arg.AfterCreate(result.User)
+		return arg.AfterCreate(result.Account)
 	})
 
 	return result, err

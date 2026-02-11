@@ -27,39 +27,53 @@ var File_rpc_wallet_service_proto protoreflect.FileDescriptor
 
 const file_rpc_wallet_service_proto_rawDesc = "" +
 	"\n" +
-	"\x18rpc_wallet_service.proto\x12\x05proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\rrpc_dto.proto\x1a\x1brpc_transaction.model.proto2\xbd\n" +
-	"\n" +
-	"\rWalletService\x12\xbf\x01\n" +
-	"\rDepositeAsset\x12\x1b.proto.DepositeAssetRequest\x1a\x1c.proto.DepositeAssetResponse\"s\x92AL\n" +
-	"\rWalletService\x12\x0eDeposite Asset\x1a\x1dDeposite asset to user walletb\f\n" +
-	"\n" +
-	"\n" +
-	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/deposite_asset\x12\xc1\x01\n" +
-	"\rWithdrawAsset\x12\x1b.proto.WithdrawAssetRequest\x1a\x1c.proto.WithdrawAssetResponse\"u\x92AN\n" +
-	"\rWalletService\x12\x0eWithdraw Asset\x1a\x1fWithdraw asset from user walletb\f\n" +
+	"\x18rpc_wallet_service.proto\x12\x05proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\rrpc_dto.proto2\xb0\x11\n" +
+	"\rWalletService\x12\xd2\x01\n" +
+	"\fDepositAsset\x12\x1a.proto.DepositAssetRequest\x1a\x1b.proto.DepositAssetResponse\"\x88\x01\x92Ab\n" +
+	"\rWalletService\x12\rDeposit Asset\x1a4Deposit asset to authenticated user's wallet accountb\f\n" +
 	"\n" +
 	"\n" +
-	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/withdraw_asset\x12\xd9\x01\n" +
-	"\rTransferAsset\x12\x1b.proto.TransferAssetRequest\x1a\x1c.proto.TransferAssetResponse\"\x8c\x01\x92Ae\n" +
-	"\rWalletService\x12\x0eTransfer Asset\x1a6Transfer asset from user wallet to another user walletb\f\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/wallet/deposit_asset\x12\xda\x01\n" +
+	"\rWithdrawAsset\x12\x1b.proto.WithdrawAssetRequest\x1a\x1c.proto.WithdrawAssetResponse\"\x8d\x01\x92Af\n" +
+	"\rWalletService\x12\x0eWithdraw Asset\x1a7Withdraw asset from authenticated user's wallet accountb\f\n" +
 	"\n" +
 	"\n" +
-	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/transfer_asset\x12\xd3\x01\n" +
-	"\rExcahngeAsset\x12\x1b.proto.ExchangeAssetRequest\x1a\x1c.proto.ExchangeAssetResponse\"\x86\x01\x92A_\n" +
-	"\rWalletService\x12\x0eExchange Asset\x1a0Exchange asset from user wallet to another assetb\f\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/withdraw_asset\x12\xeb\x01\n" +
+	"\rTransferAsset\x12\x1b.proto.TransferAssetRequest\x1a\x1c.proto.TransferAssetResponse\"\x9e\x01\x92Aw\n" +
+	"\rWalletService\x12\x0eTransfer Asset\x1aHTransfer asset from authenticated user's wallet to another user's walletb\f\n" +
 	"\n" +
 	"\n" +
-	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/exchange_asset\x12\xd9\x01\n" +
-	"\x11ContextUserWallet\x12\x16.google.protobuf.Empty\x1a .proto.ContextUserWalletResponse\"\x89\x01\x92AP\n" +
-	"\rWalletService\x12\x13Context User Wallet\x1a\x1cGet context user wallet datab\f\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/transfer_asset\x12\xe4\x01\n" +
+	"\rExchangeAsset\x12\x1b.proto.ExchangeAssetRequest\x1a\x1c.proto.ExchangeAssetResponse\"\x97\x01\x92Ap\n" +
+	"\rWalletService\x12\x0eExchange Asset\x1aAExchange one asset for another within authenticated user's walletb\f\n" +
 	"\n" +
 	"\n" +
-	"\x06Bearer\x12\x00\xfa\xb4\x18\f\b\x01\x10x\x1a\x06wallet\x82\xd3\xe4\x93\x02 \x12\x1e/v1/wallet/context_user_wallet\x12\x97\x02\n" +
-	"\x1dContextUserWalletTransactions\x12\x16.google.protobuf.Empty\x1a,.proto.ContextUserWalletTransactionsResponse\"\xaf\x01\x92Ai\n" +
-	"\rWalletService\x12 Context User Wallet Transactions\x1a(Get context user wallet transaction listb\f\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/wallet/exchange_asset\x12\xfd\x01\n" +
+	"\x11ContextUserWallet\x12\x16.google.protobuf.Empty\x1a .proto.ContextUserWalletResponse\"\xad\x01\x92At\n" +
+	"\rWalletService\x12\x1dGet Authenticated User Wallet\x1a6Retrieve wallet information for the authenticated userb\f\n" +
 	"\n" +
 	"\n" +
-	"\x06Bearer\x12\x00\xfa\xb4\x18\f\b\x01\x10x\x1a\x06wallet\x82\xd3\xe4\x93\x02-\x12+/v1/wallet/context_user_wallet_transactionsB\xcd\x02\x92A\x90\x02\x12}\n" +
+	"\x06Bearer\x12\x00\xfa\xb4\x18\f\b\x01\x10x\x1a\x06wallet\x82\xd3\xe4\x93\x02 \x12\x1e/v1/wallet/context_user_wallet\x12\xb3\x02\n" +
+	"\x1dContextUserWalletTransactions\x12\x16.google.protobuf.Empty\x1a,.proto.ContextUserWalletTransactionsResponse\"\xcb\x01\x92A\x84\x01\n" +
+	"\rWalletService\x12#Get Authenticated User Transactions\x1a@Retrieve transaction history for the authenticated user's walletb\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00\xfa\xb4\x18\f\b\x01\x10x\x1a\x06wallet\x82\xd3\xe4\x93\x02-\x12+/v1/wallet/context_user_wallet_transactions\x12\x8c\x02\n" +
+	"\x13GetAccountTransfers\x12!.proto.GetAccountTransfersRequest\x1a\".proto.GetAccountTransfersResponse\"\xad\x01\x92A\x7f\n" +
+	"\rWalletService\x12\x15Get Account Transfers\x1aIQuery TigerBeetle transfers for a specific account with filtering optionsb\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02%:\x01*\" /v1/wallet/get_account_transfers\x12\xf1\x01\n" +
+	"\x0eQueryTransfers\x12\x1c.proto.QueryTransfersRequest\x1a\x1d.proto.QueryTransfersResponse\"\xa1\x01\x92Ay\n" +
+	"\rWalletService\x12\x0fQuery Transfers\x1aIQuery TigerBeetle transfers by metadata, ledger, code, and other criteriab\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1/wallet/query_transfers\x12\xde\x01\n" +
+	"\x0fLookupTransfers\x12\x1d.proto.LookupTransfersRequest\x1a\x1e.proto.LookupTransfersResponse\"\x8b\x01\x92Ab\n" +
+	"\rWalletService\x12\x10Lookup Transfers\x1a1Fetch specific TigerBeetle transfers by their IDsb\f\n" +
+	"\n" +
+	"\n" +
+	"\x06Bearer\x12\x00\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/v1/wallet/lookup_transfersB\xcd\x02\x92A\x90\x02\x12}\n" +
 	"\x12Wallet Service API\x12-Wallet Service API for user wallet management\"1\n" +
 	"\x1aWallet Service API Support\x1a\x13liveutil@icloud.com2\x051.0.0*\x02\x01\x022\x10application/json:\x10application/jsonZY\n" +
 	"W\n" +
@@ -69,33 +83,45 @@ const file_rpc_wallet_service_proto_rawDesc = "" +
 	"\x06Bearer\x12\x00Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
 
 var file_rpc_wallet_service_proto_goTypes = []any{
-	(*DepositeAssetRequest)(nil),                  // 0: proto.DepositeAssetRequest
+	(*DepositAssetRequest)(nil),                   // 0: proto.DepositAssetRequest
 	(*WithdrawAssetRequest)(nil),                  // 1: proto.WithdrawAssetRequest
 	(*TransferAssetRequest)(nil),                  // 2: proto.TransferAssetRequest
 	(*ExchangeAssetRequest)(nil),                  // 3: proto.ExchangeAssetRequest
 	(*emptypb.Empty)(nil),                         // 4: google.protobuf.Empty
-	(*DepositeAssetResponse)(nil),                 // 5: proto.DepositeAssetResponse
-	(*WithdrawAssetResponse)(nil),                 // 6: proto.WithdrawAssetResponse
-	(*TransferAssetResponse)(nil),                 // 7: proto.TransferAssetResponse
-	(*ExchangeAssetResponse)(nil),                 // 8: proto.ExchangeAssetResponse
-	(*ContextUserWalletResponse)(nil),             // 9: proto.ContextUserWalletResponse
-	(*ContextUserWalletTransactionsResponse)(nil), // 10: proto.ContextUserWalletTransactionsResponse
+	(*GetAccountTransfersRequest)(nil),            // 5: proto.GetAccountTransfersRequest
+	(*QueryTransfersRequest)(nil),                 // 6: proto.QueryTransfersRequest
+	(*LookupTransfersRequest)(nil),                // 7: proto.LookupTransfersRequest
+	(*DepositAssetResponse)(nil),                  // 8: proto.DepositAssetResponse
+	(*WithdrawAssetResponse)(nil),                 // 9: proto.WithdrawAssetResponse
+	(*TransferAssetResponse)(nil),                 // 10: proto.TransferAssetResponse
+	(*ExchangeAssetResponse)(nil),                 // 11: proto.ExchangeAssetResponse
+	(*ContextUserWalletResponse)(nil),             // 12: proto.ContextUserWalletResponse
+	(*ContextUserWalletTransactionsResponse)(nil), // 13: proto.ContextUserWalletTransactionsResponse
+	(*GetAccountTransfersResponse)(nil),           // 14: proto.GetAccountTransfersResponse
+	(*QueryTransfersResponse)(nil),                // 15: proto.QueryTransfersResponse
+	(*LookupTransfersResponse)(nil),               // 16: proto.LookupTransfersResponse
 }
 var file_rpc_wallet_service_proto_depIdxs = []int32{
-	0,  // 0: proto.WalletService.DepositeAsset:input_type -> proto.DepositeAssetRequest
+	0,  // 0: proto.WalletService.DepositAsset:input_type -> proto.DepositAssetRequest
 	1,  // 1: proto.WalletService.WithdrawAsset:input_type -> proto.WithdrawAssetRequest
 	2,  // 2: proto.WalletService.TransferAsset:input_type -> proto.TransferAssetRequest
-	3,  // 3: proto.WalletService.ExcahngeAsset:input_type -> proto.ExchangeAssetRequest
+	3,  // 3: proto.WalletService.ExchangeAsset:input_type -> proto.ExchangeAssetRequest
 	4,  // 4: proto.WalletService.ContextUserWallet:input_type -> google.protobuf.Empty
 	4,  // 5: proto.WalletService.ContextUserWalletTransactions:input_type -> google.protobuf.Empty
-	5,  // 6: proto.WalletService.DepositeAsset:output_type -> proto.DepositeAssetResponse
-	6,  // 7: proto.WalletService.WithdrawAsset:output_type -> proto.WithdrawAssetResponse
-	7,  // 8: proto.WalletService.TransferAsset:output_type -> proto.TransferAssetResponse
-	8,  // 9: proto.WalletService.ExcahngeAsset:output_type -> proto.ExchangeAssetResponse
-	9,  // 10: proto.WalletService.ContextUserWallet:output_type -> proto.ContextUserWalletResponse
-	10, // 11: proto.WalletService.ContextUserWalletTransactions:output_type -> proto.ContextUserWalletTransactionsResponse
-	6,  // [6:12] is the sub-list for method output_type
-	0,  // [0:6] is the sub-list for method input_type
+	5,  // 6: proto.WalletService.GetAccountTransfers:input_type -> proto.GetAccountTransfersRequest
+	6,  // 7: proto.WalletService.QueryTransfers:input_type -> proto.QueryTransfersRequest
+	7,  // 8: proto.WalletService.LookupTransfers:input_type -> proto.LookupTransfersRequest
+	8,  // 9: proto.WalletService.DepositAsset:output_type -> proto.DepositAssetResponse
+	9,  // 10: proto.WalletService.WithdrawAsset:output_type -> proto.WithdrawAssetResponse
+	10, // 11: proto.WalletService.TransferAsset:output_type -> proto.TransferAssetResponse
+	11, // 12: proto.WalletService.ExchangeAsset:output_type -> proto.ExchangeAssetResponse
+	12, // 13: proto.WalletService.ContextUserWallet:output_type -> proto.ContextUserWalletResponse
+	13, // 14: proto.WalletService.ContextUserWalletTransactions:output_type -> proto.ContextUserWalletTransactionsResponse
+	14, // 15: proto.WalletService.GetAccountTransfers:output_type -> proto.GetAccountTransfersResponse
+	15, // 16: proto.WalletService.QueryTransfers:output_type -> proto.QueryTransfersResponse
+	16, // 17: proto.WalletService.LookupTransfers:output_type -> proto.LookupTransfersResponse
+	9,  // [9:18] is the sub-list for method output_type
+	0,  // [0:9] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -107,7 +133,6 @@ func file_rpc_wallet_service_proto_init() {
 		return
 	}
 	file_rpc_dto_proto_init()
-	file_rpc_transaction_model_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

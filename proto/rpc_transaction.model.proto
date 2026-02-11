@@ -6,20 +6,127 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
 
-// Transaction message containing all transaction data and nested entities
+// Uint128 represents a 128-bit unsigned integer for TigerBeetle IDs and amounts.
+// Stored as 16 bytes in little-endian format for compatibility with TigerBeetle's uint128 type.
+message Uint128 {
+  bytes value = 1; // 16 bytes, little-endian encoded
+}
+
+// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
+// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
+// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
+message Transfer {
+  // Unique identifier for this transfer (128-bit, immutable)
+  bytes id = 1; // 16 bytes
+
+  // Account from which funds are debited (128-bit account ID)
+  bytes debit_account_id = 2; // 16 bytes
+
+  // Account to which funds are credited (128-bit account ID)
+  bytes credit_account_id = 3; // 16 bytes
+
+  // Amount to transfer in the smallest unit of the asset (128-bit for precision)
+  bytes amount = 4; // 16 bytes
+
+  // Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
+  bytes pending_id = 5; // 16 bytes
+
+  // Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
+  bytes user_data_128 = 6; // 16 bytes
+
+  // Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
+  uint64 timestamp = 7; // 8 bytes
+
+  // Custom 64-bit metadata field for application-specific data (e.g., user ID)
+  uint64 user_data_64 = 8; // 8 bytes
+
+  // Timeout for pending transfers in seconds (0 for immediate transfers)
+  uint32 timeout = 9; // 4 bytes
+
+  // Ledger identifier to isolate different asset types or business domains
+  uint32 ledger = 10; // 4 bytes
+
+  // Transfer code for categorizing transaction types (e.g., 718 for payment)
+  // Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+  uint32 code = 11; // 4 bytes
+
+  // Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
+  // Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+  uint32 flags = 12; // 4 bytes
+
+  // Custom 32-bit metadata field for application-specific data (e.g., transaction type)
+  uint32 user_data_32 = 13; // 4 bytes
+}
+
+// TransferFlags represents the individual flag bits for Transfer.flags field.
+// These flags control transfer behavior and state in TigerBeetle.
+message TransferFlags {
+  // Link this transfer to the next transfer in a batch (atomic execution)
+  bool linked = 1;
+
+  // Mark this transfer as pending (two-phase commit)
+  bool pending = 2;
+
+  // Post (commit) a previously pending transfer
+  bool post_pending_transfer = 3;
+
+  // Void (rollback) a previously pending transfer
+  bool void_pending_transfer = 4;
+
+  // Automatically balance the debit side if amount exceeds available balance
+  bool balancing_debit = 5;
+
+  // Automatically balance the credit side if amount exceeds available balance
+  bool balancing_credit = 6;
+
+  // Close the debit account after this transfer (final transaction)
+  bool closing_debit = 7;
+
+  // Close the credit account after this transfer (final transaction)
+  bool closing_credit = 8;
+
+  // Mark this transfer as imported from an external system (audit trail)
+  bool imported = 9;
+}
+
+// Transaction represents a high-level financial transaction in the wallet service.
+// This is the application-layer representation that maps to one or more TigerBeetle transfers.
+// Field ordering optimized for Go memory alignment.
 message Transaction {
-    // transaction public identifier to hide real database id of transaction
-    string identifier = 1;
-    // transaction type
-    string transaction_type = 2;
-    // transaction asset type
-    string asset = 3;
-    // transaction amount
-    float amount = 4;
-    // transaction fee
-    float fee = 5;
-    // transaction status
-    string status = 6;
-    // transaction creation time
-    google.protobuf.Timestamp created_at = 7;
+  // Timestamp when the transaction was created in the wallet service
+  google.protobuf.Timestamp created_at = 1; // 8 bytes (pointer)
+
+  // Ledger identifier for asset isolation (matches Transfer.ledger)
+  uint32 ledger = 2; // 4 bytes
+
+  // Transaction type code (matches Transfer.code)
+  uint32 code = 3; // 4 bytes
+
+  // Unique external identifier for the transaction (ULID format)
+  string identifier = 4;
+
+  // Transaction type classification (e.g., "deposit", "withdrawal", "transfer", "exchange")
+  string transaction_type = 5;
+
+  // Asset code involved in the transaction (e.g., "USD", "EUR", "BTC")
+  string asset = 6;
+
+  // External identifier of the debit account (maps to wallet_account.identifier)
+  string debit_account_id = 7;
+
+  // External identifier of the credit account (maps to wallet_account.identifier)
+  string credit_account_id = 8;
+
+  // Human-readable flags describing transaction state (e.g., "pending,linked")
+  string flags = 9;
+
+  // Transaction amount as a decimal string for precision (e.g., "100.50")
+  // Note: Use string instead of float to avoid precision loss in financial calculations
+  string amount = 10;
+
+  // Transaction fee as a decimal string for precision (e.g., "1.50")
+  string fee = 11;
+
+  // Current status of the transaction (e.g., "pending", "completed", "failed", "reversed")
+  string status = 12;
 }

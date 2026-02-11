@@ -6,7 +6,6 @@ import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "rpc_dto.proto";
-import "rpc_transaction.model.proto";
 
 option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
 
@@ -43,17 +42,19 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   };
 };
 
-// WalletService service provides user wallet management endpoints
+// WalletService provides comprehensive wallet management endpoints for asset operations.
+// All endpoints require Bearer token authentication and support both gRPC and HTTP/JSON.
 service WalletService {
-  // Deposite asset to user wallet.
-  rpc DepositeAsset(DepositeAssetRequest) returns (DepositeAssetResponse) {
+  // DepositAsset adds funds to the authenticated user's wallet account for a specific asset.
+  // This operation creates a credit transfer in TigerBeetle from a system account to the user's account.
+  rpc DepositAsset(DepositAssetRequest) returns (DepositAssetResponse) {
     option (google.api.http) = {
-      post: "/v1/wallet/deposite_asset"
+      post: "/v1/wallet/deposit_asset"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary    : "Deposite Asset";
-      description: "Deposite asset to user wallet";
+      summary    : "Deposit Asset";
+      description: "Deposit asset to authenticated user's wallet account";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -64,7 +65,8 @@ service WalletService {
     };
   }
 
-  // Withdraw asset from user wallet.
+  // WithdrawAsset removes funds from the authenticated user's wallet account for a specific asset.
+  // This operation creates a debit transfer in TigerBeetle from the user's account to a system account.
   rpc WithdrawAsset(WithdrawAssetRequest) returns (WithdrawAssetResponse) {
     option (google.api.http) = {
       post: "/v1/wallet/withdraw_asset"
@@ -72,7 +74,7 @@ service WalletService {
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary    : "Withdraw Asset";
-      description: "Withdraw asset from user wallet";
+      description: "Withdraw asset from authenticated user's wallet account";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -83,7 +85,8 @@ service WalletService {
     };
   }
 
-  // Transfer asset from user wallet to another user wallet.
+  // TransferAsset moves funds from the authenticated user's wallet to another user's wallet.
+  // This operation creates a transfer in TigerBeetle between two user accounts.
   rpc TransferAsset(TransferAssetRequest) returns (TransferAssetResponse) {
     option (google.api.http) = {
       post: "/v1/wallet/transfer_asset"
@@ -91,7 +94,7 @@ service WalletService {
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary    : "Transfer Asset";
-      description: "Transfer asset from user wallet to another user wallet";
+      description: "Transfer asset from authenticated user's wallet to another user's wallet";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -102,15 +105,16 @@ service WalletService {
     };
   }
 
-  // Exchange asset from user wallet to another asset.
-  rpc ExcahngeAsset(ExchangeAssetRequest) returns (ExchangeAssetResponse) {
+  // ExchangeAsset converts one asset to another within the authenticated user's wallet.
+  // This operation creates two linked transfers in TigerBeetle for atomic exchange.
+  rpc ExchangeAsset(ExchangeAssetRequest) returns (ExchangeAssetResponse) {
     option (google.api.http) = {
       post: "/v1/wallet/exchange_asset"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary    : "Exchange Asset";
-      description: "Exchange asset from user wallet to another asset";
+      description: "Exchange one asset for another within authenticated user's wallet";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -121,14 +125,15 @@ service WalletService {
     };
   }
 
-  // Get context user wallet data.
-  rpc ContextUserWallet(google.protobuf.Empty) returns (ContextUserWalletResponse) {
+  // ContextUserAccounts retrieves the authenticated user's account information include asset wallets.
+  // This endpoint is cached for 120 seconds to reduce database load.
+  rpc ContextUserAccounts(google.protobuf.Empty) returns (ContextUserWalletResponse) {
     option (google.api.http) = {
       get: "/v1/wallet/context_user_wallet"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary    : "Context User Wallet";
-      description: "Get context user wallet data";
+      summary    : "Get Authenticated User Wallet";
+      description: "Retrieve wallet information for the authenticated user";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -144,14 +149,15 @@ service WalletService {
     };
   }
 
-  // Get context user wallet transaction list.
+  // ContextUserWalletTransactions retrieves the authenticated user's transaction history.
+  // This endpoint is cached for 120 seconds to reduce database load.
   rpc ContextUserWalletTransactions(google.protobuf.Empty) returns (ContextUserWalletTransactionsResponse) {
     option (google.api.http) = {
       get: "/v1/wallet/context_user_wallet_transactions"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary    : "Context User Wallet Transactions";
-      description: "Get context user wallet transaction list";
+      summary    : "Get Authenticated User Transactions";
+      description: "Retrieve transaction history for the authenticated user's wallet";
       security   : {
         security_requirement: {
           key  : "Bearer";
@@ -164,6 +170,66 @@ service WalletService {
       enabled    : true
       ttl_seconds: 120
       key_prefix : "wallet"
+    };
+  }
+
+  // GetAccountTransfers queries TigerBeetle transfers for a specific account.
+  // This is a low-level endpoint for direct TigerBeetle transfer queries.
+  rpc GetAccountTransfers(GetAccountTransfersRequest) returns (GetAccountTransfersResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/get_account_transfers"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Get Account Transfers";
+      description: "Query TigerBeetle transfers for a specific account with filtering options";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // QueryTransfers queries TigerBeetle transfers by metadata and filter criteria.
+  // This is a low-level endpoint for advanced transfer queries.
+  rpc QueryTransfers(QueryTransfersRequest) returns (QueryTransfersResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/query_transfers"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Query Transfers";
+      description: "Query TigerBeetle transfers by metadata, ledger, code, and other criteria";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
+    };
+  }
+
+  // LookupTransfers fetches specific TigerBeetle transfers by their IDs.
+  // This is the most efficient way to retrieve known transfers.
+  rpc LookupTransfers(LookupTransfersRequest) returns (LookupTransfersResponse) {
+    option (google.api.http) = {
+      post: "/v1/wallet/lookup_transfers"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary    : "Lookup Transfers";
+      description: "Fetch specific TigerBeetle transfers by their IDs";
+      security   : {
+        security_requirement: {
+          key  : "Bearer";
+          value: {};
+        };
+      };
+      tags: "WalletService";
     };
   }
 }

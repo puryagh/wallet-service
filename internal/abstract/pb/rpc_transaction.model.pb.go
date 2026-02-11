@@ -22,30 +22,366 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Transaction message containing all transaction data and nested entities
+// Uint128 represents a 128-bit unsigned integer for TigerBeetle IDs and amounts.
+// Stored as 16 bytes in little-endian format for compatibility with TigerBeetle's uint128 type.
+type Uint128 struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         []byte                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"` // 16 bytes, little-endian encoded
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Uint128) Reset() {
+	*x = Uint128{}
+	mi := &file_rpc_transaction_model_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Uint128) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Uint128) ProtoMessage() {}
+
+func (x *Uint128) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_transaction_model_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Uint128.ProtoReflect.Descriptor instead.
+func (*Uint128) Descriptor() ([]byte, []int) {
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Uint128) GetValue() []byte {
+	if x != nil {
+		return x.Value
+	}
+	return nil
+}
+
+// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
+// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
+// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
+type Transfer struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for this transfer (128-bit, immutable)
+	Id []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // 16 bytes
+	// Account from which funds are debited (128-bit account ID)
+	DebitAccountId []byte `protobuf:"bytes,2,opt,name=debit_account_id,json=debitAccountId,proto3" json:"debit_account_id,omitempty"` // 16 bytes
+	// Account to which funds are credited (128-bit account ID)
+	CreditAccountId []byte `protobuf:"bytes,3,opt,name=credit_account_id,json=creditAccountId,proto3" json:"credit_account_id,omitempty"` // 16 bytes
+	// Amount to transfer in the smallest unit of the asset (128-bit for precision)
+	Amount []byte `protobuf:"bytes,4,opt,name=amount,proto3" json:"amount,omitempty"` // 16 bytes
+	// Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
+	PendingId []byte `protobuf:"bytes,5,opt,name=pending_id,json=pendingId,proto3" json:"pending_id,omitempty"` // 16 bytes
+	// Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
+	UserData_128 []byte `protobuf:"bytes,6,opt,name=user_data_128,json=userData128,proto3" json:"user_data_128,omitempty"` // 16 bytes
+	// Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
+	Timestamp uint64 `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // 8 bytes
+	// Custom 64-bit metadata field for application-specific data (e.g., user ID)
+	UserData_64 uint64 `protobuf:"varint,8,opt,name=user_data_64,json=userData64,proto3" json:"user_data_64,omitempty"` // 8 bytes
+	// Timeout for pending transfers in seconds (0 for immediate transfers)
+	Timeout uint32 `protobuf:"varint,9,opt,name=timeout,proto3" json:"timeout,omitempty"` // 4 bytes
+	// Ledger identifier to isolate different asset types or business domains
+	Ledger uint32 `protobuf:"varint,10,opt,name=ledger,proto3" json:"ledger,omitempty"` // 4 bytes
+	// Transfer code for categorizing transaction types (e.g., 718 for payment)
+	// Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+	Code uint32 `protobuf:"varint,11,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
+	// Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
+	// Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+	Flags uint32 `protobuf:"varint,12,opt,name=flags,proto3" json:"flags,omitempty"` // 4 bytes
+	// Custom 32-bit metadata field for application-specific data (e.g., transaction type)
+	UserData_32   uint32 `protobuf:"varint,13,opt,name=user_data_32,json=userData32,proto3" json:"user_data_32,omitempty"` // 4 bytes
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Transfer) Reset() {
+	*x = Transfer{}
+	mi := &file_rpc_transaction_model_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Transfer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Transfer) ProtoMessage() {}
+
+func (x *Transfer) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_transaction_model_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Transfer.ProtoReflect.Descriptor instead.
+func (*Transfer) Descriptor() ([]byte, []int) {
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Transfer) GetId() []byte {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *Transfer) GetDebitAccountId() []byte {
+	if x != nil {
+		return x.DebitAccountId
+	}
+	return nil
+}
+
+func (x *Transfer) GetCreditAccountId() []byte {
+	if x != nil {
+		return x.CreditAccountId
+	}
+	return nil
+}
+
+func (x *Transfer) GetAmount() []byte {
+	if x != nil {
+		return x.Amount
+	}
+	return nil
+}
+
+func (x *Transfer) GetPendingId() []byte {
+	if x != nil {
+		return x.PendingId
+	}
+	return nil
+}
+
+func (x *Transfer) GetUserData_128() []byte {
+	if x != nil {
+		return x.UserData_128
+	}
+	return nil
+}
+
+func (x *Transfer) GetTimestamp() uint64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+func (x *Transfer) GetUserData_64() uint64 {
+	if x != nil {
+		return x.UserData_64
+	}
+	return 0
+}
+
+func (x *Transfer) GetTimeout() uint32 {
+	if x != nil {
+		return x.Timeout
+	}
+	return 0
+}
+
+func (x *Transfer) GetLedger() uint32 {
+	if x != nil {
+		return x.Ledger
+	}
+	return 0
+}
+
+func (x *Transfer) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *Transfer) GetFlags() uint32 {
+	if x != nil {
+		return x.Flags
+	}
+	return 0
+}
+
+func (x *Transfer) GetUserData_32() uint32 {
+	if x != nil {
+		return x.UserData_32
+	}
+	return 0
+}
+
+// TransferFlags represents the individual flag bits for Transfer.flags field.
+// These flags control transfer behavior and state in TigerBeetle.
+type TransferFlags struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Link this transfer to the next transfer in a batch (atomic execution)
+	Linked bool `protobuf:"varint,1,opt,name=linked,proto3" json:"linked,omitempty"`
+	// Mark this transfer as pending (two-phase commit)
+	Pending bool `protobuf:"varint,2,opt,name=pending,proto3" json:"pending,omitempty"`
+	// Post (commit) a previously pending transfer
+	PostPendingTransfer bool `protobuf:"varint,3,opt,name=post_pending_transfer,json=postPendingTransfer,proto3" json:"post_pending_transfer,omitempty"`
+	// Void (rollback) a previously pending transfer
+	VoidPendingTransfer bool `protobuf:"varint,4,opt,name=void_pending_transfer,json=voidPendingTransfer,proto3" json:"void_pending_transfer,omitempty"`
+	// Automatically balance the debit side if amount exceeds available balance
+	BalancingDebit bool `protobuf:"varint,5,opt,name=balancing_debit,json=balancingDebit,proto3" json:"balancing_debit,omitempty"`
+	// Automatically balance the credit side if amount exceeds available balance
+	BalancingCredit bool `protobuf:"varint,6,opt,name=balancing_credit,json=balancingCredit,proto3" json:"balancing_credit,omitempty"`
+	// Close the debit account after this transfer (final transaction)
+	ClosingDebit bool `protobuf:"varint,7,opt,name=closing_debit,json=closingDebit,proto3" json:"closing_debit,omitempty"`
+	// Close the credit account after this transfer (final transaction)
+	ClosingCredit bool `protobuf:"varint,8,opt,name=closing_credit,json=closingCredit,proto3" json:"closing_credit,omitempty"`
+	// Mark this transfer as imported from an external system (audit trail)
+	Imported      bool `protobuf:"varint,9,opt,name=imported,proto3" json:"imported,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferFlags) Reset() {
+	*x = TransferFlags{}
+	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferFlags) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferFlags) ProtoMessage() {}
+
+func (x *TransferFlags) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferFlags.ProtoReflect.Descriptor instead.
+func (*TransferFlags) Descriptor() ([]byte, []int) {
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *TransferFlags) GetLinked() bool {
+	if x != nil {
+		return x.Linked
+	}
+	return false
+}
+
+func (x *TransferFlags) GetPending() bool {
+	if x != nil {
+		return x.Pending
+	}
+	return false
+}
+
+func (x *TransferFlags) GetPostPendingTransfer() bool {
+	if x != nil {
+		return x.PostPendingTransfer
+	}
+	return false
+}
+
+func (x *TransferFlags) GetVoidPendingTransfer() bool {
+	if x != nil {
+		return x.VoidPendingTransfer
+	}
+	return false
+}
+
+func (x *TransferFlags) GetBalancingDebit() bool {
+	if x != nil {
+		return x.BalancingDebit
+	}
+	return false
+}
+
+func (x *TransferFlags) GetBalancingCredit() bool {
+	if x != nil {
+		return x.BalancingCredit
+	}
+	return false
+}
+
+func (x *TransferFlags) GetClosingDebit() bool {
+	if x != nil {
+		return x.ClosingDebit
+	}
+	return false
+}
+
+func (x *TransferFlags) GetClosingCredit() bool {
+	if x != nil {
+		return x.ClosingCredit
+	}
+	return false
+}
+
+func (x *TransferFlags) GetImported() bool {
+	if x != nil {
+		return x.Imported
+	}
+	return false
+}
+
+// Transaction represents a high-level financial transaction in the wallet service.
+// This is the application-layer representation that maps to one or more TigerBeetle transfers.
+// Field ordering optimized for Go memory alignment.
 type Transaction struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// transaction public identifier to hide real database id of transaction
-	Identifier string `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
-	// transaction type
-	TransactionType string `protobuf:"bytes,2,opt,name=transaction_type,json=transactionType,proto3" json:"transaction_type,omitempty"`
-	// transaction asset type
-	Asset string `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset,omitempty"`
-	// transaction amount
-	Amount float32 `protobuf:"fixed32,4,opt,name=amount,proto3" json:"amount,omitempty"`
-	// transaction fee
-	Fee float32 `protobuf:"fixed32,5,opt,name=fee,proto3" json:"fee,omitempty"`
-	// transaction status
-	Status string `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	// transaction creation time
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Timestamp when the transaction was created in the wallet service
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 8 bytes (pointer)
+	// Ledger identifier for asset isolation (matches Transfer.ledger)
+	Ledger uint32 `protobuf:"varint,2,opt,name=ledger,proto3" json:"ledger,omitempty"` // 4 bytes
+	// Transaction type code (matches Transfer.code)
+	Code uint32 `protobuf:"varint,3,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
+	// Unique external identifier for the transaction (ULID format)
+	Identifier string `protobuf:"bytes,4,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	// Transaction type classification (e.g., "deposit", "withdrawal", "transfer", "exchange")
+	TransactionType string `protobuf:"bytes,5,opt,name=transaction_type,json=transactionType,proto3" json:"transaction_type,omitempty"`
+	// Asset code involved in the transaction (e.g., "USD", "EUR", "BTC")
+	Asset string `protobuf:"bytes,6,opt,name=asset,proto3" json:"asset,omitempty"`
+	// External identifier of the debit account (maps to wallet_account.identifier)
+	DebitAccountId string `protobuf:"bytes,7,opt,name=debit_account_id,json=debitAccountId,proto3" json:"debit_account_id,omitempty"`
+	// External identifier of the credit account (maps to wallet_account.identifier)
+	CreditAccountId string `protobuf:"bytes,8,opt,name=credit_account_id,json=creditAccountId,proto3" json:"credit_account_id,omitempty"`
+	// Human-readable flags describing transaction state (e.g., "pending,linked")
+	Flags string `protobuf:"bytes,9,opt,name=flags,proto3" json:"flags,omitempty"`
+	// Transaction amount as a decimal string for precision (e.g., "100.50")
+	// Note: Use string instead of float to avoid precision loss in financial calculations
+	Amount string `protobuf:"bytes,10,opt,name=amount,proto3" json:"amount,omitempty"`
+	// Transaction fee as a decimal string for precision (e.g., "1.50")
+	Fee string `protobuf:"bytes,11,opt,name=fee,proto3" json:"fee,omitempty"`
+	// Current status of the transaction (e.g., "pending", "completed", "failed", "reversed")
+	Status        string `protobuf:"bytes,12,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Transaction) Reset() {
 	*x = Transaction{}
-	mi := &file_rpc_transaction_model_proto_msgTypes[0]
+	mi := &file_rpc_transaction_model_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -57,7 +393,7 @@ func (x *Transaction) String() string {
 func (*Transaction) ProtoMessage() {}
 
 func (x *Transaction) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_transaction_model_proto_msgTypes[0]
+	mi := &file_rpc_transaction_model_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -70,7 +406,28 @@ func (x *Transaction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction.ProtoReflect.Descriptor instead.
 func (*Transaction) Descriptor() ([]byte, []int) {
-	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{0}
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Transaction) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Transaction) GetLedger() uint32 {
+	if x != nil {
+		return x.Ledger
+	}
+	return 0
+}
+
+func (x *Transaction) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
 }
 
 func (x *Transaction) GetIdentifier() string {
@@ -94,18 +451,39 @@ func (x *Transaction) GetAsset() string {
 	return ""
 }
 
-func (x *Transaction) GetAmount() float32 {
+func (x *Transaction) GetDebitAccountId() string {
+	if x != nil {
+		return x.DebitAccountId
+	}
+	return ""
+}
+
+func (x *Transaction) GetCreditAccountId() string {
+	if x != nil {
+		return x.CreditAccountId
+	}
+	return ""
+}
+
+func (x *Transaction) GetFlags() string {
+	if x != nil {
+		return x.Flags
+	}
+	return ""
+}
+
+func (x *Transaction) GetAmount() string {
 	if x != nil {
 		return x.Amount
 	}
-	return 0
+	return ""
 }
 
-func (x *Transaction) GetFee() float32 {
+func (x *Transaction) GetFee() string {
 	if x != nil {
 		return x.Fee
 	}
-	return 0
+	return ""
 }
 
 func (x *Transaction) GetStatus() string {
@@ -115,29 +493,58 @@ func (x *Transaction) GetStatus() string {
 	return ""
 }
 
-func (x *Transaction) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
 var File_rpc_transaction_model_proto protoreflect.FileDescriptor
 
 const file_rpc_transaction_model_proto_rawDesc = "" +
 	"\n" +
-	"\x1brpc_transaction.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xeb\x01\n" +
-	"\vTransaction\x12\x1e\n" +
+	"\x1brpc_transaction.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1f\n" +
+	"\aUint128\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\fR\x05value\"\x89\x03\n" +
+	"\bTransfer\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\fR\x02id\x12(\n" +
+	"\x10debit_account_id\x18\x02 \x01(\fR\x0edebitAccountId\x12*\n" +
+	"\x11credit_account_id\x18\x03 \x01(\fR\x0fcreditAccountId\x12\x16\n" +
+	"\x06amount\x18\x04 \x01(\fR\x06amount\x12\x1d\n" +
 	"\n" +
-	"identifier\x18\x01 \x01(\tR\n" +
+	"pending_id\x18\x05 \x01(\fR\tpendingId\x12\"\n" +
+	"\ruser_data_128\x18\x06 \x01(\fR\vuserData128\x12\x1c\n" +
+	"\ttimestamp\x18\a \x01(\x04R\ttimestamp\x12 \n" +
+	"\fuser_data_64\x18\b \x01(\x04R\n" +
+	"userData64\x12\x18\n" +
+	"\atimeout\x18\t \x01(\rR\atimeout\x12\x16\n" +
+	"\x06ledger\x18\n" +
+	" \x01(\rR\x06ledger\x12\x12\n" +
+	"\x04code\x18\v \x01(\rR\x04code\x12\x14\n" +
+	"\x05flags\x18\f \x01(\rR\x05flags\x12 \n" +
+	"\fuser_data_32\x18\r \x01(\rR\n" +
+	"userData32\"\xe5\x02\n" +
+	"\rTransferFlags\x12\x16\n" +
+	"\x06linked\x18\x01 \x01(\bR\x06linked\x12\x18\n" +
+	"\apending\x18\x02 \x01(\bR\apending\x122\n" +
+	"\x15post_pending_transfer\x18\x03 \x01(\bR\x13postPendingTransfer\x122\n" +
+	"\x15void_pending_transfer\x18\x04 \x01(\bR\x13voidPendingTransfer\x12'\n" +
+	"\x0fbalancing_debit\x18\x05 \x01(\bR\x0ebalancingDebit\x12)\n" +
+	"\x10balancing_credit\x18\x06 \x01(\bR\x0fbalancingCredit\x12#\n" +
+	"\rclosing_debit\x18\a \x01(\bR\fclosingDebit\x12%\n" +
+	"\x0eclosing_credit\x18\b \x01(\bR\rclosingCredit\x12\x1a\n" +
+	"\bimported\x18\t \x01(\bR\bimported\"\x83\x03\n" +
+	"\vTransaction\x129\n" +
+	"\n" +
+	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
+	"\x06ledger\x18\x02 \x01(\rR\x06ledger\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\rR\x04code\x12\x1e\n" +
+	"\n" +
+	"identifier\x18\x04 \x01(\tR\n" +
 	"identifier\x12)\n" +
-	"\x10transaction_type\x18\x02 \x01(\tR\x0ftransactionType\x12\x14\n" +
-	"\x05asset\x18\x03 \x01(\tR\x05asset\x12\x16\n" +
-	"\x06amount\x18\x04 \x01(\x02R\x06amount\x12\x10\n" +
-	"\x03fee\x18\x05 \x01(\x02R\x03fee\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x129\n" +
-	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAtB9Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
+	"\x10transaction_type\x18\x05 \x01(\tR\x0ftransactionType\x12\x14\n" +
+	"\x05asset\x18\x06 \x01(\tR\x05asset\x12(\n" +
+	"\x10debit_account_id\x18\a \x01(\tR\x0edebitAccountId\x12*\n" +
+	"\x11credit_account_id\x18\b \x01(\tR\x0fcreditAccountId\x12\x14\n" +
+	"\x05flags\x18\t \x01(\tR\x05flags\x12\x16\n" +
+	"\x06amount\x18\n" +
+	" \x01(\tR\x06amount\x12\x10\n" +
+	"\x03fee\x18\v \x01(\tR\x03fee\x12\x16\n" +
+	"\x06status\x18\f \x01(\tR\x06statusB9Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
 
 var (
 	file_rpc_transaction_model_proto_rawDescOnce sync.Once
@@ -151,13 +558,16 @@ func file_rpc_transaction_model_proto_rawDescGZIP() []byte {
 	return file_rpc_transaction_model_proto_rawDescData
 }
 
-var file_rpc_transaction_model_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_rpc_transaction_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_rpc_transaction_model_proto_goTypes = []any{
-	(*Transaction)(nil),           // 0: proto.Transaction
-	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
+	(*Uint128)(nil),               // 0: proto.Uint128
+	(*Transfer)(nil),              // 1: proto.Transfer
+	(*TransferFlags)(nil),         // 2: proto.TransferFlags
+	(*Transaction)(nil),           // 3: proto.Transaction
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_rpc_transaction_model_proto_depIdxs = []int32{
-	1, // 0: proto.Transaction.created_at:type_name -> google.protobuf.Timestamp
+	4, // 0: proto.Transaction.created_at:type_name -> google.protobuf.Timestamp
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -176,7 +586,7 @@ func file_rpc_transaction_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_transaction_model_proto_rawDesc), len(file_rpc_transaction_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -1,238 +1,191 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-01-23T07:42:40.094Z
+-- Generated at: 2026-02-11T09:19:42.757Z
 
-CREATE TYPE "contact_type" AS ENUM (
-  'EMAIL',
-  'MOBILE'
-);
-
-CREATE TYPE "profile_status" AS ENUM (
+CREATE TYPE "account_status" AS ENUM (
   'PENDING',
-  'FILLED',
-  'REJECTED',
-  'APPROVED',
-  'LOCKED'
+  'ISSUED',
+  'ACTIVE'
 );
 
-CREATE TYPE "profile_type" AS ENUM (
-  'NATURAL',
-  'LEGAL'
+CREATE TYPE "wallet_account_status" AS ENUM (
+  'PENDING',
+  'ACTIVE',
+  'INACTIVE',
+  'BANNED',
+  'LOCKED',
+  'LINKED_LOCKED'
 );
 
-CREATE TABLE "users" (
-  "id" bigserial PRIMARY KEY,
+CREATE TABLE "accounts" (
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
-  "approved" boolean NOT NULL DEFAULT false,
+  "title" varchar(128) NOT NULL,
+  "description" varchar(256),
+  "status" account_status NOT NULL DEFAULT 'ACTIVE',
   "banned" boolean NOT NULL DEFAULT false,
+  "user_identifier" ulid NOT NULL,
+  "base_asset_identifier" ulid NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
-  "roles" text[] NOT NULL DEFAULT '{USER}',
   "expires_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   "updated_at" timestamptz,
   "deleted_at" timestamptz
 );
 
-CREATE TABLE "contacts" (
-  "id" bigserial PRIMARY KEY,
+CREATE TABLE "wallets" (
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
-  "contact_type" contact_type NOT NULL DEFAULT 'MOBILE',
-  "user_id" bigserial NOT NULL,
-  "mobile" varchar(16) UNIQUE NOT NULL,
-  "mobile_totp" varchar(256),
-  "is_mobile_verified" boolean NOT NULL DEFAULT false,
-  "mobile_totp_expires_at" timestamptz,
-  "email" varchar(256) UNIQUE NOT NULL,
-  "email_totp" varchar(256),
-  "is_email_verified" boolean NOT NULL DEFAULT false,
-  "email_totp_expires_at" timestamptz,
+  "user_identifier" ulid NOT NULL,
+  "account_identifier" ulid NOT NULL,
+  "asset_identifier" bigserial NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
+  "ledger_account_id" "BYTEA(16)" NOT NULL,
+  "ledger_account_code" INTEGER NOT NULL,
+  "primary_account_number" varchar(24) NOT NULL,
+  "iban" varchar(34),
+  "cvv" varchar(6),
+  "cvv_two" varchar(6),
+  "expire_date" varchar(6),
+  "pin_code" varchar(256),
+  "status" wallet_account_status NOT NULL DEFAULT 'ACTIVE',
+  "transaction_totp_secret" varchar(64),
+  "transaction_totp_expires_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   "updated_at" timestamptz,
   "deleted_at" timestamptz
 );
 
-CREATE TABLE "profiles" (
-  "id" bigserial PRIMARY KEY,
+CREATE TABLE "wallet_assets" (
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
-  "user_id" bigserial NOT NULL,
-  "profile_type" profile_type NOT NULL,
-  "first_name" varchar(128) NOT NULL,
-  "last_name" varchar(128) NOT NULL,
-  "national_id" varchar(32) UNIQUE NOT NULL,
-  "status" profile_status NOT NULL DEFAULT 'PENDING',
+  "active" boolean NOT NULL DEFAULT false,
+  "code" varchar(256) NOT NULL,
+  "symbol" varchar(10) NOT NULL,
+  "title" varchar(128) NOT NULL,
+  "description" varchar(256),
   "meta_data" jsonb NOT NULL DEFAULT '{}',
-  "birth_date" timestamptz,
+  "ledger_code" INTEGER NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   "updated_at" timestamptz,
   "deleted_at" timestamptz
 );
 
-CREATE TABLE "sessions" (
-  "id" bigserial PRIMARY KEY NOT NULL,
-  "host" varchar(256) NOT NULL,
-  "device_id" varchar(128) NOT NULL,
-  "device_name" varchar(256) NOT NULL,
-  "device_user_agent" jsonb NOT NULL,
-  "device_notification_token" varchar(256),
-  "identifier" varchar(64) UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
-  "user_id" bigserial NOT NULL,
-  "expires_in" timestamptz NOT NULL,
-  "notification" varchar(256) DEFAULT '',
-  "meta_data" jsonb DEFAULT '{}',
-  "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  "deleted_at" timestamptz,
-  "updated_at" timestamptz
-);
+CREATE INDEX ON "accounts" ("identifier");
 
-CREATE INDEX ON "users" ("id");
+CREATE INDEX ON "accounts" ("deleted_at");
 
-CREATE INDEX ON "users" ("identifier");
+CREATE INDEX ON "accounts" ("identifier", "deleted_at");
 
-CREATE INDEX ON "users" ("deleted_at");
+CREATE INDEX ON "accounts" ("identifier", "banned", "deleted_at");
 
-CREATE INDEX ON "users" ("id", "identifier", "deleted_at");
+CREATE INDEX ON "accounts" ("identifier", "status", "deleted_at");
 
-CREATE INDEX ON "users" ("id", "identifier", "banned", "approved", "deleted_at");
+CREATE INDEX ON "accounts" ("banned");
 
-CREATE INDEX ON "users" ("banned", "approved");
+CREATE INDEX ON "accounts" ("status");
 
-CREATE INDEX ON "contacts" ("id");
+CREATE INDEX ON "wallets" ("identifier");
 
-CREATE INDEX ON "contacts" ("identifier");
+CREATE INDEX ON "wallets" ("deleted_at");
 
-CREATE INDEX ON "contacts" ("deleted_at");
+CREATE INDEX ON "wallets" ("identifier", "deleted_at");
 
-CREATE INDEX ON "contacts" ("id", "identifier", "deleted_at");
+CREATE INDEX ON "wallets" ("identifier", "asset_identifier");
 
-CREATE INDEX ON "contacts" ("id", "identifier", "contact_type", "mobile", "email");
+CREATE INDEX ON "wallets" ("identifier", "account_identifier", "asset_identifier");
 
-CREATE INDEX ON "profiles" ("id");
+CREATE INDEX ON "wallet_assets" ("identifier");
 
-CREATE INDEX ON "profiles" ("identifier");
+CREATE INDEX ON "wallet_assets" ("deleted_at");
 
-CREATE INDEX ON "profiles" ("deleted_at");
+CREATE INDEX ON "wallet_assets" ("identifier", "deleted_at");
 
-CREATE INDEX ON "profiles" ("id", "identifier", "deleted_at");
+CREATE INDEX ON "wallet_assets" ("identifier", "active", "deleted_at");
 
-CREATE INDEX ON "profiles" ("id", "identifier", "profile_type", "status", "national_id");
+CREATE INDEX ON "wallet_assets" ("active");
 
-CREATE INDEX ON "sessions" ("deleted_at");
+COMMENT ON COLUMN "accounts"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
-CREATE INDEX ON "sessions" ("host");
+COMMENT ON COLUMN "accounts"."title" IS 'account title';
 
-CREATE INDEX ON "sessions" ("id", "deleted_at");
+COMMENT ON COLUMN "accounts"."description" IS 'account description';
 
-CREATE INDEX ON "sessions" ("user_id", "deleted_at");
+COMMENT ON COLUMN "accounts"."status" IS 'account status';
 
-COMMENT ON COLUMN "users"."id" IS 'user unique id';
+COMMENT ON COLUMN "accounts"."banned" IS 'is account banned or no';
 
-COMMENT ON COLUMN "users"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
+COMMENT ON COLUMN "accounts"."user_identifier" IS 'related user identifier to determining account owner account';
 
-COMMENT ON COLUMN "users"."approved" IS 'is user approved or no';
+COMMENT ON COLUMN "accounts"."base_asset_identifier" IS 'related base asset identifier to determining account base asset';
 
-COMMENT ON COLUMN "users"."banned" IS 'is user banned or no';
+COMMENT ON COLUMN "accounts"."meta_data" IS 'account meta data';
 
-COMMENT ON COLUMN "users"."meta_data" IS 'user meta data';
+COMMENT ON COLUMN "accounts"."expires_at" IS 'expire time of account, if not sets then user valid for unlimited time';
 
-COMMENT ON COLUMN "users"."roles" IS 'user assigned roles for permission controls';
+COMMENT ON COLUMN "accounts"."created_at" IS 'when account was created';
 
-COMMENT ON COLUMN "users"."expires_at" IS 'expire time of user, if not sets then user valid for unlimited time';
+COMMENT ON COLUMN "accounts"."updated_at" IS 'when account was updated';
 
-COMMENT ON COLUMN "users"."created_at" IS 'when user was created';
+COMMENT ON COLUMN "accounts"."deleted_at" IS 'when account was deleted';
 
-COMMENT ON COLUMN "users"."updated_at" IS 'when user was updated';
+COMMENT ON COLUMN "wallets"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
-COMMENT ON COLUMN "users"."deleted_at" IS 'when user was deleted';
+COMMENT ON COLUMN "wallets"."user_identifier" IS 'related user identifier to determining account owner';
 
-COMMENT ON COLUMN "contacts"."id" IS 'contact unique id';
+COMMENT ON COLUMN "wallets"."account_identifier" IS 'related account identifier to determining account of wallet';
 
-COMMENT ON COLUMN "contacts"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
+COMMENT ON COLUMN "wallets"."asset_identifier" IS 'related asset identifier to determining asset of wallet';
 
-COMMENT ON COLUMN "contacts"."contact_type" IS 'contact primary type';
+COMMENT ON COLUMN "wallets"."meta_data" IS 'wallet account meta data';
 
-COMMENT ON COLUMN "contacts"."user_id" IS 'related user id to determining session owner account';
+COMMENT ON COLUMN "wallets"."ledger_account_id" IS 'related ledger account id to determining "ledger account" of wallet in ledger core';
 
-COMMENT ON COLUMN "contacts"."mobile" IS 'contact primary mobile phone number for authorization use';
+COMMENT ON COLUMN "wallets"."ledger_account_code" IS 'related ledger account code to determining service code for wallet in ledger core';
 
-COMMENT ON COLUMN "contacts"."mobile_totp" IS 'holds TOTP bcrypted pass code';
+COMMENT ON COLUMN "wallets"."primary_account_number" IS 'primary account number of wallet account';
 
-COMMENT ON COLUMN "contacts"."is_mobile_verified" IS 'sets to true if user verified his mobile by first time otp verification';
+COMMENT ON COLUMN "wallets"."iban" IS 'IBAN of wallet account';
 
-COMMENT ON COLUMN "contacts"."mobile_totp_expires_at" IS 'holds by mobile OTP verification code expire time';
+COMMENT ON COLUMN "wallets"."cvv" IS 'CVV of wallet account';
 
-COMMENT ON COLUMN "contacts"."email" IS 'contact primary e-mail address';
+COMMENT ON COLUMN "wallets"."cvv_two" IS 'CVV2 of wallet account';
 
-COMMENT ON COLUMN "contacts"."email_totp" IS 'holds TOTP bcrypted pass code';
+COMMENT ON COLUMN "wallets"."expire_date" IS 'expire date of wallet account';
 
-COMMENT ON COLUMN "contacts"."is_email_verified" IS 'sets to true if user verified his email by first time otp verification';
+COMMENT ON COLUMN "wallets"."pin_code" IS 'PIN code of wallet account (bcrypted)';
 
-COMMENT ON COLUMN "contacts"."email_totp_expires_at" IS 'holds by e-mail OTP verification code expire time';
+COMMENT ON COLUMN "wallets"."status" IS 'wallet account status';
 
-COMMENT ON COLUMN "contacts"."meta_data" IS 'contact meta data';
+COMMENT ON COLUMN "wallets"."transaction_totp_secret" IS 'transaction TOTP secret for wallet account (bcrypted)';
 
-COMMENT ON COLUMN "contacts"."created_at" IS 'when contact was created';
+COMMENT ON COLUMN "wallets"."transaction_totp_expires_at" IS 'transaction TOTP secret expire time for wallet account';
 
-COMMENT ON COLUMN "contacts"."updated_at" IS 'when contact was updated';
+COMMENT ON COLUMN "wallets"."created_at" IS 'when wallet account was created';
 
-COMMENT ON COLUMN "contacts"."deleted_at" IS 'when contact was deleted';
+COMMENT ON COLUMN "wallets"."updated_at" IS 'when wallet account was updated';
 
-COMMENT ON COLUMN "profiles"."id" IS 'profile unique id';
+COMMENT ON COLUMN "wallets"."deleted_at" IS 'when wallet account was deleted';
 
-COMMENT ON COLUMN "profiles"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
+COMMENT ON COLUMN "wallet_assets"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
-COMMENT ON COLUMN "profiles"."user_id" IS 'related user id to determining session owner account';
+COMMENT ON COLUMN "wallet_assets"."active" IS 'is wallet asset active or no';
 
-COMMENT ON COLUMN "profiles"."profile_type" IS 'legal or natural person type definition';
+COMMENT ON COLUMN "wallet_assets"."code" IS 'asset code of wallet asset';
 
-COMMENT ON COLUMN "profiles"."first_name" IS 'user first name';
+COMMENT ON COLUMN "wallet_assets"."symbol" IS 'asset symbol of wallet asset';
 
-COMMENT ON COLUMN "profiles"."last_name" IS 'user last name';
+COMMENT ON COLUMN "wallet_assets"."title" IS 'wallet asset title';
 
-COMMENT ON COLUMN "profiles"."national_id" IS 'user unique personal national id-code';
+COMMENT ON COLUMN "wallet_assets"."description" IS 'wallet asset description';
 
-COMMENT ON COLUMN "profiles"."status" IS 'profile control status';
+COMMENT ON COLUMN "wallet_assets"."meta_data" IS 'wallet asset meta data';
 
-COMMENT ON COLUMN "profiles"."meta_data" IS 'profile meta data';
+COMMENT ON COLUMN "wallet_assets"."ledger_code" IS 'related ledger code to determining wallet in ledger';
 
-COMMENT ON COLUMN "profiles"."birth_date" IS 'user birth date information';
+COMMENT ON COLUMN "wallet_assets"."created_at" IS 'when wallet asset was created';
 
-COMMENT ON COLUMN "profiles"."created_at" IS 'when profile was created';
+COMMENT ON COLUMN "wallet_assets"."updated_at" IS 'when wallet asset was updated';
 
-COMMENT ON COLUMN "profiles"."updated_at" IS 'when profile was updated';
+COMMENT ON COLUMN "wallet_assets"."deleted_at" IS 'when wallet asset was deleted';
 
-COMMENT ON COLUMN "profiles"."deleted_at" IS 'when profile was deleted';
+ALTER TABLE "wallets" ADD FOREIGN KEY ("account_identifier") REFERENCES "accounts" ("identifier");
 
-COMMENT ON COLUMN "sessions"."id" IS 'session unique id';
-
-COMMENT ON COLUMN "sessions"."host" IS 'session creation request host name (for SSO use)';
-
-COMMENT ON COLUMN "sessions"."device_id" IS 'device unique identifier for device recognition';
-
-COMMENT ON COLUMN "sessions"."device_name" IS 'device human friendly name';
-
-COMMENT ON COLUMN "sessions"."device_user_agent" IS 'device user agent info in json format';
-
-COMMENT ON COLUMN "sessions"."device_notification_token" IS 'device notification token for push notification sending';
-
-COMMENT ON COLUMN "sessions"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
-
-COMMENT ON COLUMN "sessions"."user_id" IS 'related user id to determining session owner account';
-
-COMMENT ON COLUMN "sessions"."expires_in" IS 'when session expires (only refresh token would updates this field)';
-
-COMMENT ON COLUMN "sessions"."notification" IS 'notification provider token for sending notifications by device';
-
-COMMENT ON COLUMN "sessions"."meta_data" IS 'meta data of session like IP, UserAgent etc...';
-
-COMMENT ON COLUMN "sessions"."created_at" IS 'when session created';
-
-COMMENT ON COLUMN "sessions"."deleted_at" IS 'when session deleted';
-
-COMMENT ON COLUMN "sessions"."updated_at" IS 'when session updated';
-
-ALTER TABLE "contacts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "sessions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "wallets" ADD FOREIGN KEY ("asset_identifier") REFERENCES "wallet_assets" ("identifier");

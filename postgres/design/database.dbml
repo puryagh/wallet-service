@@ -5,26 +5,113 @@ Project wallet_service {
   '''
 }
 
-// wallets table contains SMD for wallets
-Table wallets {
-  id bigserial [pk, note: 'wallet unique id']
+// account status enum
+Enum account_status {
+  PENDING [note: 'wallet is pending for KYC verification']
+  ISSUED [note: 'wallet is issued but not active yet, activation is pending for first deposit of base asset']
+  ACTIVE [note: 'wallet is active']
+}
+
+// accounts table contains SMD for user related wallets
+Table accounts {
   identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
-  banned boolean [not null, default: false, note: 'is wallet banned or no']
+  title varchar(128) [not null, note: 'account title']
+  description varchar(256) [note: 'account description']
+  status account_status [not null, default: 'ACTIVE', note: 'account status']
+  banned boolean [not null, default: false, note: 'is account banned or no']
 
-  meta_data jsonb [not null, default: '{}', note: 'wallet meta data']
+  user_identifier ulid [not null, note: 'related user identifier to determining account owner account']
 
-  expires_at timestamptz [note: 'expire time of wallet, if not sets then user valid for unlimited time']
-  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet was created']
-  updated_at timestamptz [note: 'when wallet was updated']
-  deleted_at timestamptz [note: 'when wallet was deleted']
+  base_asset_identifier ulid [not null, note: 'related base asset identifier to determining account base asset']
+
+  meta_data jsonb [not null, default: '{}', note: 'account meta data']
+
+  expires_at timestamptz [note: 'expire time of account, if not sets then user valid for unlimited time']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when account was created']
+  updated_at timestamptz [note: 'when account was updated']
+  deleted_at timestamptz [note: 'when account was deleted']
 
   Indexes {
-    id
     identifier
     deleted_at
-    (id, identifier, deleted_at)
-    (id, identifier, banned, deleted_at)
+    (identifier, deleted_at)
+    (identifier, banned, deleted_at)
+    (identifier, status, deleted_at)
     (banned)
+    (status)
+  }
+}
+
+// wallet account status enum
+Enum wallet_account_status {
+  PENDING [note: 'wallet account is pending for KYC verification']
+  ACTIVE [note: 'wallet account is active']
+  INACTIVE [note: 'wallet account is inactive']
+  BANNED [note: 'wallet account is banned']
+  LOCKED [note: 'wallet account is locked by owner']
+  LINKED_LOCKED [note: 'wallet account is locked by linking to another wallet account']
+}
+
+// wallets table contains SMD for wallets
+Table wallets {
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  
+  user_identifier ulid [not null, note: 'related user identifier to determining account owner']
+  account_identifier ulid [not null, ref: > accounts.identifier, note: 'related account identifier to determining account of wallet']
+
+  asset_identifier bigserial [not null, ref: > wallet_assets.identifier, note: 'related asset identifier to determining asset of wallet']
+
+  meta_data jsonb [not null, default: '{}', note: 'wallet account meta data']
+
+  ledger_account_id BYTEA(16) [not null, note: 'related ledger account id to determining "ledger account" of wallet in ledger core']
+  ledger_account_code INTEGER [not null, note: 'related ledger account code to determining service code for wallet in ledger core']
+
+  primary_account_number varchar(24) [not null, note: 'primary account number of wallet account']
+  iban varchar(34) [note: 'IBAN of wallet account']
+  cvv varchar(6) [note: 'CVV of wallet account']
+  cvv_two varchar(6) [note: 'CVV2 of wallet account']
+  expire_date varchar(6) [note: 'expire date of wallet account']
+  pin_code varchar(256) [note: 'PIN code of wallet account (bcrypted)']
+  status wallet_account_status [not null, default: 'ACTIVE', note: 'wallet account status']
+
+  transaction_totp_secret varchar(64) [note: 'transaction TOTP secret for wallet account (bcrypted)']
+  transaction_totp_expires_at timestamptz [note: 'transaction TOTP secret expire time for wallet account']
+
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet account was created']
+  updated_at timestamptz [note: 'when wallet account was updated']
+  deleted_at timestamptz [note: 'when wallet account was deleted']
+
+  Indexes {
+    identifier
+    deleted_at
+    (identifier, deleted_at)
+    (identifier, asset_identifier)
+    (identifier, account_identifier, asset_identifier)
   }
 
+}
+
+Table wallet_assets {
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
+  active boolean [not null, default: false, note: 'is wallet asset active or no']
+  code varchar(256) [not null, note: 'asset code of wallet asset']
+  symbol varchar(10) [not null, note: 'asset symbol of wallet asset']
+  title varchar(128) [not null, note: 'wallet asset title']
+  description varchar(256) [note: 'wallet asset description']
+
+  meta_data jsonb [not null, default: '{}', note: 'wallet asset meta data']
+
+  ledger_code INTEGER [not null, note: 'related ledger code to determining wallet in ledger']
+
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet asset was created']
+  updated_at timestamptz [note: 'when wallet asset was updated']
+  deleted_at timestamptz [note: 'when wallet asset was deleted']
+
+  Indexes {
+    identifier
+    deleted_at
+    (identifier, deleted_at)
+    (identifier, active, deleted_at)
+    (active)
+  }
 }

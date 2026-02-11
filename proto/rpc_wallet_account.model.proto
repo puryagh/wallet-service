@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+// WalletAccount represents an individual asset account within a wallet.
+// Each wallet account is linked to a TigerBeetle ledger account for double-entry bookkeeping.
+// Field ordering optimized for Go memory alignment: pointers → bytes → int32 → strings → maps.
+message WalletAccount {
+  // Timestamp when the wallet account was created in the system
+  google.protobuf.Timestamp created_at = 1; // 8 bytes (pointer)
+
+  // Timestamp when the wallet account was last updated (null if never updated)
+  google.protobuf.Timestamp updated_at = 2; // 8 bytes (pointer)
+
+  // Timestamp when the wallet account was soft-deleted (null if active)
+  google.protobuf.Timestamp deleted_at = 3; // 8 bytes (pointer)
+
+  // TigerBeetle ledger account ID (128-bit, 16 bytes) for double-entry bookkeeping
+  // This links the wallet account to its corresponding account in TigerBeetle
+  bytes ledger_account_id = 4; // 16 bytes
+
+  // TigerBeetle account code for categorizing account types (e.g., 1=asset, 2=liability)
+  // Stored as int32 for proto3 compatibility (SMALLINT in PostgreSQL)
+  int32 ledger_account_code = 5; // 4 bytes
+
+  // Unique external identifier for the wallet account (ULID format)
+  string identifier = 6;
+
+  // External identifier of the user who owns this wallet account
+  string user_identifier = 7;
+
+  // External identifier of the parent wallet containing this account
+  string wallet_identifier = 8;
+
+  // External identifier of the asset type for this account (e.g., USD, EUR, BTC)
+  string asset_identifier = 9;
+
+  // Primary Account Number (PAN) for card-based accounts (up to 24 digits)
+  // Stored encrypted in the database for PCI-DSS compliance
+  string primary_account_number = 10;
+
+  // International Bank Account Number for bank transfer compatibility (up to 34 characters)
+  string iban = 11;
+
+  // Card Verification Value (CVV) for card security (3-6 digits, encrypted)
+  string cvv = 12;
+
+  // Card expiration date in MMYY format (4 characters)
+  string expire_date = 13;
+
+  // Secondary CVV (CVV2) for additional card security (3-6 digits, encrypted)
+  string cvv_two = 14;
+
+  // Personal Identification Number for account access (encrypted, variable length)
+  string pin_code = 15;
+
+  // Current lifecycle status of the account (PENDING, ACTIVE, INACTIVE, BANNED, LOCKED, LINKED_LOCKED)
+  string status = 16;
+
+  // Flexible key-value metadata for storing custom attributes (e.g., account limits, preferences)
+  map<string, string> meta_data = 17;
+}
+
+// WalletAccountResponse is an alias for WalletAccount used in API responses for clarity.
+// Maintains backward compatibility with existing API contracts.
+message WalletAccountResponse {
+  // Timestamp when the wallet account was created in the system
+  google.protobuf.Timestamp created_at = 1;
+
+  // Timestamp when the wallet account was last updated (null if never updated)
+  google.protobuf.Timestamp updated_at = 2;
+
+  // Timestamp when the wallet account was soft-deleted (null if active)
+  google.protobuf.Timestamp deleted_at = 3;
+
+  // TigerBeetle ledger account ID (128-bit, 16 bytes) for double-entry bookkeeping
+  bytes ledger_account_id = 4;
+
+  // TigerBeetle account code for categorizing account types
+  int32 ledger_account_code = 5;
+
+  // Unique external identifier for the wallet account (ULID format)
+  string identifier = 6;
+
+  // External identifier of the user who owns this wallet account
+  string user_identifier = 7;
+
+  // External identifier of the parent wallet containing this account
+  string wallet_identifier = 8;
+
+  // External identifier of the asset type for this account
+  string asset_identifier = 9;
+
+  // Primary Account Number (PAN) for card-based accounts (encrypted)
+  string primary_account_number = 10;
+
+  // International Bank Account Number for bank transfer compatibility
+  string iban = 11;
+
+  // Card Verification Value (CVV) for card security (encrypted)
+  string cvv = 12;
+
+  // Card expiration date in MMYY format
+  string expire_date = 13;
+
+  // Secondary CVV (CVV2) for additional card security (encrypted)
+  string cvv_two = 14;
+
+  // Personal Identification Number for account access (encrypted)
+  string pin_code = 15;
+
+  // Current lifecycle status of the account
+  string status = 16;
+
+  // Flexible key-value metadata for storing custom attributes
+  map<string, string> meta_data = 17;
+}

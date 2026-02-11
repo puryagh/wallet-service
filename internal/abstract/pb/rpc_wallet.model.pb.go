@@ -22,23 +22,35 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Wallet message containing all wallet data and nested entities
+// Wallet represents a user's wallet container that holds multiple asset accounts.
+// A wallet is the top-level entity that groups related wallet accounts for a single user.
+// Field ordering optimized for Go memory alignment: pointers/timestamps → bools → strings → maps.
 type Wallet struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// wallet public identifier to hide real database id of wallet
-	Identifier string `protobuf:"bytes,1,opt,name=identifier,proto3" json:"identifier,omitempty"`
-	// wallet ban status
-	Banned bool `protobuf:"varint,2,opt,name=banned,proto3" json:"banned,omitempty"`
-	// metadata contains wallet meta data
-	MetaData map[string]string `protobuf:"bytes,3,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// wallet expiration time
-	ExpiresAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	// wallet creation time
-	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	// wallet update time
-	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// wallet deletion time
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	// Timestamp when the wallet was created in the system
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // 8 bytes (pointer)
+	// Timestamp when the wallet was last updated (null if never updated)
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"` // 8 bytes (pointer)
+	// Timestamp when the wallet was soft-deleted (null if active)
+	DeletedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"` // 8 bytes (pointer)
+	// Expiration timestamp for temporary or time-limited wallets (null if permanent)
+	ExpiresAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"` // 8 bytes (pointer)
+	// Indicates whether the wallet is banned due to policy violations or fraud
+	Banned bool `protobuf:"varint,5,opt,name=banned,proto3" json:"banned,omitempty"` // 1 byte
+	// Unique external identifier for the wallet (ULID format for sortable, globally unique IDs)
+	Identifier string `protobuf:"bytes,6,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	// Human-readable name or label for the wallet (e.g., "Main Wallet", "Savings")
+	Title string `protobuf:"bytes,7,opt,name=title,proto3" json:"title,omitempty"`
+	// Optional description providing additional context about the wallet's purpose
+	Description string `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
+	// Current lifecycle status of the wallet (PENDING, ISSUED, ACTIVE)
+	Status string `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	// External identifier of the user who owns this wallet
+	UserIdentifier string `protobuf:"bytes,10,opt,name=user_identifier,json=userIdentifier,proto3" json:"user_identifier,omitempty"`
+	// External identifier of the primary/base asset for this wallet (e.g., default currency)
+	BaseAssetIdentifier string `protobuf:"bytes,11,opt,name=base_asset_identifier,json=baseAssetIdentifier,proto3" json:"base_asset_identifier,omitempty"`
+	// Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)
+	MetaData      map[string]string `protobuf:"bytes,12,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,34 +85,6 @@ func (*Wallet) Descriptor() ([]byte, []int) {
 	return file_rpc_wallet_model_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Wallet) GetIdentifier() string {
-	if x != nil {
-		return x.Identifier
-	}
-	return ""
-}
-
-func (x *Wallet) GetBanned() bool {
-	if x != nil {
-		return x.Banned
-	}
-	return false
-}
-
-func (x *Wallet) GetMetaData() map[string]string {
-	if x != nil {
-		return x.MetaData
-	}
-	return nil
-}
-
-func (x *Wallet) GetExpiresAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return nil
-}
-
 func (x *Wallet) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -122,25 +106,263 @@ func (x *Wallet) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Wallet) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+func (x *Wallet) GetBanned() bool {
+	if x != nil {
+		return x.Banned
+	}
+	return false
+}
+
+func (x *Wallet) GetIdentifier() string {
+	if x != nil {
+		return x.Identifier
+	}
+	return ""
+}
+
+func (x *Wallet) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Wallet) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Wallet) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Wallet) GetUserIdentifier() string {
+	if x != nil {
+		return x.UserIdentifier
+	}
+	return ""
+}
+
+func (x *Wallet) GetBaseAssetIdentifier() string {
+	if x != nil {
+		return x.BaseAssetIdentifier
+	}
+	return ""
+}
+
+func (x *Wallet) GetMetaData() map[string]string {
+	if x != nil {
+		return x.MetaData
+	}
+	return nil
+}
+
+// WalletResponse is an alias for Wallet used in API responses for clarity.
+// Maintains backward compatibility with existing API contracts.
+type WalletResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Timestamp when the wallet was created in the system
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Timestamp when the wallet was last updated (null if never updated)
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Timestamp when the wallet was soft-deleted (null if active)
+	DeletedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	// Expiration timestamp for temporary or time-limited wallets (null if permanent)
+	ExpiresAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	// Indicates whether the wallet is banned due to policy violations or fraud
+	Banned bool `protobuf:"varint,5,opt,name=banned,proto3" json:"banned,omitempty"`
+	// Unique external identifier for the wallet (ULID format)
+	Identifier string `protobuf:"bytes,6,opt,name=identifier,proto3" json:"identifier,omitempty"`
+	// Human-readable name or label for the wallet
+	Title string `protobuf:"bytes,7,opt,name=title,proto3" json:"title,omitempty"`
+	// Optional description providing additional context about the wallet's purpose
+	Description string `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
+	// Current lifecycle status of the wallet (PENDING, ISSUED, ACTIVE)
+	Status string `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	// External identifier of the user who owns this wallet
+	UserIdentifier string `protobuf:"bytes,10,opt,name=user_identifier,json=userIdentifier,proto3" json:"user_identifier,omitempty"`
+	// External identifier of the primary/base asset for this wallet
+	BaseAssetIdentifier string `protobuf:"bytes,11,opt,name=base_asset_identifier,json=baseAssetIdentifier,proto3" json:"base_asset_identifier,omitempty"`
+	// Flexible key-value metadata for storing custom attributes
+	MetaData      map[string]string `protobuf:"bytes,12,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WalletResponse) Reset() {
+	*x = WalletResponse{}
+	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WalletResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WalletResponse) ProtoMessage() {}
+
+func (x *WalletResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WalletResponse.ProtoReflect.Descriptor instead.
+func (*WalletResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_wallet_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *WalletResponse) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *WalletResponse) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *WalletResponse) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
+func (x *WalletResponse) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+func (x *WalletResponse) GetBanned() bool {
+	if x != nil {
+		return x.Banned
+	}
+	return false
+}
+
+func (x *WalletResponse) GetIdentifier() string {
+	if x != nil {
+		return x.Identifier
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetUserIdentifier() string {
+	if x != nil {
+		return x.UserIdentifier
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetBaseAssetIdentifier() string {
+	if x != nil {
+		return x.BaseAssetIdentifier
+	}
+	return ""
+}
+
+func (x *WalletResponse) GetMetaData() map[string]string {
+	if x != nil {
+		return x.MetaData
+	}
+	return nil
+}
+
 var File_rpc_wallet_model_proto protoreflect.FileDescriptor
 
 const file_rpc_wallet_model_proto_rawDesc = "" +
 	"\n" +
-	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa3\x03\n" +
-	"\x06Wallet\x12\x1e\n" +
+	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd0\x04\n" +
+	"\x06Wallet\x129\n" +
 	"\n" +
-	"identifier\x18\x01 \x01(\tR\n" +
-	"identifier\x12\x16\n" +
-	"\x06banned\x18\x02 \x01(\bR\x06banned\x128\n" +
-	"\tmeta_data\x18\x03 \x03(\v2\x1b.proto.Wallet.MetaDataEntryR\bmetaData\x129\n" +
+	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"expires_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x129\n" +
+	"updated_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"deleted_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"expires_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12\x16\n" +
+	"\x06banned\x18\x05 \x01(\bR\x06banned\x12\x1e\n" +
 	"\n" +
-	"deleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x1a;\n" +
+	"identifier\x18\x06 \x01(\tR\n" +
+	"identifier\x12\x14\n" +
+	"\x05title\x18\a \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12'\n" +
+	"\x0fuser_identifier\x18\n" +
+	" \x01(\tR\x0euserIdentifier\x122\n" +
+	"\x15base_asset_identifier\x18\v \x01(\tR\x13baseAssetIdentifier\x128\n" +
+	"\tmeta_data\x18\f \x03(\v2\x1b.proto.Wallet.MetaDataEntryR\bmetaData\x1a;\n" +
+	"\rMetaDataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe0\x04\n" +
+	"\x0eWalletResponse\x129\n" +
+	"\n" +
+	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"\n" +
+	"deleted_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x129\n" +
+	"\n" +
+	"expires_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12\x16\n" +
+	"\x06banned\x18\x05 \x01(\bR\x06banned\x12\x1e\n" +
+	"\n" +
+	"identifier\x18\x06 \x01(\tR\n" +
+	"identifier\x12\x14\n" +
+	"\x05title\x18\a \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12'\n" +
+	"\x0fuser_identifier\x18\n" +
+	" \x01(\tR\x0euserIdentifier\x122\n" +
+	"\x15base_asset_identifier\x18\v \x01(\tR\x13baseAssetIdentifier\x12@\n" +
+	"\tmeta_data\x18\f \x03(\v2#.proto.WalletResponse.MetaDataEntryR\bmetaData\x1a;\n" +
 	"\rMetaDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B9Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
@@ -157,23 +379,30 @@ func file_rpc_wallet_model_proto_rawDescGZIP() []byte {
 	return file_rpc_wallet_model_proto_rawDescData
 }
 
-var file_rpc_wallet_model_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_rpc_wallet_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_rpc_wallet_model_proto_goTypes = []any{
 	(*Wallet)(nil),                // 0: proto.Wallet
-	nil,                           // 1: proto.Wallet.MetaDataEntry
-	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(*WalletResponse)(nil),        // 1: proto.WalletResponse
+	nil,                           // 2: proto.Wallet.MetaDataEntry
+	nil,                           // 3: proto.WalletResponse.MetaDataEntry
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_rpc_wallet_model_proto_depIdxs = []int32{
-	1, // 0: proto.Wallet.meta_data:type_name -> proto.Wallet.MetaDataEntry
-	2, // 1: proto.Wallet.expires_at:type_name -> google.protobuf.Timestamp
-	2, // 2: proto.Wallet.created_at:type_name -> google.protobuf.Timestamp
-	2, // 3: proto.Wallet.updated_at:type_name -> google.protobuf.Timestamp
-	2, // 4: proto.Wallet.deleted_at:type_name -> google.protobuf.Timestamp
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	4,  // 0: proto.Wallet.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 1: proto.Wallet.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 2: proto.Wallet.deleted_at:type_name -> google.protobuf.Timestamp
+	4,  // 3: proto.Wallet.expires_at:type_name -> google.protobuf.Timestamp
+	2,  // 4: proto.Wallet.meta_data:type_name -> proto.Wallet.MetaDataEntry
+	4,  // 5: proto.WalletResponse.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 6: proto.WalletResponse.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 7: proto.WalletResponse.deleted_at:type_name -> google.protobuf.Timestamp
+	4,  // 8: proto.WalletResponse.expires_at:type_name -> google.protobuf.Timestamp
+	3,  // 9: proto.WalletResponse.meta_data:type_name -> proto.WalletResponse.MetaDataEntry
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_rpc_wallet_model_proto_init() }
@@ -187,7 +416,7 @@ func file_rpc_wallet_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_wallet_model_proto_rawDesc), len(file_rpc_wallet_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

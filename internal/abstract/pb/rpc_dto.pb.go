@@ -9,7 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,15 +22,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// model that contains context user wallet response properties.
+// ContextUserWalletResponse returns the authenticated user's wallet information.
+// Field ordering optimized for Go memory alignment: bool → Wallet (pointer) → string.
 type ContextUserWalletResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// wallet data
-	Wallet        *Wallet `protobuf:"bytes,3,opt,name=wallet,proto3" json:"wallet,omitempty"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// Wallet data for the authenticated user (null if error is true)
+	Wallet *Wallet `protobuf:"bytes,2,opt,name=wallet,proto3" json:"wallet,omitempty"` // pointer
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -72,13 +73,6 @@ func (x *ContextUserWalletResponse) GetError() bool {
 	return false
 }
 
-func (x *ContextUserWalletResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 func (x *ContextUserWalletResponse) GetWallet() *Wallet {
 	if x != nil {
 		return x.Wallet
@@ -86,15 +80,23 @@ func (x *ContextUserWalletResponse) GetWallet() *Wallet {
 	return nil
 }
 
-// model that contains context user transaction list response properties.
+func (x *ContextUserWalletResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// ContextUserWalletTransactionsResponse returns the authenticated user's transaction history.
+// Field ordering optimized for Go memory alignment: bool → repeated (slice) → string.
 type ContextUserWalletTransactionsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// transaction list
-	Transactions  []*Transaction `protobuf:"bytes,3,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// List of transactions for the authenticated user (empty if error is true)
+	Transactions []*Transaction `protobuf:"bytes,2,rep,name=transactions,proto3" json:"transactions,omitempty"` // slice
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -136,13 +138,6 @@ func (x *ContextUserWalletTransactionsResponse) GetError() bool {
 	return false
 }
 
-func (x *ContextUserWalletTransactionsResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 func (x *ContextUserWalletTransactionsResponse) GetTransactions() []*Transaction {
 	if x != nil {
 		return x.Transactions
@@ -150,132 +145,143 @@ func (x *ContextUserWalletTransactionsResponse) GetTransactions() []*Transaction
 	return nil
 }
 
-// model that contains DepositeAsset request properties.
-type DepositeAssetRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// asset type
-	Asset string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
-	// asset amount
-	Amount        float32 `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DepositeAssetRequest) Reset() {
-	*x = DepositeAssetRequest{}
-	mi := &file_rpc_dto_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DepositeAssetRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DepositeAssetRequest) ProtoMessage() {}
-
-func (x *DepositeAssetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_dto_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DepositeAssetRequest.ProtoReflect.Descriptor instead.
-func (*DepositeAssetRequest) Descriptor() ([]byte, []int) {
-	return file_rpc_dto_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *DepositeAssetRequest) GetAsset() string {
-	if x != nil {
-		return x.Asset
-	}
-	return ""
-}
-
-func (x *DepositeAssetRequest) GetAmount() float32 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-// model that contains DepositeAsset response properties.
-type DepositeAssetResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// transaction data
-	Transaction   *Transaction `protobuf:"bytes,3,opt,name=transaction,proto3" json:"transaction,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DepositeAssetResponse) Reset() {
-	*x = DepositeAssetResponse{}
-	mi := &file_rpc_dto_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DepositeAssetResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DepositeAssetResponse) ProtoMessage() {}
-
-func (x *DepositeAssetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_dto_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DepositeAssetResponse.ProtoReflect.Descriptor instead.
-func (*DepositeAssetResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_dto_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *DepositeAssetResponse) GetError() bool {
-	if x != nil {
-		return x.Error
-	}
-	return false
-}
-
-func (x *DepositeAssetResponse) GetMessage() string {
+func (x *ContextUserWalletTransactionsResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *DepositeAssetResponse) GetTransaction() *Transaction {
+// DepositAssetRequest initiates a deposit of assets into the user's wallet account.
+// Note: Using string for amount to avoid floating-point precision issues in financial calculations.
+type DepositAssetRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Asset code to deposit (e.g., "USD", "EUR", "BTC")
+	Asset string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
+	// Amount to deposit as a decimal string (e.g., "100.50")
+	// Use string instead of float to maintain precision
+	Amount        string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DepositAssetRequest) Reset() {
+	*x = DepositAssetRequest{}
+	mi := &file_rpc_dto_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DepositAssetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DepositAssetRequest) ProtoMessage() {}
+
+func (x *DepositAssetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DepositAssetRequest.ProtoReflect.Descriptor instead.
+func (*DepositAssetRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DepositAssetRequest) GetAsset() string {
+	if x != nil {
+		return x.Asset
+	}
+	return ""
+}
+
+func (x *DepositAssetRequest) GetAmount() string {
+	if x != nil {
+		return x.Amount
+	}
+	return ""
+}
+
+// DepositAssetResponse returns the result of a deposit operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
+type DepositAssetResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// Transaction record for the deposit (null if error is true)
+	Transaction *Transaction `protobuf:"bytes,2,opt,name=transaction,proto3" json:"transaction,omitempty"` // pointer
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DepositAssetResponse) Reset() {
+	*x = DepositAssetResponse{}
+	mi := &file_rpc_dto_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DepositAssetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DepositAssetResponse) ProtoMessage() {}
+
+func (x *DepositAssetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DepositAssetResponse.ProtoReflect.Descriptor instead.
+func (*DepositAssetResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *DepositAssetResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
+func (x *DepositAssetResponse) GetTransaction() *Transaction {
 	if x != nil {
 		return x.Transaction
 	}
 	return nil
 }
 
-// model that contains WithdrawAsset request properties.
+func (x *DepositAssetResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// WithdrawAssetRequest initiates a withdrawal of assets from the user's wallet account.
 type WithdrawAssetRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// asset type
+	// Asset code to withdraw (e.g., "USD", "EUR", "BTC")
 	Asset string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
-	// asset amount
-	Amount        float32 `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// Amount to withdraw as a decimal string (e.g., "50.25")
+	// Use string instead of float to maintain precision
+	Amount        string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -317,22 +323,23 @@ func (x *WithdrawAssetRequest) GetAsset() string {
 	return ""
 }
 
-func (x *WithdrawAssetRequest) GetAmount() float32 {
+func (x *WithdrawAssetRequest) GetAmount() string {
 	if x != nil {
 		return x.Amount
 	}
-	return 0
+	return ""
 }
 
-// model that contains WithdrawAsset response properties.
+// WithdrawAssetResponse returns the result of a withdrawal operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 type WithdrawAssetResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// transaction data
-	Transaction   *Transaction `protobuf:"bytes,3,opt,name=transaction,proto3" json:"transaction,omitempty"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// Transaction record for the withdrawal (null if error is true)
+	Transaction *Transaction `protobuf:"bytes,2,opt,name=transaction,proto3" json:"transaction,omitempty"` // pointer
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -374,13 +381,6 @@ func (x *WithdrawAssetResponse) GetError() bool {
 	return false
 }
 
-func (x *WithdrawAssetResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 func (x *WithdrawAssetResponse) GetTransaction() *Transaction {
 	if x != nil {
 		return x.Transaction
@@ -388,14 +388,22 @@ func (x *WithdrawAssetResponse) GetTransaction() *Transaction {
 	return nil
 }
 
-// model that contains TransferAsset request properties.
+func (x *WithdrawAssetResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// TransferAssetRequest initiates a transfer of assets from the user's wallet to another user's wallet.
 type TransferAssetRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// asset type
+	// Asset code to transfer (e.g., "USD", "EUR", "BTC")
 	Asset string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
-	// asset amount
-	Amount float32 `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	// receiver wallet identifier
+	// Amount to transfer as a decimal string (e.g., "25.00")
+	// Use string instead of float to maintain precision
+	Amount string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// External identifier (ULID) of the recipient's wallet
 	ReceiverWalletIdentifier string `protobuf:"bytes,3,opt,name=receiver_wallet_identifier,json=receiverWalletIdentifier,proto3" json:"receiver_wallet_identifier,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
@@ -438,11 +446,11 @@ func (x *TransferAssetRequest) GetAsset() string {
 	return ""
 }
 
-func (x *TransferAssetRequest) GetAmount() float32 {
+func (x *TransferAssetRequest) GetAmount() string {
 	if x != nil {
 		return x.Amount
 	}
-	return 0
+	return ""
 }
 
 func (x *TransferAssetRequest) GetReceiverWalletIdentifier() string {
@@ -452,15 +460,16 @@ func (x *TransferAssetRequest) GetReceiverWalletIdentifier() string {
 	return ""
 }
 
-// model that contains TransferAsset response properties.
+// TransferAssetResponse returns the result of a transfer operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 type TransferAssetResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// transaction data
-	Transaction   *Transaction `protobuf:"bytes,3,opt,name=transaction,proto3" json:"transaction,omitempty"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// Transaction record for the transfer (null if error is true)
+	Transaction *Transaction `protobuf:"bytes,2,opt,name=transaction,proto3" json:"transaction,omitempty"` // pointer
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -502,13 +511,6 @@ func (x *TransferAssetResponse) GetError() bool {
 	return false
 }
 
-func (x *TransferAssetResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 func (x *TransferAssetResponse) GetTransaction() *Transaction {
 	if x != nil {
 		return x.Transaction
@@ -516,17 +518,24 @@ func (x *TransferAssetResponse) GetTransaction() *Transaction {
 	return nil
 }
 
-// model that contains ExchangeAsset request properties.
+func (x *TransferAssetResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// ExchangeAssetRequest initiates an exchange of one asset for another within the user's wallet.
 type ExchangeAssetRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// asset type
-	Asset string `protobuf:"bytes,1,opt,name=asset,proto3" json:"asset,omitempty"`
-	// asset amount
-	Amount float32 `protobuf:"fixed32,2,opt,name=amount,proto3" json:"amount,omitempty"`
-	// receiver wallet identifier
-	ReceiverWalletIdentifier string `protobuf:"bytes,3,opt,name=receiver_wallet_identifier,json=receiverWalletIdentifier,proto3" json:"receiver_wallet_identifier,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	// Source asset code to exchange from (e.g., "USD")
+	FromAsset string `protobuf:"bytes,1,opt,name=from_asset,json=fromAsset,proto3" json:"from_asset,omitempty"`
+	// Amount of source asset to exchange as a decimal string (e.g., "100.00")
+	Amount string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// Target asset code to exchange to (e.g., "EUR")
+	ToAsset       string `protobuf:"bytes,3,opt,name=to_asset,json=toAsset,proto3" json:"to_asset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ExchangeAssetRequest) Reset() {
@@ -559,36 +568,37 @@ func (*ExchangeAssetRequest) Descriptor() ([]byte, []int) {
 	return file_rpc_dto_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *ExchangeAssetRequest) GetAsset() string {
+func (x *ExchangeAssetRequest) GetFromAsset() string {
 	if x != nil {
-		return x.Asset
+		return x.FromAsset
 	}
 	return ""
 }
 
-func (x *ExchangeAssetRequest) GetAmount() float32 {
+func (x *ExchangeAssetRequest) GetAmount() string {
 	if x != nil {
 		return x.Amount
 	}
-	return 0
+	return ""
 }
 
-func (x *ExchangeAssetRequest) GetReceiverWalletIdentifier() string {
+func (x *ExchangeAssetRequest) GetToAsset() string {
 	if x != nil {
-		return x.ReceiverWalletIdentifier
+		return x.ToAsset
 	}
 	return ""
 }
 
-// model that contains ExchangeAsset response properties.
+// ExchangeAssetResponse returns the result of an exchange operation.
+// Field ordering optimized for Go memory alignment: bool → Transaction (pointer) → string.
 type ExchangeAssetResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// error sets true if processing failed otherwise sets false
-	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	// message contains error message if error is true or helper message if error is false
-	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	// transaction data
-	Transaction   *Transaction `protobuf:"bytes,3,opt,name=transaction,proto3" json:"transaction,omitempty"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// Transaction record for the exchange (null if error is true)
+	Transaction *Transaction `protobuf:"bytes,2,opt,name=transaction,proto3" json:"transaction,omitempty"` // pointer
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -630,6 +640,13 @@ func (x *ExchangeAssetResponse) GetError() bool {
 	return false
 }
 
+func (x *ExchangeAssetResponse) GetTransaction() *Transaction {
+	if x != nil {
+		return x.Transaction
+	}
+	return nil
+}
+
 func (x *ExchangeAssetResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
@@ -637,11 +654,754 @@ func (x *ExchangeAssetResponse) GetMessage() string {
 	return ""
 }
 
-func (x *ExchangeAssetResponse) GetTransaction() *Transaction {
+// GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.
+// This is the primary method for retrieving transaction history for an account.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.
+type GetAccountTransfersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TigerBeetle account ID (128-bit, 16 bytes) to query transfers for
+	AccountId []byte `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"` // 16 bytes
+	// Minimum timestamp filter (nanoseconds since epoch, inclusive, 0 = no lower bound)
+	TimestampMin uint64 `protobuf:"varint,2,opt,name=timestamp_min,json=timestampMin,proto3" json:"timestamp_min,omitempty"` // 8 bytes
+	// Maximum timestamp filter (nanoseconds since epoch, inclusive, 0 = no upper bound)
+	TimestampMax uint64 `protobuf:"varint,3,opt,name=timestamp_max,json=timestampMax,proto3" json:"timestamp_max,omitempty"` // 8 bytes
+	// Maximum number of results to return (default: 8190, TigerBeetle's max batch size)
+	Limit uint32 `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"` // 4 bytes
+	// Optional filter by transfer code (0 = no filter)
+	Code uint32 `protobuf:"varint,5,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
+	// Include debit transfers (money leaving the account)
+	Debits bool `protobuf:"varint,6,opt,name=debits,proto3" json:"debits,omitempty"` // 1 byte
+	// Include credit transfers (money entering the account)
+	Credits bool `protobuf:"varint,7,opt,name=credits,proto3" json:"credits,omitempty"` // 1 byte
+	// Return results in reverse chronological order (newest first)
+	Reversed      bool `protobuf:"varint,8,opt,name=reversed,proto3" json:"reversed,omitempty"` // 1 byte
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAccountTransfersRequest) Reset() {
+	*x = GetAccountTransfersRequest{}
+	mi := &file_rpc_dto_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAccountTransfersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAccountTransfersRequest) ProtoMessage() {}
+
+func (x *GetAccountTransfersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[10]
 	if x != nil {
-		return x.Transaction
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAccountTransfersRequest.ProtoReflect.Descriptor instead.
+func (*GetAccountTransfersRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetAccountTransfersRequest) GetAccountId() []byte {
+	if x != nil {
+		return x.AccountId
 	}
 	return nil
+}
+
+func (x *GetAccountTransfersRequest) GetTimestampMin() uint64 {
+	if x != nil {
+		return x.TimestampMin
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersRequest) GetTimestampMax() uint64 {
+	if x != nil {
+		return x.TimestampMax
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersRequest) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersRequest) GetDebits() bool {
+	if x != nil {
+		return x.Debits
+	}
+	return false
+}
+
+func (x *GetAccountTransfersRequest) GetCredits() bool {
+	if x != nil {
+		return x.Credits
+	}
+	return false
+}
+
+func (x *GetAccountTransfersRequest) GetReversed() bool {
+	if x != nil {
+		return x.Reversed
+	}
+	return false
+}
+
+// GetAccountTransfersResponse returns transfers matching the query criteria.
+// Field ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated.
+type GetAccountTransfersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Timestamp of the next page for pagination (0 if no more results)
+	NextTimestamp uint64 `protobuf:"varint,1,opt,name=next_timestamp,json=nextTimestamp,proto3" json:"next_timestamp,omitempty"` // 8 bytes
+	// Total number of transfers returned in this response
+	TotalCount uint32 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
+	// Indicates whether more results are available beyond this page
+	HasMore bool `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
+	// List of transfers matching the query criteria
+	Transfers     []*Transfer `protobuf:"bytes,4,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAccountTransfersResponse) Reset() {
+	*x = GetAccountTransfersResponse{}
+	mi := &file_rpc_dto_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAccountTransfersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAccountTransfersResponse) ProtoMessage() {}
+
+func (x *GetAccountTransfersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAccountTransfersResponse.ProtoReflect.Descriptor instead.
+func (*GetAccountTransfersResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetAccountTransfersResponse) GetNextTimestamp() uint64 {
+	if x != nil {
+		return x.NextTimestamp
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersResponse) GetTotalCount() uint32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *GetAccountTransfersResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *GetAccountTransfersResponse) GetTransfers() []*Transfer {
+	if x != nil {
+		return x.Transfers
+	}
+	return nil
+}
+
+// QueryTransfersRequest queries transfers by metadata and other filter criteria.
+// Useful for finding transfers by custom user_data fields or ledger/code combinations.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.
+type QueryTransfersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Filter by custom 128-bit metadata (16 bytes, 0 = no filter)
+	UserData_128 []byte `protobuf:"bytes,1,opt,name=user_data_128,json=userData128,proto3" json:"user_data_128,omitempty"` // 16 bytes
+	// Minimum timestamp filter (nanoseconds since epoch, 0 = no lower bound)
+	TimestampMin uint64 `protobuf:"varint,2,opt,name=timestamp_min,json=timestampMin,proto3" json:"timestamp_min,omitempty"` // 8 bytes
+	// Maximum timestamp filter (nanoseconds since epoch, 0 = no upper bound)
+	TimestampMax uint64 `protobuf:"varint,3,opt,name=timestamp_max,json=timestampMax,proto3" json:"timestamp_max,omitempty"` // 8 bytes
+	// Filter by custom 64-bit metadata (0 = no filter)
+	UserData_64 uint64 `protobuf:"varint,4,opt,name=user_data_64,json=userData64,proto3" json:"user_data_64,omitempty"` // 8 bytes
+	// Maximum number of results to return
+	Limit uint32 `protobuf:"varint,5,opt,name=limit,proto3" json:"limit,omitempty"` // 4 bytes
+	// Filter by ledger identifier (0 = no filter)
+	Ledger uint32 `protobuf:"varint,6,opt,name=ledger,proto3" json:"ledger,omitempty"` // 4 bytes
+	// Filter by transfer code (0 = no filter)
+	Code uint32 `protobuf:"varint,7,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
+	// Filter by custom 32-bit metadata (0 = no filter)
+	UserData_32 uint32 `protobuf:"varint,8,opt,name=user_data_32,json=userData32,proto3" json:"user_data_32,omitempty"` // 4 bytes
+	// Return results in reverse chronological order (newest first)
+	Reversed      bool `protobuf:"varint,9,opt,name=reversed,proto3" json:"reversed,omitempty"` // 1 byte
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *QueryTransfersRequest) Reset() {
+	*x = QueryTransfersRequest{}
+	mi := &file_rpc_dto_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *QueryTransfersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryTransfersRequest) ProtoMessage() {}
+
+func (x *QueryTransfersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QueryTransfersRequest.ProtoReflect.Descriptor instead.
+func (*QueryTransfersRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *QueryTransfersRequest) GetUserData_128() []byte {
+	if x != nil {
+		return x.UserData_128
+	}
+	return nil
+}
+
+func (x *QueryTransfersRequest) GetTimestampMin() uint64 {
+	if x != nil {
+		return x.TimestampMin
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetTimestampMax() uint64 {
+	if x != nil {
+		return x.TimestampMax
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetUserData_64() uint64 {
+	if x != nil {
+		return x.UserData_64
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetLedger() uint32 {
+	if x != nil {
+		return x.Ledger
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetUserData_32() uint32 {
+	if x != nil {
+		return x.UserData_32
+	}
+	return 0
+}
+
+func (x *QueryTransfersRequest) GetReversed() bool {
+	if x != nil {
+		return x.Reversed
+	}
+	return false
+}
+
+// QueryTransfersResponse returns transfers matching the query criteria.
+// Field ordering optimized for Go memory alignment: uint32 → bool → repeated.
+type QueryTransfersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Total number of transfers returned in this response
+	TotalCount uint32 `protobuf:"varint,1,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
+	// Indicates whether more results are available beyond this page
+	HasMore bool `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
+	// List of transfers matching the query criteria
+	Transfers     []*Transfer `protobuf:"bytes,3,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *QueryTransfersResponse) Reset() {
+	*x = QueryTransfersResponse{}
+	mi := &file_rpc_dto_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *QueryTransfersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QueryTransfersResponse) ProtoMessage() {}
+
+func (x *QueryTransfersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QueryTransfersResponse.ProtoReflect.Descriptor instead.
+func (*QueryTransfersResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *QueryTransfersResponse) GetTotalCount() uint32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *QueryTransfersResponse) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
+}
+
+func (x *QueryTransfersResponse) GetTransfers() []*Transfer {
+	if x != nil {
+		return x.Transfers
+	}
+	return nil
+}
+
+// LookupTransfersRequest fetches specific transfers by their IDs.
+// This is the most efficient way to retrieve known transfers.
+type LookupTransfersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// List of transfer IDs (128-bit, 16 bytes each) to look up
+	Ids           [][]byte `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LookupTransfersRequest) Reset() {
+	*x = LookupTransfersRequest{}
+	mi := &file_rpc_dto_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LookupTransfersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LookupTransfersRequest) ProtoMessage() {}
+
+func (x *LookupTransfersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LookupTransfersRequest.ProtoReflect.Descriptor instead.
+func (*LookupTransfersRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *LookupTransfersRequest) GetIds() [][]byte {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+// LookupTransfersResponse returns the requested transfers.
+type LookupTransfersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// List of transfers matching the requested IDs (order may differ from request)
+	Transfers     []*Transfer `protobuf:"bytes,1,rep,name=transfers,proto3" json:"transfers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LookupTransfersResponse) Reset() {
+	*x = LookupTransfersResponse{}
+	mi := &file_rpc_dto_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LookupTransfersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LookupTransfersResponse) ProtoMessage() {}
+
+func (x *LookupTransfersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LookupTransfersResponse.ProtoReflect.Descriptor instead.
+func (*LookupTransfersResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *LookupTransfersResponse) GetTransfers() []*Transfer {
+	if x != nil {
+		return x.Transfers
+	}
+	return nil
+}
+
+// AccountFilter provides advanced filtering for account-based transfer queries.
+// This is a lower-level filter that maps directly to TigerBeetle's AccountFilter.
+// Field ordering optimized for Go memory alignment: bytes → uint64 → uint32.
+type AccountFilter struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TigerBeetle account ID (128-bit, 16 bytes) to query transfers for
+	AccountId []byte `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"` // 16 bytes
+	// Filter by custom 128-bit metadata (16 bytes, 0 = no filter)
+	UserData_128 []byte `protobuf:"bytes,2,opt,name=user_data_128,json=userData128,proto3" json:"user_data_128,omitempty"` // 16 bytes
+	// Minimum timestamp filter (nanoseconds since epoch, 0 = no lower bound)
+	TimestampMin uint64 `protobuf:"varint,3,opt,name=timestamp_min,json=timestampMin,proto3" json:"timestamp_min,omitempty"` // 8 bytes
+	// Maximum timestamp filter (nanoseconds since epoch, 0 = no upper bound)
+	TimestampMax uint64 `protobuf:"varint,4,opt,name=timestamp_max,json=timestampMax,proto3" json:"timestamp_max,omitempty"` // 8 bytes
+	// Filter by custom 64-bit metadata (0 = no filter)
+	UserData_64 uint64 `protobuf:"varint,5,opt,name=user_data_64,json=userData64,proto3" json:"user_data_64,omitempty"` // 8 bytes
+	// Maximum number of results to return
+	Limit uint32 `protobuf:"varint,6,opt,name=limit,proto3" json:"limit,omitempty"` // 4 bytes
+	// Bitfield flags for filter behavior (debits, credits, reversed)
+	Flags uint32 `protobuf:"varint,7,opt,name=flags,proto3" json:"flags,omitempty"` // 4 bytes
+	// Filter by transfer code (0 = no filter)
+	Code uint32 `protobuf:"varint,8,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
+	// Filter by custom 32-bit metadata (0 = no filter)
+	UserData_32   uint32 `protobuf:"varint,9,opt,name=user_data_32,json=userData32,proto3" json:"user_data_32,omitempty"` // 4 bytes
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccountFilter) Reset() {
+	*x = AccountFilter{}
+	mi := &file_rpc_dto_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccountFilter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccountFilter) ProtoMessage() {}
+
+func (x *AccountFilter) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccountFilter.ProtoReflect.Descriptor instead.
+func (*AccountFilter) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *AccountFilter) GetAccountId() []byte {
+	if x != nil {
+		return x.AccountId
+	}
+	return nil
+}
+
+func (x *AccountFilter) GetUserData_128() []byte {
+	if x != nil {
+		return x.UserData_128
+	}
+	return nil
+}
+
+func (x *AccountFilter) GetTimestampMin() uint64 {
+	if x != nil {
+		return x.TimestampMin
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetTimestampMax() uint64 {
+	if x != nil {
+		return x.TimestampMax
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetUserData_64() uint64 {
+	if x != nil {
+		return x.UserData_64
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetFlags() uint32 {
+	if x != nil {
+		return x.Flags
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetCode() uint32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *AccountFilter) GetUserData_32() uint32 {
+	if x != nil {
+		return x.UserData_32
+	}
+	return 0
+}
+
+// GetTransactionsRequest queries high-level transactions from the wallet service.
+// This provides a user-friendly interface with timestamp-based filtering.
+// Field ordering optimized for Go memory alignment: Timestamp (pointer) → uint32 → bool.
+type GetTransactionsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Minimum timestamp filter (inclusive, null = no lower bound)
+	TimestampMin *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=timestamp_min,json=timestampMin,proto3" json:"timestamp_min,omitempty"` // 8 bytes (pointer)
+	// Maximum timestamp filter (inclusive, null = no upper bound)
+	TimestampMax *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=timestamp_max,json=timestampMax,proto3" json:"timestamp_max,omitempty"` // 8 bytes (pointer)
+	// Maximum number of transactions to return in the response
+	Limit uint32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"` // 4 bytes
+	// Include debit transactions (money leaving accounts)
+	IncludeDebits bool `protobuf:"varint,4,opt,name=include_debits,json=includeDebits,proto3" json:"include_debits,omitempty"` // 1 byte
+	// Include credit transactions (money entering accounts)
+	IncludeCredits bool `protobuf:"varint,5,opt,name=include_credits,json=includeCredits,proto3" json:"include_credits,omitempty"` // 1 byte
+	// Return results in reverse chronological order (newest first)
+	ReverseOrder bool `protobuf:"varint,6,opt,name=reverse_order,json=reverseOrder,proto3" json:"reverse_order,omitempty"` // 1 byte
+	// External identifier (ULID) of the account to query transactions for
+	AccountId     string `protobuf:"bytes,7,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTransactionsRequest) Reset() {
+	*x = GetTransactionsRequest{}
+	mi := &file_rpc_dto_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTransactionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTransactionsRequest) ProtoMessage() {}
+
+func (x *GetTransactionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTransactionsRequest.ProtoReflect.Descriptor instead.
+func (*GetTransactionsRequest) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetTransactionsRequest) GetTimestampMin() *timestamppb.Timestamp {
+	if x != nil {
+		return x.TimestampMin
+	}
+	return nil
+}
+
+func (x *GetTransactionsRequest) GetTimestampMax() *timestamppb.Timestamp {
+	if x != nil {
+		return x.TimestampMax
+	}
+	return nil
+}
+
+func (x *GetTransactionsRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetTransactionsRequest) GetIncludeDebits() bool {
+	if x != nil {
+		return x.IncludeDebits
+	}
+	return false
+}
+
+func (x *GetTransactionsRequest) GetIncludeCredits() bool {
+	if x != nil {
+		return x.IncludeCredits
+	}
+	return false
+}
+
+func (x *GetTransactionsRequest) GetReverseOrder() bool {
+	if x != nil {
+		return x.ReverseOrder
+	}
+	return false
+}
+
+func (x *GetTransactionsRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+// GetTransactionsResponse returns high-level transactions matching the query criteria.
+// Field ordering optimized for Go memory alignment: bool → repeated → string.
+type GetTransactionsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
+	// List of transactions matching the query criteria (empty if error is true)
+	Transactions []*Transaction `protobuf:"bytes,2,rep,name=transactions,proto3" json:"transactions,omitempty"` // slice
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTransactionsResponse) Reset() {
+	*x = GetTransactionsResponse{}
+	mi := &file_rpc_dto_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTransactionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTransactionsResponse) ProtoMessage() {}
+
+func (x *GetTransactionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_dto_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTransactionsResponse.ProtoReflect.Descriptor instead.
+func (*GetTransactionsResponse) Descriptor() ([]byte, []int) {
+	return file_rpc_dto_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetTransactionsResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
+func (x *GetTransactionsResponse) GetTransactions() []*Transaction {
+	if x != nil {
+		return x.Transactions
+	}
+	return nil
+}
+
+func (x *GetTransactionsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_rpc_dto_proto protoreflect.FileDescriptor
@@ -650,43 +1410,107 @@ const file_rpc_dto_proto_rawDesc = "" +
 	"\n" +
 	"\rrpc_dto.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16rpc_wallet.model.proto\x1a\x1brpc_transaction.model.proto\"r\n" +
 	"\x19ContextUserWalletResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12%\n" +
-	"\x06wallet\x18\x03 \x01(\v2\r.proto.WalletR\x06wallet\"\x8f\x01\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x12%\n" +
+	"\x06wallet\x18\x02 \x01(\v2\r.proto.WalletR\x06wallet\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\x8f\x01\n" +
 	"%ContextUserWalletTransactionsResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x126\n" +
-	"\ftransactions\x18\x03 \x03(\v2\x12.proto.TransactionR\ftransactions\"D\n" +
-	"\x14DepositeAssetRequest\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x126\n" +
+	"\ftransactions\x18\x02 \x03(\v2\x12.proto.TransactionR\ftransactions\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"C\n" +
+	"\x13DepositAssetRequest\x12\x14\n" +
 	"\x05asset\x18\x01 \x01(\tR\x05asset\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x02R\x06amount\"}\n" +
-	"\x15DepositeAssetResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x124\n" +
-	"\vtransaction\x18\x03 \x01(\v2\x12.proto.TransactionR\vtransaction\"D\n" +
+	"\x06amount\x18\x02 \x01(\tR\x06amount\"|\n" +
+	"\x14DepositAssetResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x124\n" +
+	"\vtransaction\x18\x02 \x01(\v2\x12.proto.TransactionR\vtransaction\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"D\n" +
 	"\x14WithdrawAssetRequest\x12\x14\n" +
 	"\x05asset\x18\x01 \x01(\tR\x05asset\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x02R\x06amount\"}\n" +
+	"\x06amount\x18\x02 \x01(\tR\x06amount\"}\n" +
 	"\x15WithdrawAssetResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x124\n" +
-	"\vtransaction\x18\x03 \x01(\v2\x12.proto.TransactionR\vtransaction\"\x82\x01\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x124\n" +
+	"\vtransaction\x18\x02 \x01(\v2\x12.proto.TransactionR\vtransaction\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\x82\x01\n" +
 	"\x14TransferAssetRequest\x12\x14\n" +
 	"\x05asset\x18\x01 \x01(\tR\x05asset\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x02R\x06amount\x12<\n" +
+	"\x06amount\x18\x02 \x01(\tR\x06amount\x12<\n" +
 	"\x1areceiver_wallet_identifier\x18\x03 \x01(\tR\x18receiverWalletIdentifier\"}\n" +
 	"\x15TransferAssetResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x124\n" +
-	"\vtransaction\x18\x03 \x01(\v2\x12.proto.TransactionR\vtransaction\"\x82\x01\n" +
-	"\x14ExchangeAssetRequest\x12\x14\n" +
-	"\x05asset\x18\x01 \x01(\tR\x05asset\x12\x16\n" +
-	"\x06amount\x18\x02 \x01(\x02R\x06amount\x12<\n" +
-	"\x1areceiver_wallet_identifier\x18\x03 \x01(\tR\x18receiverWalletIdentifier\"}\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x124\n" +
+	"\vtransaction\x18\x02 \x01(\v2\x12.proto.TransactionR\vtransaction\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"h\n" +
+	"\x14ExchangeAssetRequest\x12\x1d\n" +
+	"\n" +
+	"from_asset\x18\x01 \x01(\tR\tfromAsset\x12\x16\n" +
+	"\x06amount\x18\x02 \x01(\tR\x06amount\x12\x19\n" +
+	"\bto_asset\x18\x03 \x01(\tR\atoAsset\"}\n" +
 	"\x15ExchangeAssetResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x124\n" +
-	"\vtransaction\x18\x03 \x01(\v2\x12.proto.TransactionR\vtransactionB9Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
+	"\x05error\x18\x01 \x01(\bR\x05error\x124\n" +
+	"\vtransaction\x18\x02 \x01(\v2\x12.proto.TransactionR\vtransaction\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\xfd\x01\n" +
+	"\x1aGetAccountTransfersRequest\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\fR\taccountId\x12#\n" +
+	"\rtimestamp_min\x18\x02 \x01(\x04R\ftimestampMin\x12#\n" +
+	"\rtimestamp_max\x18\x03 \x01(\x04R\ftimestampMax\x12\x14\n" +
+	"\x05limit\x18\x04 \x01(\rR\x05limit\x12\x12\n" +
+	"\x04code\x18\x05 \x01(\rR\x04code\x12\x16\n" +
+	"\x06debits\x18\x06 \x01(\bR\x06debits\x12\x18\n" +
+	"\acredits\x18\a \x01(\bR\acredits\x12\x1a\n" +
+	"\breversed\x18\b \x01(\bR\breversed\"\xaf\x01\n" +
+	"\x1bGetAccountTransfersResponse\x12%\n" +
+	"\x0enext_timestamp\x18\x01 \x01(\x04R\rnextTimestamp\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\rR\n" +
+	"totalCount\x12\x19\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12-\n" +
+	"\ttransfers\x18\x04 \x03(\v2\x0f.proto.TransferR\ttransfers\"\xa7\x02\n" +
+	"\x15QueryTransfersRequest\x12\"\n" +
+	"\ruser_data_128\x18\x01 \x01(\fR\vuserData128\x12#\n" +
+	"\rtimestamp_min\x18\x02 \x01(\x04R\ftimestampMin\x12#\n" +
+	"\rtimestamp_max\x18\x03 \x01(\x04R\ftimestampMax\x12 \n" +
+	"\fuser_data_64\x18\x04 \x01(\x04R\n" +
+	"userData64\x12\x14\n" +
+	"\x05limit\x18\x05 \x01(\rR\x05limit\x12\x16\n" +
+	"\x06ledger\x18\x06 \x01(\rR\x06ledger\x12\x12\n" +
+	"\x04code\x18\a \x01(\rR\x04code\x12 \n" +
+	"\fuser_data_32\x18\b \x01(\rR\n" +
+	"userData32\x12\x1a\n" +
+	"\breversed\x18\t \x01(\bR\breversed\"\x83\x01\n" +
+	"\x16QueryTransfersResponse\x12\x1f\n" +
+	"\vtotal_count\x18\x01 \x01(\rR\n" +
+	"totalCount\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12-\n" +
+	"\ttransfers\x18\x03 \x03(\v2\x0f.proto.TransferR\ttransfers\"*\n" +
+	"\x16LookupTransfersRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\fR\x03ids\"H\n" +
+	"\x17LookupTransfersResponse\x12-\n" +
+	"\ttransfers\x18\x01 \x03(\v2\x0f.proto.TransferR\ttransfers\"\xa0\x02\n" +
+	"\rAccountFilter\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\fR\taccountId\x12\"\n" +
+	"\ruser_data_128\x18\x02 \x01(\fR\vuserData128\x12#\n" +
+	"\rtimestamp_min\x18\x03 \x01(\x04R\ftimestampMin\x12#\n" +
+	"\rtimestamp_max\x18\x04 \x01(\x04R\ftimestampMax\x12 \n" +
+	"\fuser_data_64\x18\x05 \x01(\x04R\n" +
+	"userData64\x12\x14\n" +
+	"\x05limit\x18\x06 \x01(\rR\x05limit\x12\x14\n" +
+	"\x05flags\x18\a \x01(\rR\x05flags\x12\x12\n" +
+	"\x04code\x18\b \x01(\rR\x04code\x12 \n" +
+	"\fuser_data_32\x18\t \x01(\rR\n" +
+	"userData32\"\xc4\x02\n" +
+	"\x16GetTransactionsRequest\x12?\n" +
+	"\rtimestamp_min\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ftimestampMin\x12?\n" +
+	"\rtimestamp_max\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ftimestampMax\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\rR\x05limit\x12%\n" +
+	"\x0einclude_debits\x18\x04 \x01(\bR\rincludeDebits\x12'\n" +
+	"\x0finclude_credits\x18\x05 \x01(\bR\x0eincludeCredits\x12#\n" +
+	"\rreverse_order\x18\x06 \x01(\bR\freverseOrder\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\a \x01(\tR\taccountId\"\x81\x01\n" +
+	"\x17GetTransactionsResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x126\n" +
+	"\ftransactions\x18\x02 \x03(\v2\x12.proto.TransactionR\ftransactions\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessageB9Z7github.com/liveutil/wallet-service/internal/abstract/pbb\x06proto3"
 
 var (
 	file_rpc_dto_proto_rawDescOnce sync.Once
@@ -700,33 +1524,50 @@ func file_rpc_dto_proto_rawDescGZIP() []byte {
 	return file_rpc_dto_proto_rawDescData
 }
 
-var file_rpc_dto_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_rpc_dto_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_rpc_dto_proto_goTypes = []any{
 	(*ContextUserWalletResponse)(nil),             // 0: proto.ContextUserWalletResponse
 	(*ContextUserWalletTransactionsResponse)(nil), // 1: proto.ContextUserWalletTransactionsResponse
-	(*DepositeAssetRequest)(nil),                  // 2: proto.DepositeAssetRequest
-	(*DepositeAssetResponse)(nil),                 // 3: proto.DepositeAssetResponse
+	(*DepositAssetRequest)(nil),                   // 2: proto.DepositAssetRequest
+	(*DepositAssetResponse)(nil),                  // 3: proto.DepositAssetResponse
 	(*WithdrawAssetRequest)(nil),                  // 4: proto.WithdrawAssetRequest
 	(*WithdrawAssetResponse)(nil),                 // 5: proto.WithdrawAssetResponse
 	(*TransferAssetRequest)(nil),                  // 6: proto.TransferAssetRequest
 	(*TransferAssetResponse)(nil),                 // 7: proto.TransferAssetResponse
 	(*ExchangeAssetRequest)(nil),                  // 8: proto.ExchangeAssetRequest
 	(*ExchangeAssetResponse)(nil),                 // 9: proto.ExchangeAssetResponse
-	(*Wallet)(nil),                                // 10: proto.Wallet
-	(*Transaction)(nil),                           // 11: proto.Transaction
+	(*GetAccountTransfersRequest)(nil),            // 10: proto.GetAccountTransfersRequest
+	(*GetAccountTransfersResponse)(nil),           // 11: proto.GetAccountTransfersResponse
+	(*QueryTransfersRequest)(nil),                 // 12: proto.QueryTransfersRequest
+	(*QueryTransfersResponse)(nil),                // 13: proto.QueryTransfersResponse
+	(*LookupTransfersRequest)(nil),                // 14: proto.LookupTransfersRequest
+	(*LookupTransfersResponse)(nil),               // 15: proto.LookupTransfersResponse
+	(*AccountFilter)(nil),                         // 16: proto.AccountFilter
+	(*GetTransactionsRequest)(nil),                // 17: proto.GetTransactionsRequest
+	(*GetTransactionsResponse)(nil),               // 18: proto.GetTransactionsResponse
+	(*Wallet)(nil),                                // 19: proto.Wallet
+	(*Transaction)(nil),                           // 20: proto.Transaction
+	(*Transfer)(nil),                              // 21: proto.Transfer
+	(*timestamppb.Timestamp)(nil),                 // 22: google.protobuf.Timestamp
 }
 var file_rpc_dto_proto_depIdxs = []int32{
-	10, // 0: proto.ContextUserWalletResponse.wallet:type_name -> proto.Wallet
-	11, // 1: proto.ContextUserWalletTransactionsResponse.transactions:type_name -> proto.Transaction
-	11, // 2: proto.DepositeAssetResponse.transaction:type_name -> proto.Transaction
-	11, // 3: proto.WithdrawAssetResponse.transaction:type_name -> proto.Transaction
-	11, // 4: proto.TransferAssetResponse.transaction:type_name -> proto.Transaction
-	11, // 5: proto.ExchangeAssetResponse.transaction:type_name -> proto.Transaction
-	6,  // [6:6] is the sub-list for method output_type
-	6,  // [6:6] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	19, // 0: proto.ContextUserWalletResponse.wallet:type_name -> proto.Wallet
+	20, // 1: proto.ContextUserWalletTransactionsResponse.transactions:type_name -> proto.Transaction
+	20, // 2: proto.DepositAssetResponse.transaction:type_name -> proto.Transaction
+	20, // 3: proto.WithdrawAssetResponse.transaction:type_name -> proto.Transaction
+	20, // 4: proto.TransferAssetResponse.transaction:type_name -> proto.Transaction
+	20, // 5: proto.ExchangeAssetResponse.transaction:type_name -> proto.Transaction
+	21, // 6: proto.GetAccountTransfersResponse.transfers:type_name -> proto.Transfer
+	21, // 7: proto.QueryTransfersResponse.transfers:type_name -> proto.Transfer
+	21, // 8: proto.LookupTransfersResponse.transfers:type_name -> proto.Transfer
+	22, // 9: proto.GetTransactionsRequest.timestamp_min:type_name -> google.protobuf.Timestamp
+	22, // 10: proto.GetTransactionsRequest.timestamp_max:type_name -> google.protobuf.Timestamp
+	20, // 11: proto.GetTransactionsResponse.transactions:type_name -> proto.Transaction
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_rpc_dto_proto_init() }
@@ -742,7 +1583,7 @@ func file_rpc_dto_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_dto_proto_rawDesc), len(file_rpc_dto_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
