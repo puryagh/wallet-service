@@ -13,7 +13,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title      : "Wallet Service API";
     version    : "1.0.0";
-    description: "Wallet Service API for user wallet management";
+    description: "Wallet Service API for user account and wallets management";
     contact    : {
       name : "Wallet Service API Support";
       email: "liveutil@icloud.com";
