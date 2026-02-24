@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-02-11T09:19:42.757Z
+-- Generated at: 2026-02-24T20:00:53.594Z
 
 CREATE TYPE "account_status" AS ENUM (
   'PENDING',
@@ -18,6 +18,7 @@ CREATE TYPE "wallet_account_status" AS ENUM (
 );
 
 CREATE TABLE "accounts" (
+  "id" bigserial PRIMARY KEY,
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
   "title" varchar(128) NOT NULL,
   "description" varchar(256),
@@ -33,12 +34,13 @@ CREATE TABLE "accounts" (
 );
 
 CREATE TABLE "wallets" (
+  "id" bigserial PRIMARY KEY,
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
   "user_identifier" ulid NOT NULL,
   "account_identifier" ulid NOT NULL,
   "asset_identifier" bigserial NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
-  "ledger_account_id" "BYTEA(16)" NOT NULL,
+  "ledger_account_id" bit(128) NOT NULL,
   "ledger_account_code" INTEGER NOT NULL,
   "primary_account_number" varchar(24) NOT NULL,
   "iban" varchar(34),
@@ -55,6 +57,7 @@ CREATE TABLE "wallets" (
 );
 
 CREATE TABLE "wallet_assets" (
+  "id" bigserial PRIMARY KEY,
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
   "active" boolean NOT NULL DEFAULT false,
   "code" varchar(256) NOT NULL,
@@ -102,6 +105,8 @@ CREATE INDEX ON "wallet_assets" ("identifier", "active", "deleted_at");
 
 CREATE INDEX ON "wallet_assets" ("active");
 
+COMMENT ON COLUMN "accounts"."id" IS 'account unique id';
+
 COMMENT ON COLUMN "accounts"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
 COMMENT ON COLUMN "accounts"."title" IS 'account title';
@@ -125,6 +130,8 @@ COMMENT ON COLUMN "accounts"."created_at" IS 'when account was created';
 COMMENT ON COLUMN "accounts"."updated_at" IS 'when account was updated';
 
 COMMENT ON COLUMN "accounts"."deleted_at" IS 'when account was deleted';
+
+COMMENT ON COLUMN "wallets"."id" IS 'wallet unique id';
 
 COMMENT ON COLUMN "wallets"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
@@ -164,6 +171,8 @@ COMMENT ON COLUMN "wallets"."updated_at" IS 'when wallet account was updated';
 
 COMMENT ON COLUMN "wallets"."deleted_at" IS 'when wallet account was deleted';
 
+COMMENT ON COLUMN "wallet_assets"."id" IS 'wallet_asset unique id';
+
 COMMENT ON COLUMN "wallet_assets"."identifier" IS 'unique external identifier for inter system internal-external identifier separation';
 
 COMMENT ON COLUMN "wallet_assets"."active" IS 'is wallet asset active or no';
@@ -185,7 +194,3 @@ COMMENT ON COLUMN "wallet_assets"."created_at" IS 'when wallet asset was created
 COMMENT ON COLUMN "wallet_assets"."updated_at" IS 'when wallet asset was updated';
 
 COMMENT ON COLUMN "wallet_assets"."deleted_at" IS 'when wallet asset was deleted';
-
-ALTER TABLE "wallets" ADD FOREIGN KEY ("account_identifier") REFERENCES "accounts" ("identifier");
-
-ALTER TABLE "wallets" ADD FOREIGN KEY ("asset_identifier") REFERENCES "wallet_assets" ("identifier");

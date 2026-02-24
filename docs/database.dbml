@@ -14,6 +14,7 @@ Enum account_status {
 
 // accounts table contains SMD for user related wallets
 Table accounts {
+  id bigserial [pk, note: 'account unique id']
   identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
   title varchar(128) [not null, note: 'account title']
   description varchar(256) [note: 'account description']
@@ -54,16 +55,17 @@ Enum wallet_account_status {
 
 // wallets table contains SMD for wallets
 Table wallets {
+  id bigserial [pk, note: 'wallet unique id']
   identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
   
   user_identifier ulid [not null, note: 'related user identifier to determining account owner']
-  account_identifier ulid [not null, ref: > accounts.identifier, note: 'related account identifier to determining account of wallet']
+  account_identifier ulid [not null, note: 'related account identifier to determining account of wallet']
 
-  asset_identifier bigserial [not null, ref: > wallet_assets.identifier, note: 'related asset identifier to determining asset of wallet']
+  asset_identifier bigserial [not null, note: 'related asset identifier to determining asset of wallet']
 
   meta_data jsonb [not null, default: '{}', note: 'wallet account meta data']
 
-  ledger_account_id BYTEA(16) [not null, note: 'related ledger account id to determining "ledger account" of wallet in ledger core']
+  ledger_account_id bit(128) [not null, note: 'related ledger account id to determining "ledger account" of wallet in ledger core']
   ledger_account_code INTEGER [not null, note: 'related ledger account code to determining service code for wallet in ledger core']
 
   primary_account_number varchar(24) [not null, note: 'primary account number of wallet account']
@@ -92,6 +94,7 @@ Table wallets {
 }
 
 Table wallet_assets {
+  id bigserial [pk, note: 'wallet_asset unique id']
   identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
   active boolean [not null, default: false, note: 'is wallet asset active or no']
   code varchar(256) [not null, note: 'asset code of wallet asset']

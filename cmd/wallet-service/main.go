@@ -13,11 +13,14 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/liveutil/go-lib/configuration"
 	"github.com/liveutil/go-lib/env"
 	"github.com/liveutil/go-lib/framework/healthcheck"
 	"github.com/liveutil/go-lib/framework/healthcheck/healthpb"
+	"github.com/liveutil/go-lib/framework/mesh"
 	"github.com/liveutil/go-lib/fsutil"
 	"github.com/liveutil/go-lib/grpcutil"
 	"github.com/liveutil/go-lib/jsonschema"
@@ -26,6 +29,8 @@ import (
 	"github.com/liveutil/go-lib/pgutil"
 	"github.com/liveutil/go-lib/redisutils"
 	"github.com/liveutil/go-lib/tracing"
+	"github.com/liveutil/wallet-service/internal/abstract/pb"
+	"github.com/liveutil/wallet-service/internal/application/wallet"
 	"github.com/liveutil/wallet-service/internal/config"
 	"github.com/liveutil/wallet-service/internal/infra/db/postgres/repository"
 	"github.com/nats-io/nats.go"
@@ -46,6 +51,9 @@ const APPLICATION string = "wallet_service"
 var fieldKeys = []string{"method"}
 
 func main() {
+	appContext, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	environment := "dev"
 
 	if env.IsProduction() {
@@ -59,7 +67,7 @@ func main() {
 	}
 
 	// determine which configuration file to use
-	baseConfigEnvFile := env.GetStringDefault("LU_CFG_BASE_CONFIG_ENV_FILE", fmt.Sprintf("%s/close-loop-stack/env/stack.%s.env", parentDir, environment))
+	baseConfigEnvFile := env.GetStringDefault("LU_CFG_BASE_CONFIG_ENV_FILE", fmt.Sprintf("%s/liveutil-stack/env/stack.%s.env", parentDir, environment))
 
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -86,7 +94,7 @@ func main() {
 	}
 
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		if err := tp.Shutdown(appContext); err != nil {
 			log.Fatal().Err(err).Msgf("failed to shutdown Jaeger tracer: %v", err)
 		}
 	}()
@@ -101,11 +109,11 @@ func main() {
 	defer natsConn.Close()
 
 	// initialize mongo client to write logs to MongoDB in development mode
-	mongoClient, err := mongo.Connect(context.Background(), options.Client().ApplyURI(appConfig.LogsMongoUri))
+	mongoClient, err := mongo.Connect(appContext, options.Client().ApplyURI(appConfig.LogsMongoUri))
 	if err != nil {
 		log.Fatal().Err(err).Msgf("failed to connect to mongo: %v", err)
 	}
-	defer mongoClient.Disconnect(context.Background())
+	defer mongoClient.Disconnect(appContext)
 
 	// initialize logger to write logs to console in development mode
 	if baseConf.Environment == "development" {
@@ -131,9 +139,21 @@ func main() {
 	pg := pgutil.NewOrGetSingleton(baseConf.DBMaxPoolSize, baseConf.DBConnectionAttempt, dbTimeout, baseConf.DBSource, logger)
 	defer pg.Close()
 
+	// Register custom PostgreSQL types (ULID) with pgx
+	// This fixes the "cannot scan unknown type (OID 16702)" error
+	pg.Pool.Config().AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		// Register ULID type - OID 16702 is the custom ULID type from the PostgreSQL extension
+		conn.TypeMap().RegisterType(&pgtype.Type{
+			Name:  "ulid",
+			OID:   16702,
+			Codec: &pgtype.TextCodec{},
+		})
+		return nil
+	}
+
 	go func(pool *pgxpool.Pool) {
 		for {
-			if e := pool.Ping(context.Background()); e != nil {
+			if e := pool.Ping(appContext); e != nil {
 				_ = logger.Log("component", "postgres_connection", "error", e)
 				log.Err(e).Msgf("postgres_connection: %v", e)
 			}
@@ -170,22 +190,37 @@ func main() {
 		Help:      "total duration of requests (ms).",
 	}, fieldKeys)
 
-	opts := &user.UserServiceOpts{
-		Repository:      repo,
-		BaseConfig:      &baseConf,
-		Config:          &appConfig,
-		Redis:           redisClient,
-		PASETO:          maker,
-		NATS:            natsConn,
-		SchemaPath:      jsonschema.GetSchemaPath(APPLICATION),
-		ApplicationName: APPLICATION,
-		Logger:          logger,
+	userServiceMeshClient := mesh.NewUsersServiceMeshClient(natsConn, dbTimeout)
+
+	walletServiceOpts := &wallet.WalletServiceOptions{
+		Repository:            repo,
+		BaseConfig:            &baseConf,
+		Config:                &appConfig,
+		Redis:                 redisClient,
+		PasetoMaker:           maker,
+		NATS:                  natsConn,
+		SchemaPath:            jsonschema.GetSchemaPath(APPLICATION),
+		ApplicationName:       APPLICATION,
+		Logger:                logger,
+		UserServiceMeshClient: &userServiceMeshClient,
 	}
 
-	service, err := user.NewUserService(opts)
+	service, err := wallet.NewWalletService(walletServiceOpts)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("failed to create user service: %v", err)
 	}
+
+	// initialize admin service
+	// adminServiceOpts := &admin.UserAdminServiceOpts{
+	// 	Repository: repo,
+	// 	BaseConfig: &baseConf,
+	// 	Config:     &appConfig,
+	// 	Redis:      redisClient,
+	// 	PASETO:     maker,
+	// 	NATS:       natsConn,
+	// 	Logger:     logger,
+	// }
+	// adminService := admin.NewService(adminServiceOpts)
 
 	// logging interceptor
 	loggingInterceptor := grpcutil.NewLoggingInterceptor(logger, jaegerTracer)
@@ -204,19 +239,21 @@ func main() {
 		HealthCheckKey: appConfig.HealthCheckKey,
 		Secret:         appConfig.TokenSymmetricKey,
 		GetUserInfo: func(ctx context.Context, id int64) (any, error) {
-			return repo.GetSafeUserById(ctx, id)
+			return userServiceMeshClient.GetUserByID(ctx, uint64(id))
 		},
 		Paseto: maker,
 		AccessRoles: map[string][]string{
-			"SignUp":       {},
-			"SignIn":       {},
-			"OtpVerify":    {},
-			"RefreshToken": {},
-			"Check":        {},
-			"Watch":        {},
-			"ContextUser":  {"USER"},
-			"healthCheck":  {},
-			"HealthWatch":  {},
+			"DepositAsset":                  {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"WithdrawAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"TransferAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"ExchangeAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"ContextUserAccounts":           {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"ContextUserWalletTransactions": {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"GetAccountTransfers":           {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"QueryTransfers":                {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"LookupTransfers":               {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"hCheck":                        {},
+			"Watch":                         {},
 		},
 		Tracer: jaegerTracer,
 	})
@@ -231,8 +268,11 @@ func main() {
 		),
 	)
 
-	// register service
-	pb.RegisterUserServiceServer(server, service)
+	// register user service gRPC service implementation
+	pb.RegisterWalletServiceServer(server, service)
+
+	// register users administration gRPC service implementation
+	// pb.RegisterUsersAdminServiceServer(server, adminService)
 
 	// use framework healthcheck service for readiness and liveness probes
 	healthCheckServiceOpts := &healthcheck.HealthServiceOpts{
@@ -283,7 +323,7 @@ func main() {
 		opts := []grpc.DialOption{
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		}
-		err = pb.RegisterUserServiceHandlerFromEndpoint(context.Background(), gatewayMux, appConfig.GrpcListenerHost, opts)
+		err = pb.RegisterWalletServiceHandlerFromEndpoint(appContext, gatewayMux, appConfig.GrpcListenerHost, opts)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("failed to register gateway: %v", err)
 		}

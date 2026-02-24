@@ -24,7 +24,7 @@ const (
 	WalletService_WithdrawAsset_FullMethodName                 = "/proto.WalletService/WithdrawAsset"
 	WalletService_TransferAsset_FullMethodName                 = "/proto.WalletService/TransferAsset"
 	WalletService_ExchangeAsset_FullMethodName                 = "/proto.WalletService/ExchangeAsset"
-	WalletService_ContextUserWallet_FullMethodName             = "/proto.WalletService/ContextUserWallet"
+	WalletService_ContextUserAccounts_FullMethodName           = "/proto.WalletService/ContextUserAccounts"
 	WalletService_ContextUserWalletTransactions_FullMethodName = "/proto.WalletService/ContextUserWalletTransactions"
 	WalletService_GetAccountTransfers_FullMethodName           = "/proto.WalletService/GetAccountTransfers"
 	WalletService_QueryTransfers_FullMethodName                = "/proto.WalletService/QueryTransfers"
@@ -50,9 +50,9 @@ type WalletServiceClient interface {
 	// ExchangeAsset converts one asset to another within the authenticated user's wallet.
 	// This operation creates two linked transfers in TigerBeetle for atomic exchange.
 	ExchangeAsset(ctx context.Context, in *ExchangeAssetRequest, opts ...grpc.CallOption) (*ExchangeAssetResponse, error)
-	// ContextUserWallet retrieves the authenticated user's wallet information.
+	// ContextUserAccounts retrieves the authenticated user's account information include asset wallets.
 	// This endpoint is cached for 120 seconds to reduce database load.
-	ContextUserWallet(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletResponse, error)
+	ContextUserAccounts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletResponse, error)
 	// ContextUserWalletTransactions retrieves the authenticated user's transaction history.
 	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWalletTransactions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletTransactionsResponse, error)
@@ -115,10 +115,10 @@ func (c *walletServiceClient) ExchangeAsset(ctx context.Context, in *ExchangeAss
 	return out, nil
 }
 
-func (c *walletServiceClient) ContextUserWallet(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletResponse, error) {
+func (c *walletServiceClient) ContextUserAccounts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ContextUserWalletResponse)
-	err := c.cc.Invoke(ctx, WalletService_ContextUserWallet_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, WalletService_ContextUserAccounts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -184,9 +184,9 @@ type WalletServiceServer interface {
 	// ExchangeAsset converts one asset to another within the authenticated user's wallet.
 	// This operation creates two linked transfers in TigerBeetle for atomic exchange.
 	ExchangeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error)
-	// ContextUserWallet retrieves the authenticated user's wallet information.
+	// ContextUserAccounts retrieves the authenticated user's account information include asset wallets.
 	// This endpoint is cached for 120 seconds to reduce database load.
-	ContextUserWallet(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error)
+	ContextUserAccounts(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error)
 	// ContextUserWalletTransactions retrieves the authenticated user's transaction history.
 	// This endpoint is cached for 120 seconds to reduce database load.
 	ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error)
@@ -221,8 +221,8 @@ func (UnimplementedWalletServiceServer) TransferAsset(context.Context, *Transfer
 func (UnimplementedWalletServiceServer) ExchangeAsset(context.Context, *ExchangeAssetRequest) (*ExchangeAssetResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExchangeAsset not implemented")
 }
-func (UnimplementedWalletServiceServer) ContextUserWallet(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ContextUserWallet not implemented")
+func (UnimplementedWalletServiceServer) ContextUserAccounts(context.Context, *emptypb.Empty) (*ContextUserWalletResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ContextUserAccounts not implemented")
 }
 func (UnimplementedWalletServiceServer) ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ContextUserWalletTransactions not implemented")
@@ -329,20 +329,20 @@ func _WalletService_ExchangeAsset_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WalletService_ContextUserWallet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WalletService_ContextUserAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WalletServiceServer).ContextUserWallet(ctx, in)
+		return srv.(WalletServiceServer).ContextUserAccounts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: WalletService_ContextUserWallet_FullMethodName,
+		FullMethod: WalletService_ContextUserAccounts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServiceServer).ContextUserWallet(ctx, req.(*emptypb.Empty))
+		return srv.(WalletServiceServer).ContextUserAccounts(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -443,8 +443,8 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _WalletService_ExchangeAsset_Handler,
 		},
 		{
-			MethodName: "ContextUserWallet",
-			Handler:    _WalletService_ContextUserWallet_Handler,
+			MethodName: "ContextUserAccounts",
+			Handler:    _WalletService_ContextUserAccounts_Handler,
 		},
 		{
 			MethodName: "ContextUserWalletTransactions",

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Wallet Service API",
-    "description": "Wallet Service API for user wallet management",
+    "description": "Wallet Service API for user account and wallets management",
     "version": "1.0.0",
     "contact": {
       "name": "Wallet Service API Support",
@@ -29,7 +29,7 @@
       "get": {
         "summary": "Get Authenticated User Wallet",
         "description": "Retrieve wallet information for the authenticated user",
-        "operationId": "WalletService_ContextUserWallet",
+        "operationId": "WalletService_ContextUserAccounts",
         "responses": {
           "200": {
             "description": "A successful response.",
