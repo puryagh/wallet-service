@@ -93,14 +93,30 @@ Table wallets {
 
 }
 
+// wallet asset counting unit enum
+Enum wallet_asset_unit {
+  NONE [note: 'wallet asset default unit that is not defined']
+  MILLIGRAM [note: 'Milligram (10^-3)']
+  GRAM [note: 'ISO 4217 Gram (10^0)']
+  KILOGRAM [note: 'ISO 4217 Kilogram (10^3)']
+  TONNE [note: 'ISO 4217 Tonne (10^6)']
+  PIECE [note: 'Piece (10^0)']
+}
+
 Table wallet_assets {
   id bigserial [pk, note: 'wallet_asset unique id']
   identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for inter system internal-external identifier separation']
   active boolean [not null, default: false, note: 'is wallet asset active or no']
   code varchar(256) [not null, note: 'asset code of wallet asset']
-  symbol varchar(10) [not null, note: 'asset symbol of wallet asset']
+  symbol varchar(10) [unique, not null, note: 'asset symbol of wallet asset']
   title varchar(128) [not null, note: 'wallet asset title']
   description varchar(256) [note: 'wallet asset description']
+  
+  unit wallet_asset_unit [not null, default: 'NONE', note: 'wallet asset unit']
+  unit_title varchar(128) [note: 'wallet asset unit title']
+  decimals int [not null, default: 0, note: 'wallet asset decimals']
+  network varchar(256) [note: 'wallet asset network']
+  icon_url varchar(256) [note: 'wallet asset icon url']
 
   meta_data jsonb [not null, default: '{}', note: 'wallet asset meta data']
 

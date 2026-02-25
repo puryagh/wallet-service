@@ -121,6 +121,7 @@ schema: ## Generate SQL schema from DBML file located at internal/infra/db/diagr
 	@cp internal/infra/db/postgres/database.dbml ./postgres/design/database.dbml
 	@cp internal/infra/db/postgres/database.dbml ../../liveutil-stack/postgres/schemas/$(APPLICATION_NAME).dbml
 	@cp internal/infra/db/postgres/schema.sql ../../liveutil-stack/postgres/schemas/$(APPLICATION_NAME).sql
+	@cp internal/infra/db/postgres/configure/db_config.sql ../../liveutil-stack/postgres/configure/$(APPLICATION_NAME)_db_configuration.sql
 	@echo "Schema generation complete."
 
 .PHONY: compose-tb-build

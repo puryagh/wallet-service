@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-02-24T20:00:53.594Z
+-- Generated at: 2026-02-25T19:20:20.594Z
 
 CREATE TYPE "account_status" AS ENUM (
   'PENDING',
@@ -15,6 +15,15 @@ CREATE TYPE "wallet_account_status" AS ENUM (
   'BANNED',
   'LOCKED',
   'LINKED_LOCKED'
+);
+
+CREATE TYPE "wallet_asset_unit" AS ENUM (
+  'NONE',
+  'MILLIGRAM',
+  'GRAM',
+  'KILOGRAM',
+  'TONNE',
+  'PIECE'
 );
 
 CREATE TABLE "accounts" (
@@ -61,9 +70,14 @@ CREATE TABLE "wallet_assets" (
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
   "active" boolean NOT NULL DEFAULT false,
   "code" varchar(256) NOT NULL,
-  "symbol" varchar(10) NOT NULL,
+  "symbol" varchar(10) UNIQUE NOT NULL,
   "title" varchar(128) NOT NULL,
   "description" varchar(256),
+  "unit" wallet_asset_unit NOT NULL DEFAULT 'NONE',
+  "unit_title" varchar(128),
+  "decimals" int NOT NULL DEFAULT 0,
+  "network" varchar(256),
+  "icon_url" varchar(256),
   "meta_data" jsonb NOT NULL DEFAULT '{}',
   "ledger_code" INTEGER NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
@@ -184,6 +198,16 @@ COMMENT ON COLUMN "wallet_assets"."symbol" IS 'asset symbol of wallet asset';
 COMMENT ON COLUMN "wallet_assets"."title" IS 'wallet asset title';
 
 COMMENT ON COLUMN "wallet_assets"."description" IS 'wallet asset description';
+
+COMMENT ON COLUMN "wallet_assets"."unit" IS 'wallet asset unit';
+
+COMMENT ON COLUMN "wallet_assets"."unit_title" IS 'wallet asset unit title';
+
+COMMENT ON COLUMN "wallet_assets"."decimals" IS 'wallet asset decimals';
+
+COMMENT ON COLUMN "wallet_assets"."network" IS 'wallet asset network';
+
+COMMENT ON COLUMN "wallet_assets"."icon_url" IS 'wallet asset icon url';
 
 COMMENT ON COLUMN "wallet_assets"."meta_data" IS 'wallet asset meta data';
 

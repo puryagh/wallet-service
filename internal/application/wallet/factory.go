@@ -10,6 +10,7 @@ import (
 	"github.com/liveutil/wallet-service/internal/infra/db/postgres/repository"
 	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
+	tb "github.com/tigerbeetle/tigerbeetle-go"
 )
 
 type (
@@ -23,7 +24,8 @@ type (
 		SchemaPath            string
 		ApplicationName       string
 		Logger                kitlog.Logger
-		UserServiceMeshClient *mesh.UsersServiceMeshClient
+		UserServiceMeshClient mesh.UsersServiceMeshClient
+		Tigerbeetle           tb.Client
 	}
 )
 

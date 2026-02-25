@@ -8,13 +8,13 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4
 	github.com/jackc/pgx/v5 v5.7.6
-	github.com/liveutil/go-lib v0.1.17
+	github.com/liveutil/go-lib v0.1.24
 	github.com/nats-io/nats.go v1.48.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/prometheus/client_golang v1.22.0
 	github.com/redis/go-redis/v9 v9.17.2
 	github.com/rs/zerolog v1.34.0
-	github.com/tigerbeetle/tigerbeetle-go v0.16.70
+	github.com/tigerbeetle/tigerbeetle-go v0.16.74
 	go.mongodb.org/mongo-driver v1.17.6
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b
 	google.golang.org/grpc v1.78.0

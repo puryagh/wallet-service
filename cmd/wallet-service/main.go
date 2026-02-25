@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -37,6 +38,8 @@ import (
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	tb "github.com/tigerbeetle/tigerbeetle-go"
+	"github.com/tigerbeetle/tigerbeetle-go/pkg/types"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
@@ -190,7 +193,22 @@ func main() {
 		Help:      "total duration of requests (ms).",
 	}, fieldKeys)
 
+	// initialize user service mesh client
 	userServiceMeshClient := mesh.NewUsersServiceMeshClient(natsConn, dbTimeout)
+
+	// initialize tigerbeetle client
+	cid, err := strconv.ParseUint(appConfig.TigerbeetleClusterID, 10, 64)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Error parsing cluster ID to uint64: %s", err)
+	}
+
+	clusterId := types.ToUint128(cid)
+
+	tigerbeetleClient, err := tb.NewClient(clusterId, appConfig.TigerbeetleClusterAddresses)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Error creating client: %s", err)
+	}
+	defer tigerbeetleClient.Close()
 
 	walletServiceOpts := &wallet.WalletServiceOptions{
 		Repository:            repo,
@@ -202,7 +220,8 @@ func main() {
 		SchemaPath:            jsonschema.GetSchemaPath(APPLICATION),
 		ApplicationName:       APPLICATION,
 		Logger:                logger,
-		UserServiceMeshClient: &userServiceMeshClient,
+		UserServiceMeshClient: userServiceMeshClient,
+		Tigerbeetle:           tigerbeetleClient,
 	}
 
 	service, err := wallet.NewWalletService(walletServiceOpts)
@@ -247,7 +266,7 @@ func main() {
 			"WithdrawAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
 			"TransferAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
 			"ExchangeAsset":                 {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
-			"ContextUserAccounts":           {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
+			"ContextUserAccounts":           {"USER"},
 			"ContextUserWalletTransactions": {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
 			"GetAccountTransfers":           {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},
 			"QueryTransfers":                {"USER", "ADMIN", "SUPER_ADMIN", "MERCHANT"},

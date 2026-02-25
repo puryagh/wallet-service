@@ -10,6 +10,7 @@ import (
 	"github.com/liveutil/wallet-service/internal/infra/db/postgres/repository"
 	"github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
+	tb "github.com/tigerbeetle/tigerbeetle-go"
 )
 
 // service is the implementation of the wallet service
@@ -25,8 +26,9 @@ type service struct {
 	schemaPath      string
 	applicationName string
 	logger          kitlog.Logger
+	tigerbeetle     tb.Client
 
-	userServiceMeshClient *mesh.UsersServiceMeshClient
+	userServiceMeshClient mesh.UsersServiceMeshClient
 }
 
 // NewService creates a new wallet service

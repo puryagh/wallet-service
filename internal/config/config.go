@@ -16,9 +16,12 @@ type Configuration struct {
 	SchemaPath                       string        `json:"schema_path" mapstructure:"LU_CFG_SCHEMA_PATH"`
 	GrpcListenerHost                 string        `json:"grpc_listener_host" mapstructure:"LU_CFG_GRPC_LISTENER_HOST"`
 	HttpListenerHost                 string        `json:"http_listener_host" mapstructure:"LU_CFG_HTTP_LISTENER_HOST"`
-	MeliPayamakURL                   string        `json:"meli_payamak_url" mapstructure:"LU_CFG_MELIPAYAMAK_URL"`
-	MeliPayamakApiKey                string        `json:"meli_payamak_api_key" mapstructure:"LU_CFG_MELIPAYAMAK_API_KEY"`
-	MeliPayamakTimeout               time.Duration `json:"meli_payamak_timeout" mapstructure:"LU_FCG_MELIPAYAMAK_TIMEOUT"`
-	MeliPayamakMaxWorkers            int           `json:"meli_payamak_max_workers" mapstructure:"LU_FCG_MELIPAYAMAK_MAX_WORKERS"`
-	MeliPayamakVerificationPatternID int           `json:"meli_payamak_verification_pattern_id" mapstructure:"LU_FCG_MELIPAYAMAK_VERIFICATION_PATTERN_ID"`
+	MeliPayamakURL                   string        `json:"meli_payamak_url" mapstructure:"LU_CFG_MELI_PAYAMAK_URL"`
+	MeliPayamakApiKey                string        `json:"meli_payamak_api_key" mapstructure:"LU_CFG_MELI_PAYAMAK_API_KEY"`
+	MeliPayamakTimeout               time.Duration `json:"meli_payamak_timeout" mapstructure:"LU_FCG_MELI_PAYAMAK_TIMEOUT"`
+	MeliPayamakMaxWorkers            int           `json:"meli_payamak_max_workers" mapstructure:"LU_FCG_MELI_PAYAMAK_MAX_WORKERS"`
+	MeliPayamakVerificationPatternID int           `json:"meli_payamak_verification_pattern_id" mapstructure:"LU_FCG_MELI_PAYAMAK_VERIFICATION_PATTERN_ID"`
+	TigerbeetleClusterID             string        `json:"tigerbeetle_cluster_id" mapstructure:"LU_CFG_TIGERBEETLE_CLUSTER_ID"`
+	TigerbeetleClusterAddresses      []string      `json:"tigerbeetle_cluster_addresses" mapstructure:"LU_CFG_TIGERBEETLE_CLUSTER_ADDRESSES"`
+	AccountsInitialAssets            []string      `json:"accounts_initial_assets" mapstructure:"LU_CFG_ACCOUNTS_INITIAL_ASSETS"`
 }
