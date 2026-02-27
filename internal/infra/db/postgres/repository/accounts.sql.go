@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	ulid "github.com/oklog/ulid/v2"
 )
 
 const createAccount = `-- name: CreateAccount :one
@@ -27,7 +26,7 @@ INSERT INTO accounts (
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP, NULL
 )
-RETURNING identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at
+RETURNING id, identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at
 `
 
 type CreateAccountParams struct {
@@ -35,8 +34,8 @@ type CreateAccountParams struct {
 	Description         pgtype.Text        `json:"description"`
 	Status              AccountStatus      `json:"status"`
 	Banned              bool               `json:"banned"`
-	UserIdentifier      ulid.ULID          `json:"user_identifier"`
-	BaseAssetIdentifier ulid.ULID          `json:"base_asset_identifier"`
+	UserIdentifier      string             `json:"user_identifier"`
+	BaseAssetIdentifier string             `json:"base_asset_identifier"`
 	MetaData            []byte             `json:"meta_data"`
 	ExpiresAt           pgtype.Timestamptz `json:"expires_at"`
 }
@@ -54,6 +53,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 	)
 	var i Account
 	err := row.Scan(
+		&i.ID,
 		&i.Identifier,
 		&i.Title,
 		&i.Description,
@@ -71,16 +71,17 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 }
 
 const getAccountByIdentifier = `-- name: GetAccountByIdentifier :one
-SELECT identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at FROM accounts
-WHERE identifier = $1
+SELECT id, identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at FROM accounts
+WHERE identifier::varchar(32) = $1::varchar(32)
 AND deleted_at IS NULL
 LIMIT 1
 `
 
-func (q *Queries) GetAccountByIdentifier(ctx context.Context, identifier ulid.ULID) (Account, error) {
-	row := q.db.QueryRow(ctx, getAccountByIdentifier, identifier)
+func (q *Queries) GetAccountByIdentifier(ctx context.Context, dollar_1 string) (Account, error) {
+	row := q.db.QueryRow(ctx, getAccountByIdentifier, dollar_1)
 	var i Account
 	err := row.Scan(
+		&i.ID,
 		&i.Identifier,
 		&i.Title,
 		&i.Description,
@@ -97,49 +98,29 @@ func (q *Queries) GetAccountByIdentifier(ctx context.Context, identifier ulid.UL
 	return i, err
 }
 
-const getUserAccounts = `-- name: GetUserAccounts :many
-SELECT identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at FROM accounts
-WHERE user_identifier = $1
-AND deleted_at IS NULL
-ORDER BY created_at DESC
-LIMIT $2 OFFSET $3
+const getUserAccount = `-- name: GetUserAccount :one
+SELECT id, identifier, title, description, status, banned, user_identifier, base_asset_identifier, meta_data, expires_at, created_at, updated_at, deleted_at FROM accounts
+WHERE accounts.user_identifier = $1
+LIMIT 1
 `
 
-type GetUserAccountsParams struct {
-	UserIdentifier ulid.ULID `json:"user_identifier"`
-	Limit          int32     `json:"limit"`
-	Offset         int32     `json:"offset"`
-}
-
-func (q *Queries) GetUserAccounts(ctx context.Context, arg GetUserAccountsParams) ([]Account, error) {
-	rows, err := q.db.Query(ctx, getUserAccounts, arg.UserIdentifier, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Account{}
-	for rows.Next() {
-		var i Account
-		if err := rows.Scan(
-			&i.Identifier,
-			&i.Title,
-			&i.Description,
-			&i.Status,
-			&i.Banned,
-			&i.UserIdentifier,
-			&i.BaseAssetIdentifier,
-			&i.MetaData,
-			&i.ExpiresAt,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetUserAccount(ctx context.Context, userIdentifier string) (Account, error) {
+	row := q.db.QueryRow(ctx, getUserAccount, userIdentifier)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Identifier,
+		&i.Title,
+		&i.Description,
+		&i.Status,
+		&i.Banned,
+		&i.UserIdentifier,
+		&i.BaseAssetIdentifier,
+		&i.MetaData,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }

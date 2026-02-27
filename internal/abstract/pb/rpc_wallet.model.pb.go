@@ -48,9 +48,11 @@ type Wallet struct {
 	// External identifier of the user who owns this wallet
 	UserIdentifier string `protobuf:"bytes,10,opt,name=user_identifier,json=userIdentifier,proto3" json:"user_identifier,omitempty"`
 	// External identifier of the primary/base asset for this wallet (e.g., default currency)
-	BaseAssetIdentifier string `protobuf:"bytes,11,opt,name=base_asset_identifier,json=baseAssetIdentifier,proto3" json:"base_asset_identifier,omitempty"`
+	AssetIdentifier string `protobuf:"bytes,11,opt,name=asset_identifier,json=assetIdentifier,proto3" json:"asset_identifier,omitempty"`
 	// Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)
-	MetaData      map[string]string `protobuf:"bytes,12,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	MetaData map[string]string `protobuf:"bytes,12,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Asset of wallet
+	Asset         *Asset `protobuf:"bytes,13,opt,name=asset,proto3" json:"asset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -155,9 +157,9 @@ func (x *Wallet) GetUserIdentifier() string {
 	return ""
 }
 
-func (x *Wallet) GetBaseAssetIdentifier() string {
+func (x *Wallet) GetAssetIdentifier() string {
 	if x != nil {
-		return x.BaseAssetIdentifier
+		return x.AssetIdentifier
 	}
 	return ""
 }
@@ -165,6 +167,13 @@ func (x *Wallet) GetBaseAssetIdentifier() string {
 func (x *Wallet) GetMetaData() map[string]string {
 	if x != nil {
 		return x.MetaData
+	}
+	return nil
+}
+
+func (x *Wallet) GetAsset() *Asset {
+	if x != nil {
+		return x.Asset
 	}
 	return nil
 }
@@ -319,7 +328,7 @@ var File_rpc_wallet_model_proto protoreflect.FileDescriptor
 
 const file_rpc_wallet_model_proto_rawDesc = "" +
 	"\n" +
-	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd0\x04\n" +
+	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15rpc_asset.model.proto\"\xeb\x04\n" +
 	"\x06Wallet\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -337,9 +346,10 @@ const file_rpc_wallet_model_proto_rawDesc = "" +
 	"\vdescription\x18\b \x01(\tR\vdescription\x12\x16\n" +
 	"\x06status\x18\t \x01(\tR\x06status\x12'\n" +
 	"\x0fuser_identifier\x18\n" +
-	" \x01(\tR\x0euserIdentifier\x122\n" +
-	"\x15base_asset_identifier\x18\v \x01(\tR\x13baseAssetIdentifier\x128\n" +
-	"\tmeta_data\x18\f \x03(\v2\x1b.proto.Wallet.MetaDataEntryR\bmetaData\x1a;\n" +
+	" \x01(\tR\x0euserIdentifier\x12)\n" +
+	"\x10asset_identifier\x18\v \x01(\tR\x0fassetIdentifier\x128\n" +
+	"\tmeta_data\x18\f \x03(\v2\x1b.proto.Wallet.MetaDataEntryR\bmetaData\x12\"\n" +
+	"\x05asset\x18\r \x01(\v2\f.proto.AssetR\x05asset\x1a;\n" +
 	"\rMetaDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe0\x04\n" +
@@ -386,6 +396,7 @@ var file_rpc_wallet_model_proto_goTypes = []any{
 	nil,                           // 2: proto.Wallet.MetaDataEntry
 	nil,                           // 3: proto.WalletResponse.MetaDataEntry
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*Asset)(nil),                 // 5: proto.Asset
 }
 var file_rpc_wallet_model_proto_depIdxs = []int32{
 	4,  // 0: proto.Wallet.created_at:type_name -> google.protobuf.Timestamp
@@ -393,16 +404,17 @@ var file_rpc_wallet_model_proto_depIdxs = []int32{
 	4,  // 2: proto.Wallet.deleted_at:type_name -> google.protobuf.Timestamp
 	4,  // 3: proto.Wallet.expires_at:type_name -> google.protobuf.Timestamp
 	2,  // 4: proto.Wallet.meta_data:type_name -> proto.Wallet.MetaDataEntry
-	4,  // 5: proto.WalletResponse.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 6: proto.WalletResponse.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 7: proto.WalletResponse.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 8: proto.WalletResponse.expires_at:type_name -> google.protobuf.Timestamp
-	3,  // 9: proto.WalletResponse.meta_data:type_name -> proto.WalletResponse.MetaDataEntry
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	5,  // 5: proto.Wallet.asset:type_name -> proto.Asset
+	4,  // 6: proto.WalletResponse.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 7: proto.WalletResponse.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 8: proto.WalletResponse.deleted_at:type_name -> google.protobuf.Timestamp
+	4,  // 9: proto.WalletResponse.expires_at:type_name -> google.protobuf.Timestamp
+	3,  // 10: proto.WalletResponse.meta_data:type_name -> proto.WalletResponse.MetaDataEntry
+	11, // [11:11] is the sub-list for method output_type
+	11, // [11:11] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_rpc_wallet_model_proto_init() }
@@ -410,6 +422,7 @@ func file_rpc_wallet_model_proto_init() {
 	if File_rpc_wallet_model_proto != nil {
 		return
 	}
+	file_rpc_asset_model_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

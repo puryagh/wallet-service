@@ -1,6 +1,6 @@
 -- name: GetWalletByIdentifier :one
 SELECT * FROM wallets
-WHERE identifier = $1
+WHERE identifier::text = $1::text
 AND deleted_at IS NULL
 LIMIT 1;
 
@@ -34,4 +34,34 @@ AND wallets.user_identifier = $1
 AND wallets.base_asset_identifier = wallet_assets.identifier
 AND wallets.deleted_at IS NULL
 LIMIT 1;
+
+-- name: CreateWallet :one
+INSERT INTO wallets (
+    user_identifier,
+    account_identifier,
+    account_id,
+    asset_identifier,
+    wallet_asset_id,
+    meta_data,
+    ledger_account_id,
+    ledger_account_code,
+    primary_account_number,
+    status,
+    created_at,
+    updated_at
+) VALUES (
+    $1, 
+    $2, 
+    $3, 
+    $4, 
+    $5, 
+    $6, 
+    $7,
+    $8,
+    $9,
+    $10,
+    CURRENT_TIMESTAMP, 
+    CURRENT_TIMESTAMP
+)
+RETURNING *;
 

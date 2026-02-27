@@ -365,6 +365,64 @@
     }
   },
   "definitions": {
+    "protoAsset": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "title": "Unique external identifier for the asset (ULID format)"
+        },
+        "code": {
+          "type": "string",
+          "title": "Asset code following ISO 4217 for fiat currencies or custom codes for crypto/tokens\nExamples: \"USD\", \"EUR\", \"BTC\", \"ETH\", \"USDT\""
+        },
+        "symbol": {
+          "type": "string",
+          "title": "Short symbol for display purposes"
+        },
+        "title": {
+          "type": "string",
+          "title": "Human-readable name of the asset"
+        },
+        "description": {
+          "type": "string",
+          "title": "Optional description providing additional context about the asset"
+        },
+        "unit": {
+          "type": "string",
+          "title": "Asset unit"
+        },
+        "unit_title": {
+          "type": "string",
+          "title": "Asset unit title"
+        },
+        "decimals": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Asset decimals"
+        },
+        "network": {
+          "type": "string",
+          "title": "Asset network"
+        },
+        "icon_url": {
+          "type": "string",
+          "title": "Asset icon url"
+        },
+        "meta_data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Flexible key-value metadata for storing custom attributes"
+        },
+        "ledger_code": {
+          "type": "integer",
+          "format": "int32",
+          "title": "ledger code of asset"
+        }
+      }
+    },
     "protoContextUserWalletResponse": {
       "type": "object",
       "properties": {
@@ -373,8 +431,12 @@
           "description": "1 byte",
           "title": "Indicates whether an error occurred during processing"
         },
-        "wallet": {
-          "$ref": "#/definitions/protoWallet",
+        "wallets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoWallet"
+          },
           "description": "pointer",
           "title": "Wallet data for the authenticated user (null if error is true)"
         },
@@ -911,7 +973,7 @@
           "type": "string",
           "title": "External identifier of the user who owns this wallet"
         },
-        "base_asset_identifier": {
+        "asset_identifier": {
           "type": "string",
           "title": "External identifier of the primary/base asset for this wallet (e.g., default currency)"
         },
@@ -921,6 +983,10 @@
             "type": "string"
           },
           "title": "Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)"
+        },
+        "asset": {
+          "$ref": "#/definitions/protoAsset",
+          "title": "Asset of wallet"
         }
       },
       "description": "Wallet represents a user's wallet container that holds multiple asset accounts.\nA wallet is the top-level entity that groups related wallet accounts for a single user.\nField ordering optimized for Go memory alignment: pointers/timestamps → bools → strings → maps."

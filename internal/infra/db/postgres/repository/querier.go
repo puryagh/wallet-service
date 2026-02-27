@@ -6,15 +6,14 @@ package repository
 
 import (
 	"context"
-
-	ulid "github.com/oklog/ulid/v2"
 )
 
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
-	GetAccountByIdentifier(ctx context.Context, identifier ulid.ULID) (Account, error)
+	CreateWallet(ctx context.Context, arg CreateWalletParams) (Wallet, error)
+	GetAccountByIdentifier(ctx context.Context, dollar_1 string) (Account, error)
 	GetAllWalletAssets(ctx context.Context, arg GetAllWalletAssetsParams) ([]WalletAsset, error)
-	GetUserAccounts(ctx context.Context, arg GetUserAccountsParams) ([]Account, error)
+	GetUserAccount(ctx context.Context, userIdentifier string) (Account, error)
 	// join accounts, wallets and wallet_assets tables to get wallet and base asset information
 	// 1: select account with specified user identifier if it status that is enum is not 'PENDING' , deleted_at IS NULL and banned is FALSE and expires_at after now
 	// 2 : get wallet asset by symbol if active field IS TRUE and deleted_at IS NULL
@@ -23,9 +22,9 @@ type Querier interface {
 	//  3-3: selected wallet deleted_at IS NULL
 	GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (GetUserAssetWalletRow, error)
 	GetUserWallets(ctx context.Context, arg GetUserWalletsParams) ([]Wallet, error)
-	GetWalletAssetByIdentifier(ctx context.Context, identifier ulid.ULID) (WalletAsset, error)
+	GetWalletAssetByIdentifier(ctx context.Context, dollar_1 string) (WalletAsset, error)
 	GetWalletAssetBySymbol(ctx context.Context, symbol string) (WalletAsset, error)
-	GetWalletByIdentifier(ctx context.Context, identifier ulid.ULID) (Wallet, error)
+	GetWalletByIdentifier(ctx context.Context, dollar_1 string) (Wallet, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -7,12 +7,10 @@ package repository
 
 import (
 	"context"
-
-	ulid "github.com/oklog/ulid/v2"
 )
 
 const getAllWalletAssets = `-- name: GetAllWalletAssets :many
-SELECT identifier, active, code, symbol, title, description, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
+SELECT id, identifier, active, code, symbol, title, description, predefined, unit, unit_title, decimals, network, icon_url, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
 WHERE deleted_at IS NULL
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
@@ -33,12 +31,19 @@ func (q *Queries) GetAllWalletAssets(ctx context.Context, arg GetAllWalletAssets
 	for rows.Next() {
 		var i WalletAsset
 		if err := rows.Scan(
+			&i.ID,
 			&i.Identifier,
 			&i.Active,
 			&i.Code,
 			&i.Symbol,
 			&i.Title,
 			&i.Description,
+			&i.Predefined,
+			&i.Unit,
+			&i.UnitTitle,
+			&i.Decimals,
+			&i.Network,
+			&i.IconUrl,
 			&i.MetaData,
 			&i.LedgerCode,
 			&i.CreatedAt,
@@ -56,22 +61,29 @@ func (q *Queries) GetAllWalletAssets(ctx context.Context, arg GetAllWalletAssets
 }
 
 const getWalletAssetByIdentifier = `-- name: GetWalletAssetByIdentifier :one
-SELECT identifier, active, code, symbol, title, description, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
-WHERE identifier = $1
+SELECT id, identifier, active, code, symbol, title, description, predefined, unit, unit_title, decimals, network, icon_url, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
+WHERE identifier::text = $1::text
 AND deleted_at IS NULL
 LIMIT 1
 `
 
-func (q *Queries) GetWalletAssetByIdentifier(ctx context.Context, identifier ulid.ULID) (WalletAsset, error) {
-	row := q.db.QueryRow(ctx, getWalletAssetByIdentifier, identifier)
+func (q *Queries) GetWalletAssetByIdentifier(ctx context.Context, dollar_1 string) (WalletAsset, error) {
+	row := q.db.QueryRow(ctx, getWalletAssetByIdentifier, dollar_1)
 	var i WalletAsset
 	err := row.Scan(
+		&i.ID,
 		&i.Identifier,
 		&i.Active,
 		&i.Code,
 		&i.Symbol,
 		&i.Title,
 		&i.Description,
+		&i.Predefined,
+		&i.Unit,
+		&i.UnitTitle,
+		&i.Decimals,
+		&i.Network,
+		&i.IconUrl,
 		&i.MetaData,
 		&i.LedgerCode,
 		&i.CreatedAt,
@@ -82,7 +94,7 @@ func (q *Queries) GetWalletAssetByIdentifier(ctx context.Context, identifier uli
 }
 
 const getWalletAssetBySymbol = `-- name: GetWalletAssetBySymbol :one
-SELECT identifier, active, code, symbol, title, description, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
+SELECT id, identifier, active, code, symbol, title, description, predefined, unit, unit_title, decimals, network, icon_url, meta_data, ledger_code, created_at, updated_at, deleted_at FROM wallet_assets
 WHERE symbol = $1
 AND deleted_at IS NULL
 LIMIT 1
@@ -92,12 +104,19 @@ func (q *Queries) GetWalletAssetBySymbol(ctx context.Context, symbol string) (Wa
 	row := q.db.QueryRow(ctx, getWalletAssetBySymbol, symbol)
 	var i WalletAsset
 	err := row.Scan(
+		&i.ID,
 		&i.Identifier,
 		&i.Active,
 		&i.Code,
 		&i.Symbol,
 		&i.Title,
 		&i.Description,
+		&i.Predefined,
+		&i.Unit,
+		&i.UnitTitle,
+		&i.Decimals,
+		&i.Network,
+		&i.IconUrl,
 		&i.MetaData,
 		&i.LedgerCode,
 		&i.CreatedAt,

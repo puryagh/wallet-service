@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-02-25T19:20:20.594Z
+-- Generated at: 2026-02-27T16:54:31.917Z
 
 CREATE TYPE "account_status" AS ENUM (
   'PENDING',
@@ -33,8 +33,8 @@ CREATE TABLE "accounts" (
   "description" varchar(256),
   "status" account_status NOT NULL DEFAULT 'ACTIVE',
   "banned" boolean NOT NULL DEFAULT false,
-  "user_identifier" ulid NOT NULL,
-  "base_asset_identifier" ulid NOT NULL,
+  "user_identifier" varchar(32) UNIQUE NOT NULL,
+  "base_asset_identifier" varchar(32) NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
   "expires_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
@@ -45,11 +45,13 @@ CREATE TABLE "accounts" (
 CREATE TABLE "wallets" (
   "id" bigserial PRIMARY KEY,
   "identifier" ulid UNIQUE NOT NULL DEFAULT (gen_monotonic_ulid()),
-  "user_identifier" ulid NOT NULL,
-  "account_identifier" ulid NOT NULL,
-  "asset_identifier" bigserial NOT NULL,
+  "user_identifier" varchar(32) NOT NULL,
+  "account_identifier" varchar(32) NOT NULL,
+  "account_id" bigserial NOT NULL,
+  "asset_identifier" varchar(32) NOT NULL,
+  "wallet_asset_id" bigserial NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
-  "ledger_account_id" bit(128) NOT NULL,
+  "ledger_account_id" BYTEA NOT NULL,
   "ledger_account_code" INTEGER NOT NULL,
   "primary_account_number" varchar(24) NOT NULL,
   "iban" varchar(34),
@@ -73,6 +75,7 @@ CREATE TABLE "wallet_assets" (
   "symbol" varchar(10) UNIQUE NOT NULL,
   "title" varchar(128) NOT NULL,
   "description" varchar(256),
+  "predefined" boolean NOT NULL DEFAULT false,
   "unit" wallet_asset_unit NOT NULL DEFAULT 'NONE',
   "unit_title" varchar(128),
   "decimals" int NOT NULL DEFAULT 0,
@@ -153,7 +156,11 @@ COMMENT ON COLUMN "wallets"."user_identifier" IS 'related user identifier to det
 
 COMMENT ON COLUMN "wallets"."account_identifier" IS 'related account identifier to determining account of wallet';
 
+COMMENT ON COLUMN "wallets"."account_id" IS 'related account id to determining account of wallet';
+
 COMMENT ON COLUMN "wallets"."asset_identifier" IS 'related asset identifier to determining asset of wallet';
+
+COMMENT ON COLUMN "wallets"."wallet_asset_id" IS 'related wallet asset id to determining asset of wallet';
 
 COMMENT ON COLUMN "wallets"."meta_data" IS 'wallet account meta data';
 
@@ -199,6 +206,8 @@ COMMENT ON COLUMN "wallet_assets"."title" IS 'wallet asset title';
 
 COMMENT ON COLUMN "wallet_assets"."description" IS 'wallet asset description';
 
+COMMENT ON COLUMN "wallet_assets"."predefined" IS 'is wallet asset predefined for account initialization or no';
+
 COMMENT ON COLUMN "wallet_assets"."unit" IS 'wallet asset unit';
 
 COMMENT ON COLUMN "wallet_assets"."unit_title" IS 'wallet asset unit title';
@@ -218,3 +227,7 @@ COMMENT ON COLUMN "wallet_assets"."created_at" IS 'when wallet asset was created
 COMMENT ON COLUMN "wallet_assets"."updated_at" IS 'when wallet asset was updated';
 
 COMMENT ON COLUMN "wallet_assets"."deleted_at" IS 'when wallet asset was deleted';
+
+ALTER TABLE "wallets" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
+
+ALTER TABLE "wallets" ADD FOREIGN KEY ("wallet_asset_id") REFERENCES "wallet_assets" ("id");

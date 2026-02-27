@@ -34,6 +34,7 @@
         "sslmode",
         "stdprometheus",
         "tigerbeetle",
+        "timestamppb",
         "timestamptz",
         "totp",
         "varchar",

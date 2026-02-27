@@ -23,5 +23,7 @@ type Configuration struct {
 	MeliPayamakVerificationPatternID int           `json:"meli_payamak_verification_pattern_id" mapstructure:"LU_FCG_MELI_PAYAMAK_VERIFICATION_PATTERN_ID"`
 	TigerbeetleClusterID             string        `json:"tigerbeetle_cluster_id" mapstructure:"LU_CFG_TIGERBEETLE_CLUSTER_ID"`
 	TigerbeetleClusterAddresses      []string      `json:"tigerbeetle_cluster_addresses" mapstructure:"LU_CFG_TIGERBEETLE_CLUSTER_ADDRESSES"`
+	TigerbeetleReservedAccountNumber int           `json:"tigerbeetle_reserved_account_number" mapstructure:"LU_CFG_TIGERBEETLE_RESERVED_ACCOUNTS_NUMBER"`
 	AccountsInitialAssets            []string      `json:"accounts_initial_assets" mapstructure:"LU_CFG_ACCOUNTS_INITIAL_ASSETS"`
+	AccountsBaseAssetSymbol          string        `json:"accounts_base_asset_symbol" mapstructure:"LU_CFG_ACCOUNTS_BASE_ASSET_SYMBOL"`
 }

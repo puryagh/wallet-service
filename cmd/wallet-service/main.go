@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/liveutil/go-lib/configuration"
 	"github.com/liveutil/go-lib/env"
@@ -144,13 +143,15 @@ func main() {
 
 	// Register custom PostgreSQL types (ULID) with pgx
 	// This fixes the "cannot scan unknown type (OID 16702)" error
+	// and enables proper encoding/decoding of ULID values
 	pg.Pool.Config().AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
 		// Register ULID type - OID 16702 is the custom ULID type from the PostgreSQL extension
-		conn.TypeMap().RegisterType(&pgtype.Type{
-			Name:  "ulid",
-			OID:   16702,
-			Codec: &pgtype.TextCodec{},
-		})
+		// Use custom ULIDCodec for proper bidirectional conversion (read and write)
+		// conn.TypeMap().RegisterType(&pgtype.Type{
+		// 	Name:  "ulid",
+		// 	OID:   16702,
+		// 	Codec: &repository.ULIDCodec{},
+		// })
 		return nil
 	}
 

@@ -3,6 +3,7 @@ syntax = "proto3";
 package proto;
 
 import "google/protobuf/timestamp.proto";
+import "rpc_asset.model.proto";
 
 option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
 
@@ -41,10 +42,13 @@ message Wallet {
   string user_identifier = 10;
 
   // External identifier of the primary/base asset for this wallet (e.g., default currency)
-  string base_asset_identifier = 11;
+  string asset_identifier = 11;
 
   // Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)
   map<string, string> meta_data = 12;
+
+  // Asset of wallet
+  Asset asset = 13;
 }
 
 // WalletResponse is an alias for Wallet used in API responses for clarity.

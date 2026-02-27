@@ -1,13 +1,11 @@
--- name: GetUserAccounts :many
+-- name: GetUserAccount :one
 SELECT * FROM accounts
-WHERE user_identifier = $1
-AND deleted_at IS NULL
-ORDER BY created_at DESC
-LIMIT $2 OFFSET $3;
+WHERE accounts.user_identifier = $1
+LIMIT 1;
 
 -- name: GetAccountByIdentifier :one
 SELECT * FROM accounts
-WHERE identifier = $1
+WHERE identifier::varchar(32) = $1::varchar(32)
 AND deleted_at IS NULL
 LIMIT 1;
 

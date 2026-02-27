@@ -7,7 +7,7 @@ LIMIT $1 OFFSET $2;
 
 -- name: GetWalletAssetByIdentifier :one
 SELECT * FROM wallet_assets
-WHERE identifier = $1
+WHERE identifier::text = $1::text
 AND deleted_at IS NULL
 LIMIT 1;
 

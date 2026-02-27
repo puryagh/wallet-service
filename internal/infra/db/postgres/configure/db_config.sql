@@ -15,6 +15,7 @@ INSERT INTO
         unit_title,
         meta_data,
         ledger_code,
+        predefined,
         created_at,
         updated_at
     )
@@ -34,6 +35,7 @@ VALUES
             "allowed_pairs": "IRR_USD,IRR_XAG_MILLIGRAM,IRR_XAG_GRAM"
         }',
         1,
+        True,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     );
@@ -53,6 +55,7 @@ INSERT INTO
         unit_title,
         meta_data,
         ledger_code,
+        predefined,
         created_at,
         updated_at
     )
@@ -72,6 +75,7 @@ VALUES
             "allowed_pairs": "XAG_MILLIGRAM_IRR,XAG_MILLIGRAM_USD,XAG_GRAM_IRR,XAG_GRAM_USD,XAG_OZ_USD"
         }',
         2,
+        True,
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
     );

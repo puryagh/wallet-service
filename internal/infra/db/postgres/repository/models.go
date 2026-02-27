@@ -102,7 +102,55 @@ func (ns NullWalletAccountStatus) Value() (driver.Value, error) {
 	return string(ns.WalletAccountStatus), nil
 }
 
+type WalletAssetUnit string
+
+const (
+	WalletAssetUnitNONE      WalletAssetUnit = "NONE"
+	WalletAssetUnitMILLIGRAM WalletAssetUnit = "MILLIGRAM"
+	WalletAssetUnitGRAM      WalletAssetUnit = "GRAM"
+	WalletAssetUnitKILOGRAM  WalletAssetUnit = "KILOGRAM"
+	WalletAssetUnitTONNE     WalletAssetUnit = "TONNE"
+	WalletAssetUnitPIECE     WalletAssetUnit = "PIECE"
+)
+
+func (e *WalletAssetUnit) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WalletAssetUnit(s)
+	case string:
+		*e = WalletAssetUnit(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WalletAssetUnit: %T", src)
+	}
+	return nil
+}
+
+type NullWalletAssetUnit struct {
+	WalletAssetUnit WalletAssetUnit `json:"wallet_asset_unit"`
+	Valid           bool            `json:"valid"` // Valid is true if WalletAssetUnit is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWalletAssetUnit) Scan(value interface{}) error {
+	if value == nil {
+		ns.WalletAssetUnit, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WalletAssetUnit.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWalletAssetUnit) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WalletAssetUnit), nil
+}
+
 type Account struct {
+	// account unique id
+	ID int64 `json:"id"`
 	// unique external identifier for inter system internal-external identifier separation
 	Identifier ulid.ULID `json:"identifier"`
 	// account title
@@ -114,9 +162,9 @@ type Account struct {
 	// is account banned or no
 	Banned bool `json:"banned"`
 	// related user identifier to determining account owner account
-	UserIdentifier ulid.ULID `json:"user_identifier"`
+	UserIdentifier string `json:"user_identifier"`
 	// related base asset identifier to determining account base asset
-	BaseAssetIdentifier ulid.ULID `json:"base_asset_identifier"`
+	BaseAssetIdentifier string `json:"base_asset_identifier"`
 	// account meta data
 	MetaData []byte `json:"meta_data"`
 	// expire time of account, if not sets then user valid for unlimited time
@@ -130,18 +178,24 @@ type Account struct {
 }
 
 type Wallet struct {
+	// wallet unique id
+	ID int64 `json:"id"`
 	// unique external identifier for inter system internal-external identifier separation
 	Identifier ulid.ULID `json:"identifier"`
 	// related user identifier to determining account owner
-	UserIdentifier ulid.ULID `json:"user_identifier"`
+	UserIdentifier string `json:"user_identifier"`
 	// related account identifier to determining account of wallet
-	AccountIdentifier ulid.ULID `json:"account_identifier"`
+	AccountIdentifier string `json:"account_identifier"`
+	// related account id to determining account of wallet
+	AccountID int64 `json:"account_id"`
 	// related asset identifier to determining asset of wallet
-	AssetIdentifier int64 `json:"asset_identifier"`
+	AssetIdentifier string `json:"asset_identifier"`
+	// related wallet asset id to determining asset of wallet
+	WalletAssetID int64 `json:"wallet_asset_id"`
 	// wallet account meta data
 	MetaData []byte `json:"meta_data"`
 	// related ledger account id to determining "ledger account" of wallet in ledger core
-	LedgerAccountID interface{} `json:"ledger_account_id"`
+	LedgerAccountID []byte `json:"ledger_account_id"`
 	// related ledger account code to determining service code for wallet in ledger core
 	LedgerAccountCode int32 `json:"ledger_account_code"`
 	// primary account number of wallet account
@@ -171,6 +225,8 @@ type Wallet struct {
 }
 
 type WalletAsset struct {
+	// wallet_asset unique id
+	ID int64 `json:"id"`
 	// unique external identifier for inter system internal-external identifier separation
 	Identifier ulid.ULID `json:"identifier"`
 	// is wallet asset active or no
@@ -183,6 +239,18 @@ type WalletAsset struct {
 	Title string `json:"title"`
 	// wallet asset description
 	Description pgtype.Text `json:"description"`
+	// is wallet asset predefined for account initialization or no
+	Predefined bool `json:"predefined"`
+	// wallet asset unit
+	Unit WalletAssetUnit `json:"unit"`
+	// wallet asset unit title
+	UnitTitle pgtype.Text `json:"unit_title"`
+	// wallet asset decimals
+	Decimals int32 `json:"decimals"`
+	// wallet asset network
+	Network pgtype.Text `json:"network"`
+	// wallet asset icon url
+	IconUrl pgtype.Text `json:"icon_url"`
 	// wallet asset meta data
 	MetaData []byte `json:"meta_data"`
 	// related ledger code to determining wallet in ledger

@@ -19,7 +19,7 @@ message ContextUserWalletResponse {
 	bool error = 1; // 1 byte
 
 	// Wallet data for the authenticated user (null if error is true)
-	Wallet wallet = 2; // pointer
+	repeated Wallet wallets = 2; // pointer
 
 	// Human-readable message: error description if error=true, success message if error=false
 	string message = 3;

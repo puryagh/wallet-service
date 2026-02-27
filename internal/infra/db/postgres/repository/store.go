@@ -13,6 +13,9 @@ type Store interface {
 
 	// Account TXes
 	CreateAccountTx(ctx context.Context, arg AccountsTxParams) (AccountsTxResult, error)
+
+	// Wallet TXes
+	CreateWalletTx(ctx context.Context, arg WalletsTxParams) (WalletsTxResult, error)
 }
 
 // SQLStore provides all functions to execute SQL queries and transactions

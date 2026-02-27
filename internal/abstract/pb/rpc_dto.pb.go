@@ -29,7 +29,7 @@ type ContextUserWalletResponse struct {
 	// Indicates whether an error occurred during processing
 	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
 	// Wallet data for the authenticated user (null if error is true)
-	Wallet *Wallet `protobuf:"bytes,2,opt,name=wallet,proto3" json:"wallet,omitempty"` // pointer
+	Wallets []*Wallet `protobuf:"bytes,2,rep,name=wallets,proto3" json:"wallets,omitempty"` // pointer
 	// Human-readable message: error description if error=true, success message if error=false
 	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -73,9 +73,9 @@ func (x *ContextUserWalletResponse) GetError() bool {
 	return false
 }
 
-func (x *ContextUserWalletResponse) GetWallet() *Wallet {
+func (x *ContextUserWalletResponse) GetWallets() []*Wallet {
 	if x != nil {
-		return x.Wallet
+		return x.Wallets
 	}
 	return nil
 }
@@ -1408,10 +1408,10 @@ var File_rpc_dto_proto protoreflect.FileDescriptor
 
 const file_rpc_dto_proto_rawDesc = "" +
 	"\n" +
-	"\rrpc_dto.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16rpc_wallet.model.proto\x1a\x1brpc_transaction.model.proto\"r\n" +
+	"\rrpc_dto.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x16rpc_wallet.model.proto\x1a\x1brpc_transaction.model.proto\"t\n" +
 	"\x19ContextUserWalletResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\bR\x05error\x12%\n" +
-	"\x06wallet\x18\x02 \x01(\v2\r.proto.WalletR\x06wallet\x12\x18\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x12'\n" +
+	"\awallets\x18\x02 \x03(\v2\r.proto.WalletR\awallets\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\"\x8f\x01\n" +
 	"%ContextUserWalletTransactionsResponse\x12\x14\n" +
 	"\x05error\x18\x01 \x01(\bR\x05error\x126\n" +
@@ -1551,7 +1551,7 @@ var file_rpc_dto_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil),                 // 22: google.protobuf.Timestamp
 }
 var file_rpc_dto_proto_depIdxs = []int32{
-	19, // 0: proto.ContextUserWalletResponse.wallet:type_name -> proto.Wallet
+	19, // 0: proto.ContextUserWalletResponse.wallets:type_name -> proto.Wallet
 	20, // 1: proto.ContextUserWalletTransactionsResponse.transactions:type_name -> proto.Transaction
 	20, // 2: proto.DepositAssetResponse.transaction:type_name -> proto.Transaction
 	20, // 3: proto.WithdrawAssetResponse.transaction:type_name -> proto.Transaction

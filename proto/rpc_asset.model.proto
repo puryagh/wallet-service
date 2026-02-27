@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/liveutil/wallet-service/internal/abstract/pb";
+
+message Asset {
+    // Unique external identifier for the asset (ULID format)
+    string identifier = 1;
+
+    // Asset code following ISO 4217 for fiat currencies or custom codes for crypto/tokens
+    // Examples: "USD", "EUR", "BTC", "ETH", "USDT"
+    string code = 2;
+
+    // Short symbol for display purposes
+    string symbol = 3;
+
+    // Human-readable name of the asset
+    string title = 4;
+
+    // Optional description providing additional context about the asset
+    string description = 5;
+
+    // Asset unit
+    string unit = 6;
+
+    // Asset unit title
+    string unit_title = 7;
+
+    // Asset decimals
+    int32 decimals = 8;
+
+    // Asset network
+    string network = 9;
+
+    // Asset icon url
+    string icon_url = 10;
+
+    // Flexible key-value metadata for storing custom attributes
+    map<string, string> meta_data = 11;
+
+    // ledger code of asset
+    int32 ledger_code = 12;
+}
