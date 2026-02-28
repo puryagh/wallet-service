@@ -987,9 +987,43 @@
         "asset": {
           "$ref": "#/definitions/protoAsset",
           "title": "Asset of wallet"
+        },
+        "balance": {
+          "$ref": "#/definitions/protoWalletBalance",
+          "title": "Balance of wallet"
         }
       },
       "description": "Wallet represents a user's wallet container that holds multiple asset accounts.\nA wallet is the top-level entity that groups related wallet accounts for a single user.\nField ordering optimized for Go memory alignment: pointers/timestamps → bools → strings → maps."
+    },
+    "protoWalletBalance": {
+      "type": "object",
+      "properties": {
+        "credit": {
+          "type": "string",
+          "title": "Credit balance of wallet"
+        },
+        "debit": {
+          "type": "string",
+          "title": "Debit balance of wallet"
+        },
+        "pending_credit": {
+          "type": "string",
+          "title": "Pending credit balance of wallet"
+        },
+        "pending_debit": {
+          "type": "string",
+          "title": "Pending debit balance of wallet"
+        },
+        "balance": {
+          "type": "string",
+          "title": "Total balance of wallet"
+        },
+        "pending": {
+          "type": "string",
+          "title": "Pending balance of wallet"
+        }
+      },
+      "description": "WalletBalance represents the balance of a wallet."
     },
     "protoWithdrawAssetRequest": {
       "type": "object",

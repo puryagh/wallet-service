@@ -49,6 +49,25 @@ message Wallet {
 
   // Asset of wallet
   Asset asset = 13;
+
+  // Balance of wallet
+  WalletBalance balance = 14;
+}
+
+// WalletBalance represents the balance of a wallet.
+message WalletBalance {
+  // Credit balance of wallet
+  string credit = 1;
+  // Debit balance of wallet
+  string debit = 2;
+  // Pending credit balance of wallet
+  string pending_credit = 3;
+  // Pending debit balance of wallet
+  string pending_debit = 4;
+  // Total balance of wallet
+  string balance = 5;
+  // Pending balance of wallet
+  string pending = 6;
 }
 
 // WalletResponse is an alias for Wallet used in API responses for clarity.

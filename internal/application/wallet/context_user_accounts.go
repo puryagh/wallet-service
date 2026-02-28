@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -103,7 +104,21 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 						LedgerAccountID:      ledgerAccountIdBytes[:16],
 					},
 					AfterCreate: func(wallet repository.Wallet) error {
-						return nil
+						userData := types.ToUint128(user.ID)
+						// create tigerbeetle account
+						_, err := s.tigerbeetle.CreateAccounts([]types.Account{
+							{
+								ID:          ledgerAccountId,
+								UserData128: userData,
+								UserData64:  user.ID,
+								UserData32:  0,
+								Ledger:      1,
+								Code:        uint16(asset.LedgerCode),
+								Flags:       types.AccountFlags{DebitsMustNotExceedCredits: true}.ToUint16(),
+								Timestamp:   uint64(time.Now().UTC().Nanosecond()),
+							},
+						})
+						return err
 					},
 				}
 
@@ -137,6 +152,14 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 						IconUrl:     asset.IconUrl.String,
 						MetaData:    pgutil.JsonbToMap(asset.MetaData),
 						LedgerCode:  asset.LedgerCode,
+					},
+					Balance: &pb.WalletBalance{
+						Credit:        "0",
+						Debit:         "0",
+						PendingCredit: "0",
+						PendingDebit:  "0",
+						Balance:       "0",
+						Pending:       "0",
 					},
 				})
 
@@ -174,6 +197,26 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 			return nil, err
 		}
 
+		ledgerAccountID := types.BytesToUint128([16]byte(wallet.LedgerAccountID))
+
+		ledgerAccounts, err := s.tigerbeetle.LookupAccounts([]types.Uint128{ledgerAccountID})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(ledgerAccounts) != 1 {
+			return nil, fmt.Errorf("ledger account not found : %s", ledgerAccountID.String())
+		}
+
+		ledgerAccount := ledgerAccounts[0]
+		credit := ledgerAccount.CreditsPosted.BigInt()
+		debit := ledgerAccount.DebitsPosted.BigInt()
+		balance := new(big.Int).Sub(&credit, &debit)
+
+		pendingCredit := ledgerAccount.CreditsPending.BigInt()
+		pendingDebit := ledgerAccount.DebitsPending.BigInt()
+		pendingBalance := new(big.Int).Sub(&pendingCredit, &pendingDebit)
+
 		response.Wallets = append(response.Wallets, &pb.Wallet{
 			CreatedAt:       timestamppb.New(wallet.CreatedAt),
 			UpdatedAt:       timestamppb.New(wallet.UpdatedAt.Time),
@@ -199,6 +242,14 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 				IconUrl:     asset.IconUrl.String,
 				MetaData:    pgutil.JsonbToMap(asset.MetaData),
 				LedgerCode:  asset.LedgerCode,
+			},
+			Balance: &pb.WalletBalance{
+				Credit:        credit.String(),
+				Debit:         debit.String(),
+				PendingCredit: pendingCredit.String(),
+				PendingDebit:  pendingDebit.String(),
+				Balance:       balance.String(),
+				Pending:       pendingBalance.String(),
 			},
 		})
 

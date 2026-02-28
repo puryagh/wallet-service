@@ -43,6 +43,7 @@ func newService(opts *WalletServiceOptions) pb.WalletServiceServer {
 		schemaPath:            opts.SchemaPath,
 		applicationName:       opts.ApplicationName,
 		logger:                opts.Logger,
+		tigerbeetle:           opts.Tigerbeetle,
 		userServiceMeshClient: opts.UserServiceMeshClient,
 	}
 }

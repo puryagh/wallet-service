@@ -52,7 +52,9 @@ type Wallet struct {
 	// Flexible key-value metadata for storing custom attributes (e.g., tags, categories, limits)
 	MetaData map[string]string `protobuf:"bytes,12,rep,name=meta_data,json=metaData,proto3" json:"meta_data,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Asset of wallet
-	Asset         *Asset `protobuf:"bytes,13,opt,name=asset,proto3" json:"asset,omitempty"`
+	Asset *Asset `protobuf:"bytes,13,opt,name=asset,proto3" json:"asset,omitempty"`
+	// Balance of wallet
+	Balance       *WalletBalance `protobuf:"bytes,14,opt,name=balance,proto3" json:"balance,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -178,6 +180,104 @@ func (x *Wallet) GetAsset() *Asset {
 	return nil
 }
 
+func (x *Wallet) GetBalance() *WalletBalance {
+	if x != nil {
+		return x.Balance
+	}
+	return nil
+}
+
+// WalletBalance represents the balance of a wallet.
+type WalletBalance struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Credit balance of wallet
+	Credit string `protobuf:"bytes,1,opt,name=credit,proto3" json:"credit,omitempty"`
+	// Debit balance of wallet
+	Debit string `protobuf:"bytes,2,opt,name=debit,proto3" json:"debit,omitempty"`
+	// Pending credit balance of wallet
+	PendingCredit string `protobuf:"bytes,3,opt,name=pending_credit,json=pendingCredit,proto3" json:"pending_credit,omitempty"`
+	// Pending debit balance of wallet
+	PendingDebit string `protobuf:"bytes,4,opt,name=pending_debit,json=pendingDebit,proto3" json:"pending_debit,omitempty"`
+	// Total balance of wallet
+	Balance string `protobuf:"bytes,5,opt,name=balance,proto3" json:"balance,omitempty"`
+	// Pending balance of wallet
+	Pending       string `protobuf:"bytes,6,opt,name=pending,proto3" json:"pending,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WalletBalance) Reset() {
+	*x = WalletBalance{}
+	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WalletBalance) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WalletBalance) ProtoMessage() {}
+
+func (x *WalletBalance) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WalletBalance.ProtoReflect.Descriptor instead.
+func (*WalletBalance) Descriptor() ([]byte, []int) {
+	return file_rpc_wallet_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *WalletBalance) GetCredit() string {
+	if x != nil {
+		return x.Credit
+	}
+	return ""
+}
+
+func (x *WalletBalance) GetDebit() string {
+	if x != nil {
+		return x.Debit
+	}
+	return ""
+}
+
+func (x *WalletBalance) GetPendingCredit() string {
+	if x != nil {
+		return x.PendingCredit
+	}
+	return ""
+}
+
+func (x *WalletBalance) GetPendingDebit() string {
+	if x != nil {
+		return x.PendingDebit
+	}
+	return ""
+}
+
+func (x *WalletBalance) GetBalance() string {
+	if x != nil {
+		return x.Balance
+	}
+	return ""
+}
+
+func (x *WalletBalance) GetPending() string {
+	if x != nil {
+		return x.Pending
+	}
+	return ""
+}
+
 // WalletResponse is an alias for Wallet used in API responses for clarity.
 // Maintains backward compatibility with existing API contracts.
 type WalletResponse struct {
@@ -212,7 +312,7 @@ type WalletResponse struct {
 
 func (x *WalletResponse) Reset() {
 	*x = WalletResponse{}
-	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	mi := &file_rpc_wallet_model_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -224,7 +324,7 @@ func (x *WalletResponse) String() string {
 func (*WalletResponse) ProtoMessage() {}
 
 func (x *WalletResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_wallet_model_proto_msgTypes[1]
+	mi := &file_rpc_wallet_model_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -237,7 +337,7 @@ func (x *WalletResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WalletResponse.ProtoReflect.Descriptor instead.
 func (*WalletResponse) Descriptor() ([]byte, []int) {
-	return file_rpc_wallet_model_proto_rawDescGZIP(), []int{1}
+	return file_rpc_wallet_model_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *WalletResponse) GetCreatedAt() *timestamppb.Timestamp {
@@ -328,7 +428,7 @@ var File_rpc_wallet_model_proto protoreflect.FileDescriptor
 
 const file_rpc_wallet_model_proto_rawDesc = "" +
 	"\n" +
-	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15rpc_asset.model.proto\"\xeb\x04\n" +
+	"\x16rpc_wallet.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15rpc_asset.model.proto\"\x9b\x05\n" +
 	"\x06Wallet\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -349,10 +449,18 @@ const file_rpc_wallet_model_proto_rawDesc = "" +
 	" \x01(\tR\x0euserIdentifier\x12)\n" +
 	"\x10asset_identifier\x18\v \x01(\tR\x0fassetIdentifier\x128\n" +
 	"\tmeta_data\x18\f \x03(\v2\x1b.proto.Wallet.MetaDataEntryR\bmetaData\x12\"\n" +
-	"\x05asset\x18\r \x01(\v2\f.proto.AssetR\x05asset\x1a;\n" +
+	"\x05asset\x18\r \x01(\v2\f.proto.AssetR\x05asset\x12.\n" +
+	"\abalance\x18\x0e \x01(\v2\x14.proto.WalletBalanceR\abalance\x1a;\n" +
 	"\rMetaDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe0\x04\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbd\x01\n" +
+	"\rWalletBalance\x12\x16\n" +
+	"\x06credit\x18\x01 \x01(\tR\x06credit\x12\x14\n" +
+	"\x05debit\x18\x02 \x01(\tR\x05debit\x12%\n" +
+	"\x0epending_credit\x18\x03 \x01(\tR\rpendingCredit\x12#\n" +
+	"\rpending_debit\x18\x04 \x01(\tR\fpendingDebit\x12\x18\n" +
+	"\abalance\x18\x05 \x01(\tR\abalance\x12\x18\n" +
+	"\apending\x18\x06 \x01(\tR\apending\"\xe0\x04\n" +
 	"\x0eWalletResponse\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -389,32 +497,34 @@ func file_rpc_wallet_model_proto_rawDescGZIP() []byte {
 	return file_rpc_wallet_model_proto_rawDescData
 }
 
-var file_rpc_wallet_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_rpc_wallet_model_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_rpc_wallet_model_proto_goTypes = []any{
 	(*Wallet)(nil),                // 0: proto.Wallet
-	(*WalletResponse)(nil),        // 1: proto.WalletResponse
-	nil,                           // 2: proto.Wallet.MetaDataEntry
-	nil,                           // 3: proto.WalletResponse.MetaDataEntry
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
-	(*Asset)(nil),                 // 5: proto.Asset
+	(*WalletBalance)(nil),         // 1: proto.WalletBalance
+	(*WalletResponse)(nil),        // 2: proto.WalletResponse
+	nil,                           // 3: proto.Wallet.MetaDataEntry
+	nil,                           // 4: proto.WalletResponse.MetaDataEntry
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*Asset)(nil),                 // 6: proto.Asset
 }
 var file_rpc_wallet_model_proto_depIdxs = []int32{
-	4,  // 0: proto.Wallet.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 1: proto.Wallet.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 2: proto.Wallet.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 3: proto.Wallet.expires_at:type_name -> google.protobuf.Timestamp
-	2,  // 4: proto.Wallet.meta_data:type_name -> proto.Wallet.MetaDataEntry
-	5,  // 5: proto.Wallet.asset:type_name -> proto.Asset
-	4,  // 6: proto.WalletResponse.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 7: proto.WalletResponse.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 8: proto.WalletResponse.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 9: proto.WalletResponse.expires_at:type_name -> google.protobuf.Timestamp
-	3,  // 10: proto.WalletResponse.meta_data:type_name -> proto.WalletResponse.MetaDataEntry
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	5,  // 0: proto.Wallet.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 1: proto.Wallet.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 2: proto.Wallet.deleted_at:type_name -> google.protobuf.Timestamp
+	5,  // 3: proto.Wallet.expires_at:type_name -> google.protobuf.Timestamp
+	3,  // 4: proto.Wallet.meta_data:type_name -> proto.Wallet.MetaDataEntry
+	6,  // 5: proto.Wallet.asset:type_name -> proto.Asset
+	1,  // 6: proto.Wallet.balance:type_name -> proto.WalletBalance
+	5,  // 7: proto.WalletResponse.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 8: proto.WalletResponse.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 9: proto.WalletResponse.deleted_at:type_name -> google.protobuf.Timestamp
+	5,  // 10: proto.WalletResponse.expires_at:type_name -> google.protobuf.Timestamp
+	4,  // 11: proto.WalletResponse.meta_data:type_name -> proto.WalletResponse.MetaDataEntry
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_rpc_wallet_model_proto_init() }
@@ -429,7 +539,7 @@ func file_rpc_wallet_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rpc_wallet_model_proto_rawDesc), len(file_rpc_wallet_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
