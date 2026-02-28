@@ -101,7 +101,8 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 						LedgerAccountCode:    asset.LedgerCode,
 						Status:               repository.WalletAccountStatusACTIVE,
 						PrimaryAccountNumber: ulid.Make().String()[:24],
-						LedgerAccountID:      ledgerAccountIdBytes[:16],
+						// @ToDo: lookup ledger accounts bug
+						LedgerAccountID: ledgerAccountIdBytes[:16],
 					},
 					AfterCreate: func(wallet repository.Wallet) error {
 						userData := types.ToUint128(user.ID)
