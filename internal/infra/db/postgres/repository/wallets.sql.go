@@ -51,7 +51,7 @@ type CreateWalletParams struct {
 	AssetIdentifier      string              `json:"asset_identifier"`
 	WalletAssetID        int64               `json:"wallet_asset_id"`
 	MetaData             []byte              `json:"meta_data"`
-	LedgerAccountID      []byte              `json:"ledger_account_id"`
+	LedgerAccountID      int64               `json:"ledger_account_id"`
 	LedgerAccountCode    int32               `json:"ledger_account_code"`
 	PrimaryAccountNumber string              `json:"primary_account_number"`
 	Status               WalletAccountStatus `json:"status"`
@@ -130,7 +130,7 @@ type GetUserAssetWalletRow struct {
 	AssetIdentifier          string              `json:"asset_identifier"`
 	WalletAssetID            int64               `json:"wallet_asset_id"`
 	MetaData                 []byte              `json:"meta_data"`
-	LedgerAccountID          []byte              `json:"ledger_account_id"`
+	LedgerAccountID          int64               `json:"ledger_account_id"`
 	LedgerAccountCode        int32               `json:"ledger_account_code"`
 	PrimaryAccountNumber     string              `json:"primary_account_number"`
 	Iban                     pgtype.Text         `json:"iban"`

@@ -67,7 +67,7 @@ Table wallets {
 
   meta_data jsonb [not null, default: '{}', note: 'wallet account meta data']
 
-  ledger_account_id BYTEA [not null, note: 'related ledger account id to determining "ledger account" of wallet in ledger core']
+  ledger_account_id bigint [not null, note: 'related ledger account id to determining "ledger account" of wallet in ledger core']
   ledger_account_code INTEGER [not null, note: 'related ledger account code to determining service code for wallet in ledger core']
 
   primary_account_number varchar(24) [not null, note: 'primary account number of wallet account']

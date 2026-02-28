@@ -195,7 +195,7 @@ type Wallet struct {
 	// wallet account meta data
 	MetaData []byte `json:"meta_data"`
 	// related ledger account id to determining "ledger account" of wallet in ledger core
-	LedgerAccountID []byte `json:"ledger_account_id"`
+	LedgerAccountID int64 `json:"ledger_account_id"`
 	// related ledger account code to determining service code for wallet in ledger core
 	LedgerAccountCode int32 `json:"ledger_account_code"`
 	// primary account number of wallet account

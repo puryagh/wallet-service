@@ -77,20 +77,22 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 
 			account = txTResult.Account
 
-			for _, assetSymbol := range s.config.AccountsInitialAssets {
+			for index, assetSymbol := range s.config.AccountsInitialAssets {
 				asset, err := s.repository.GetWalletAssetBySymbol(ctx, assetSymbol)
 				if err != nil {
 					return nil, err
 				}
 
 				// generate ledger account id for wallet
-				accountID := uint64(account.ID)
+				accountID := uint64(account.ID + int64(index))
 				accountID += uint64(s.config.TigerbeetleReservedAccountNumber)
-				accountID += uint64(account.ID)
+
 				ledgerAccountId := types.ToUint128(accountID)
-				ledgerAccountIdBytes := ledgerAccountId.Bytes()
+				dbLedgerAccountId := ledgerAccountId.BigInt()
 
 				createWalletParams := repository.WalletsTxParams{
+					TigerBeetle: s.tigerbeetle,
+					UserID:      user.ID,
 					CreateWalletParams: repository.CreateWalletParams{
 						UserIdentifier:       user.Identifier,
 						AccountIdentifier:    account.Identifier.String(),
@@ -101,25 +103,10 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 						LedgerAccountCode:    asset.LedgerCode,
 						Status:               repository.WalletAccountStatusACTIVE,
 						PrimaryAccountNumber: ulid.Make().String()[:24],
-						// @ToDo: lookup ledger accounts bug
-						LedgerAccountID: ledgerAccountIdBytes[:16],
+						LedgerAccountID:      dbLedgerAccountId.Int64(),
 					},
 					AfterCreate: func(wallet repository.Wallet) error {
-						userData := types.ToUint128(user.ID)
-						// create tigerbeetle account
-						_, err := s.tigerbeetle.CreateAccounts([]types.Account{
-							{
-								ID:          ledgerAccountId,
-								UserData128: userData,
-								UserData64:  user.ID,
-								UserData32:  0,
-								Ledger:      1,
-								Code:        uint16(asset.LedgerCode),
-								Flags:       types.AccountFlags{DebitsMustNotExceedCredits: true}.ToUint16(),
-								Timestamp:   uint64(time.Now().UTC().Nanosecond()),
-							},
-						})
-						return err
+						return nil
 					},
 				}
 
@@ -198,61 +185,118 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 			return nil, err
 		}
 
-		ledgerAccountID := types.BytesToUint128([16]byte(wallet.LedgerAccountID))
+		ledgerAccountId := types.ToUint128(uint64(wallet.LedgerAccountID))
 
-		ledgerAccounts, err := s.tigerbeetle.LookupAccounts([]types.Uint128{ledgerAccountID})
+		ledgerAccounts, err := s.tigerbeetle.LookupAccounts([]types.Uint128{ledgerAccountId})
 		if err != nil {
 			return nil, err
 		}
 
-		if len(ledgerAccounts) != 1 {
-			return nil, fmt.Errorf("ledger account not found : %s", ledgerAccountID.String())
+		if len(ledgerAccounts) == 1 {
+			ledgerAccount := ledgerAccounts[0]
+			credit := ledgerAccount.CreditsPosted.BigInt()
+			debit := ledgerAccount.DebitsPosted.BigInt()
+			balance := new(big.Int).Sub(&credit, &debit)
+
+			pendingCredit := ledgerAccount.CreditsPending.BigInt()
+			pendingDebit := ledgerAccount.DebitsPending.BigInt()
+			pendingBalance := new(big.Int).Sub(&pendingCredit, &pendingDebit)
+
+			response.Wallets = append(response.Wallets, &pb.Wallet{
+				CreatedAt:       timestamppb.New(wallet.CreatedAt),
+				UpdatedAt:       timestamppb.New(wallet.UpdatedAt.Time),
+				DeletedAt:       timestamppb.New(wallet.DeletedAt.Time),
+				Banned:          account.Banned,
+				Identifier:      wallet.Identifier.String(),
+				Title:           account.Title,
+				Description:     account.Description.String,
+				Status:          string(wallet.Status),
+				UserIdentifier:  wallet.UserIdentifier,
+				AssetIdentifier: wallet.AssetIdentifier,
+				MetaData:        pgutil.JsonbToMap(wallet.MetaData),
+				Asset: &pb.Asset{
+					Identifier:  asset.Identifier.String(),
+					Code:        asset.Code,
+					Symbol:      asset.Symbol,
+					Title:       asset.Title,
+					Description: asset.Description.String,
+					Unit:        string(asset.Unit),
+					UnitTitle:   asset.UnitTitle.String,
+					Decimals:    asset.Decimals,
+					Network:     asset.Network.String,
+					IconUrl:     asset.IconUrl.String,
+					MetaData:    pgutil.JsonbToMap(asset.MetaData),
+					LedgerCode:  asset.LedgerCode,
+				},
+				Balance: &pb.WalletBalance{
+					Credit:        credit.String(),
+					Debit:         debit.String(),
+					PendingCredit: pendingCredit.String(),
+					PendingDebit:  pendingDebit.String(),
+					Balance:       balance.String(),
+					Pending:       pendingBalance.String(),
+				},
+			})
+		} else {
+			// create ledger account if not exist
+			userData := types.ToUint128(user.ID)
+			ledgerAccountId := types.ToUint128(uint64(wallet.LedgerAccountID))
+			// create tigerbeetle account
+			res, err := s.tigerbeetle.CreateAccounts([]types.Account{
+				{
+					ID:          ledgerAccountId,
+					UserData128: userData,
+					UserData64:  user.ID,
+					UserData32:  0,
+					Ledger:      1,
+					Code:        uint16(wallet.LedgerAccountCode),
+					Flags:       types.AccountFlags{DebitsMustNotExceedCredits: true}.ToUint16(),
+				},
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			for _, err := range res {
+				return nil, errors.New(err.Result.String())
+			}
+
+			response.Wallets = append(response.Wallets, &pb.Wallet{
+				CreatedAt:       timestamppb.New(wallet.CreatedAt),
+				UpdatedAt:       timestamppb.New(wallet.UpdatedAt.Time),
+				DeletedAt:       timestamppb.New(wallet.DeletedAt.Time),
+				Banned:          account.Banned,
+				Identifier:      wallet.Identifier.String(),
+				Title:           account.Title,
+				Description:     account.Description.String,
+				Status:          string(wallet.Status),
+				UserIdentifier:  wallet.UserIdentifier,
+				AssetIdentifier: wallet.AssetIdentifier,
+				MetaData:        pgutil.JsonbToMap(wallet.MetaData),
+				Asset: &pb.Asset{
+					Identifier:  asset.Identifier.String(),
+					Code:        asset.Code,
+					Symbol:      asset.Symbol,
+					Title:       asset.Title,
+					Description: asset.Description.String,
+					Unit:        string(asset.Unit),
+					UnitTitle:   asset.UnitTitle.String,
+					Decimals:    asset.Decimals,
+					Network:     asset.Network.String,
+					IconUrl:     asset.IconUrl.String,
+					MetaData:    pgutil.JsonbToMap(asset.MetaData),
+					LedgerCode:  asset.LedgerCode,
+				},
+				Balance: &pb.WalletBalance{
+					Credit:        "0",
+					Debit:         "0",
+					PendingCredit: "0",
+					PendingDebit:  "0",
+					Balance:       "0",
+					Pending:       "0",
+				},
+			})
 		}
-
-		ledgerAccount := ledgerAccounts[0]
-		credit := ledgerAccount.CreditsPosted.BigInt()
-		debit := ledgerAccount.DebitsPosted.BigInt()
-		balance := new(big.Int).Sub(&credit, &debit)
-
-		pendingCredit := ledgerAccount.CreditsPending.BigInt()
-		pendingDebit := ledgerAccount.DebitsPending.BigInt()
-		pendingBalance := new(big.Int).Sub(&pendingCredit, &pendingDebit)
-
-		response.Wallets = append(response.Wallets, &pb.Wallet{
-			CreatedAt:       timestamppb.New(wallet.CreatedAt),
-			UpdatedAt:       timestamppb.New(wallet.UpdatedAt.Time),
-			DeletedAt:       timestamppb.New(wallet.DeletedAt.Time),
-			Banned:          account.Banned,
-			Identifier:      wallet.Identifier.String(),
-			Title:           account.Title,
-			Description:     account.Description.String,
-			Status:          string(wallet.Status),
-			UserIdentifier:  wallet.UserIdentifier,
-			AssetIdentifier: wallet.AssetIdentifier,
-			MetaData:        pgutil.JsonbToMap(wallet.MetaData),
-			Asset: &pb.Asset{
-				Identifier:  asset.Identifier.String(),
-				Code:        asset.Code,
-				Symbol:      asset.Symbol,
-				Title:       asset.Title,
-				Description: asset.Description.String,
-				Unit:        string(asset.Unit),
-				UnitTitle:   asset.UnitTitle.String,
-				Decimals:    asset.Decimals,
-				Network:     asset.Network.String,
-				IconUrl:     asset.IconUrl.String,
-				MetaData:    pgutil.JsonbToMap(asset.MetaData),
-				LedgerCode:  asset.LedgerCode,
-			},
-			Balance: &pb.WalletBalance{
-				Credit:        credit.String(),
-				Debit:         debit.String(),
-				PendingCredit: pendingCredit.String(),
-				PendingDebit:  pendingDebit.String(),
-				Balance:       balance.String(),
-				Pending:       pendingBalance.String(),
-			},
-		})
 
 		response.Message = "success"
 	}

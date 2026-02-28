@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml.dbdiagram.io)
 -- Database: PostgreSQL
--- Generated at: 2026-02-27T16:54:31.917Z
+-- Generated at: 2026-02-28T09:16:43.378Z
 
 CREATE TYPE "account_status" AS ENUM (
   'PENDING',
@@ -51,7 +51,7 @@ CREATE TABLE "wallets" (
   "asset_identifier" varchar(32) NOT NULL,
   "wallet_asset_id" bigserial NOT NULL,
   "meta_data" jsonb NOT NULL DEFAULT '{}',
-  "ledger_account_id" BYTEA NOT NULL,
+  "ledger_account_id" bigint NOT NULL,
   "ledger_account_code" INTEGER NOT NULL,
   "primary_account_number" varchar(24) NOT NULL,
   "iban" varchar(34),
