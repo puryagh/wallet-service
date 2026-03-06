@@ -16,6 +16,9 @@ type Store interface {
 
 	// Wallet TXes
 	CreateWalletTx(ctx context.Context, arg WalletsTxParams) (WalletsTxResult, error)
+
+	// Batch Wallet TXes
+	BatchCreateWalletTx(ctx context.Context, arg BatchWalletsTxParams) (BatchWalletsTxResult, error)
 }
 
 // SQLStore provides all functions to execute SQL queries and transactions
