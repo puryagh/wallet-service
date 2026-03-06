@@ -172,17 +172,23 @@ message GetAccountTransfersRequest {
 // GetAccountTransfersResponse returns transfers matching the query criteria.
 // Field ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated.
 message GetAccountTransfersResponse {
+	// Indicates whether an error occurred during processing
+	bool error = 1; // 1 byte
+
   // Timestamp of the next page for pagination (0 if no more results)
-  uint64 next_timestamp = 1; // 8 bytes
+  uint64 next_timestamp = 2; // 8 bytes
 
   // Total number of transfers returned in this response
-  uint32 total_count = 2; // 4 bytes
+  uint32 total_count = 3; // 4 bytes
 
   // Indicates whether more results are available beyond this page
-  bool has_more = 3; // 1 byte
+  bool has_more = 4; // 1 byte
 
   // List of transfers matching the query criteria
-  repeated Transfer transfers = 4; // slice
+  repeated Transfer transfers = 5; // slice
+
+    // Human-readable message: error description if error=true, success message if error=false
+  string message = 6;
 }
 
 // QueryTransfersRequest queries transfers by metadata and other filter criteria.
@@ -220,14 +226,20 @@ message QueryTransfersRequest {
 // QueryTransfersResponse returns transfers matching the query criteria.
 // Field ordering optimized for Go memory alignment: uint32 → bool → repeated.
 message QueryTransfersResponse {
+  // Indicates whether an error occurred during processing
+  bool error = 1; // 1 byte
+
   // Total number of transfers returned in this response
-  uint32 total_count = 1; // 4 bytes
+  uint32 total_count = 2; // 4 bytes
 
   // Indicates whether more results are available beyond this page
-  bool has_more = 2; // 1 byte
+  bool has_more = 3; // 1 byte
 
   // List of transfers matching the query criteria
-  repeated Transfer transfers = 3; // slice
+  repeated Transfer transfers = 4; // slice
+
+  // Human-readable message: error description if error=true, success message if error=false
+  string message = 5;
 }
 
 // LookupTransfersRequest fetches specific transfers by their IDs.
@@ -239,8 +251,14 @@ message LookupTransfersRequest {
 
 // LookupTransfersResponse returns the requested transfers.
 message LookupTransfersResponse {
+  // Indicates whether an error occurred during processing
+  bool error = 1; // 1 byte
+
   // List of transfers matching the requested IDs (order may differ from request)
-  repeated Transfer transfers = 1;
+  repeated Transfer transfers = 2;
+
+  // Human-readable message: error description if error=true, success message if error=false
+  string message = 3;
 }
 
 // AccountFilter provides advanced filtering for account-based transfer queries.

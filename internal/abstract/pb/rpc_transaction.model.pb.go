@@ -68,164 +68,6 @@ func (x *Uint128) GetValue() []byte {
 	return nil
 }
 
-// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
-// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
-// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
-type Transfer struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Unique identifier for this transfer (128-bit, immutable)
-	Id []byte `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // 16 bytes
-	// Account from which funds are debited (128-bit account ID)
-	DebitAccountId []byte `protobuf:"bytes,2,opt,name=debit_account_id,json=debitAccountId,proto3" json:"debit_account_id,omitempty"` // 16 bytes
-	// Account to which funds are credited (128-bit account ID)
-	CreditAccountId []byte `protobuf:"bytes,3,opt,name=credit_account_id,json=creditAccountId,proto3" json:"credit_account_id,omitempty"` // 16 bytes
-	// Amount to transfer in the smallest unit of the asset (128-bit for precision)
-	Amount []byte `protobuf:"bytes,4,opt,name=amount,proto3" json:"amount,omitempty"` // 16 bytes
-	// Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
-	PendingId []byte `protobuf:"bytes,5,opt,name=pending_id,json=pendingId,proto3" json:"pending_id,omitempty"` // 16 bytes
-	// Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
-	UserData_128 []byte `protobuf:"bytes,6,opt,name=user_data_128,json=userData128,proto3" json:"user_data_128,omitempty"` // 16 bytes
-	// Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
-	Timestamp uint64 `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // 8 bytes
-	// Custom 64-bit metadata field for application-specific data (e.g., user ID)
-	UserData_64 uint64 `protobuf:"varint,8,opt,name=user_data_64,json=userData64,proto3" json:"user_data_64,omitempty"` // 8 bytes
-	// Timeout for pending transfers in seconds (0 for immediate transfers)
-	Timeout uint32 `protobuf:"varint,9,opt,name=timeout,proto3" json:"timeout,omitempty"` // 4 bytes
-	// Ledger identifier to isolate different asset types or business domains
-	Ledger uint32 `protobuf:"varint,10,opt,name=ledger,proto3" json:"ledger,omitempty"` // 4 bytes
-	// Transfer code for categorizing transaction types (e.g., 718 for payment)
-	// Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
-	Code uint32 `protobuf:"varint,11,opt,name=code,proto3" json:"code,omitempty"` // 4 bytes
-	// Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
-	// Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
-	Flags uint32 `protobuf:"varint,12,opt,name=flags,proto3" json:"flags,omitempty"` // 4 bytes
-	// Custom 32-bit metadata field for application-specific data (e.g., transaction type)
-	UserData_32   uint32 `protobuf:"varint,13,opt,name=user_data_32,json=userData32,proto3" json:"user_data_32,omitempty"` // 4 bytes
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Transfer) Reset() {
-	*x = Transfer{}
-	mi := &file_rpc_transaction_model_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Transfer) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Transfer) ProtoMessage() {}
-
-func (x *Transfer) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_transaction_model_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Transfer.ProtoReflect.Descriptor instead.
-func (*Transfer) Descriptor() ([]byte, []int) {
-	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *Transfer) GetId() []byte {
-	if x != nil {
-		return x.Id
-	}
-	return nil
-}
-
-func (x *Transfer) GetDebitAccountId() []byte {
-	if x != nil {
-		return x.DebitAccountId
-	}
-	return nil
-}
-
-func (x *Transfer) GetCreditAccountId() []byte {
-	if x != nil {
-		return x.CreditAccountId
-	}
-	return nil
-}
-
-func (x *Transfer) GetAmount() []byte {
-	if x != nil {
-		return x.Amount
-	}
-	return nil
-}
-
-func (x *Transfer) GetPendingId() []byte {
-	if x != nil {
-		return x.PendingId
-	}
-	return nil
-}
-
-func (x *Transfer) GetUserData_128() []byte {
-	if x != nil {
-		return x.UserData_128
-	}
-	return nil
-}
-
-func (x *Transfer) GetTimestamp() uint64 {
-	if x != nil {
-		return x.Timestamp
-	}
-	return 0
-}
-
-func (x *Transfer) GetUserData_64() uint64 {
-	if x != nil {
-		return x.UserData_64
-	}
-	return 0
-}
-
-func (x *Transfer) GetTimeout() uint32 {
-	if x != nil {
-		return x.Timeout
-	}
-	return 0
-}
-
-func (x *Transfer) GetLedger() uint32 {
-	if x != nil {
-		return x.Ledger
-	}
-	return 0
-}
-
-func (x *Transfer) GetCode() uint32 {
-	if x != nil {
-		return x.Code
-	}
-	return 0
-}
-
-func (x *Transfer) GetFlags() uint32 {
-	if x != nil {
-		return x.Flags
-	}
-	return 0
-}
-
-func (x *Transfer) GetUserData_32() uint32 {
-	if x != nil {
-		return x.UserData_32
-	}
-	return 0
-}
-
 // TransferFlags represents the individual flag bits for Transfer.flags field.
 // These flags control transfer behavior and state in TigerBeetle.
 type TransferFlags struct {
@@ -254,7 +96,7 @@ type TransferFlags struct {
 
 func (x *TransferFlags) Reset() {
 	*x = TransferFlags{}
-	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	mi := &file_rpc_transaction_model_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -266,7 +108,7 @@ func (x *TransferFlags) String() string {
 func (*TransferFlags) ProtoMessage() {}
 
 func (x *TransferFlags) ProtoReflect() protoreflect.Message {
-	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	mi := &file_rpc_transaction_model_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +121,7 @@ func (x *TransferFlags) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferFlags.ProtoReflect.Descriptor instead.
 func (*TransferFlags) Descriptor() ([]byte, []int) {
-	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{2}
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *TransferFlags) GetLinked() bool {
@@ -343,6 +185,163 @@ func (x *TransferFlags) GetImported() bool {
 		return x.Imported
 	}
 	return false
+}
+
+// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
+// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
+// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
+type Transfer struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique identifier for this transfer (128-bit, immutable)
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Account from which funds are debited (128-bit account ID)
+	DebitAccountId string `protobuf:"bytes,2,opt,name=debit_account_id,json=debitAccountId,proto3" json:"debit_account_id,omitempty"`
+	// Account to which funds are credited (128-bit account ID)
+	CreditAccountId string `protobuf:"bytes,3,opt,name=credit_account_id,json=creditAccountId,proto3" json:"credit_account_id,omitempty"`
+	// Amount to transfer in the smallest unit of the asset (128-bit for precision)
+	Amount string `protobuf:"bytes,4,opt,name=amount,proto3" json:"amount,omitempty"`
+	// Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
+	PendingId string `protobuf:"bytes,5,opt,name=pending_id,json=pendingId,proto3" json:"pending_id,omitempty"`
+	// Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
+	UserData_128 []byte `protobuf:"bytes,6,opt,name=user_data_128,json=userData128,proto3" json:"user_data_128,omitempty"`
+	// Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
+	Timestamp uint64 `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Custom 64-bit metadata field for application-specific data (e.g., user ID)
+	UserData_64 string `protobuf:"bytes,8,opt,name=user_data_64,json=userData64,proto3" json:"user_data_64,omitempty"`
+	// Timeout for pending transfers in seconds (0 for immediate transfers)
+	Timeout uint32 `protobuf:"varint,9,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	// Ledger identifier to isolate different asset types or business domains
+	Ledger string `protobuf:"bytes,10,opt,name=ledger,proto3" json:"ledger,omitempty"`
+	// Transfer code for categorizing transaction types (e.g., 718 for payment)
+	Code string `protobuf:"bytes,11,opt,name=code,proto3" json:"code,omitempty"`
+	// flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
+	// Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+	Flags *TransferFlags `protobuf:"bytes,12,opt,name=flags,proto3" json:"flags,omitempty"`
+	// Custom 32-bit metadata field for application-specific data (e.g., transaction type)
+	UserData_32   uint32 `protobuf:"varint,13,opt,name=user_data_32,json=userData32,proto3" json:"user_data_32,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Transfer) Reset() {
+	*x = Transfer{}
+	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Transfer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Transfer) ProtoMessage() {}
+
+func (x *Transfer) ProtoReflect() protoreflect.Message {
+	mi := &file_rpc_transaction_model_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Transfer.ProtoReflect.Descriptor instead.
+func (*Transfer) Descriptor() ([]byte, []int) {
+	return file_rpc_transaction_model_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Transfer) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Transfer) GetDebitAccountId() string {
+	if x != nil {
+		return x.DebitAccountId
+	}
+	return ""
+}
+
+func (x *Transfer) GetCreditAccountId() string {
+	if x != nil {
+		return x.CreditAccountId
+	}
+	return ""
+}
+
+func (x *Transfer) GetAmount() string {
+	if x != nil {
+		return x.Amount
+	}
+	return ""
+}
+
+func (x *Transfer) GetPendingId() string {
+	if x != nil {
+		return x.PendingId
+	}
+	return ""
+}
+
+func (x *Transfer) GetUserData_128() []byte {
+	if x != nil {
+		return x.UserData_128
+	}
+	return nil
+}
+
+func (x *Transfer) GetTimestamp() uint64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+func (x *Transfer) GetUserData_64() string {
+	if x != nil {
+		return x.UserData_64
+	}
+	return ""
+}
+
+func (x *Transfer) GetTimeout() uint32 {
+	if x != nil {
+		return x.Timeout
+	}
+	return 0
+}
+
+func (x *Transfer) GetLedger() string {
+	if x != nil {
+		return x.Ledger
+	}
+	return ""
+}
+
+func (x *Transfer) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *Transfer) GetFlags() *TransferFlags {
+	if x != nil {
+		return x.Flags
+	}
+	return nil
+}
+
+func (x *Transfer) GetUserData_32() uint32 {
+	if x != nil {
+		return x.UserData_32
+	}
+	return 0
 }
 
 // Transaction represents a high-level financial transaction in the wallet service.
@@ -499,25 +498,7 @@ const file_rpc_transaction_model_proto_rawDesc = "" +
 	"\n" +
 	"\x1brpc_transaction.model.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x1f\n" +
 	"\aUint128\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\fR\x05value\"\x89\x03\n" +
-	"\bTransfer\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\fR\x02id\x12(\n" +
-	"\x10debit_account_id\x18\x02 \x01(\fR\x0edebitAccountId\x12*\n" +
-	"\x11credit_account_id\x18\x03 \x01(\fR\x0fcreditAccountId\x12\x16\n" +
-	"\x06amount\x18\x04 \x01(\fR\x06amount\x12\x1d\n" +
-	"\n" +
-	"pending_id\x18\x05 \x01(\fR\tpendingId\x12\"\n" +
-	"\ruser_data_128\x18\x06 \x01(\fR\vuserData128\x12\x1c\n" +
-	"\ttimestamp\x18\a \x01(\x04R\ttimestamp\x12 \n" +
-	"\fuser_data_64\x18\b \x01(\x04R\n" +
-	"userData64\x12\x18\n" +
-	"\atimeout\x18\t \x01(\rR\atimeout\x12\x16\n" +
-	"\x06ledger\x18\n" +
-	" \x01(\rR\x06ledger\x12\x12\n" +
-	"\x04code\x18\v \x01(\rR\x04code\x12\x14\n" +
-	"\x05flags\x18\f \x01(\rR\x05flags\x12 \n" +
-	"\fuser_data_32\x18\r \x01(\rR\n" +
-	"userData32\"\xe5\x02\n" +
+	"\x05value\x18\x01 \x01(\fR\x05value\"\xe5\x02\n" +
 	"\rTransferFlags\x12\x16\n" +
 	"\x06linked\x18\x01 \x01(\bR\x06linked\x12\x18\n" +
 	"\apending\x18\x02 \x01(\bR\apending\x122\n" +
@@ -527,7 +508,25 @@ const file_rpc_transaction_model_proto_rawDesc = "" +
 	"\x10balancing_credit\x18\x06 \x01(\bR\x0fbalancingCredit\x12#\n" +
 	"\rclosing_debit\x18\a \x01(\bR\fclosingDebit\x12%\n" +
 	"\x0eclosing_credit\x18\b \x01(\bR\rclosingCredit\x12\x1a\n" +
-	"\bimported\x18\t \x01(\bR\bimported\"\x83\x03\n" +
+	"\bimported\x18\t \x01(\bR\bimported\"\x9f\x03\n" +
+	"\bTransfer\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12(\n" +
+	"\x10debit_account_id\x18\x02 \x01(\tR\x0edebitAccountId\x12*\n" +
+	"\x11credit_account_id\x18\x03 \x01(\tR\x0fcreditAccountId\x12\x16\n" +
+	"\x06amount\x18\x04 \x01(\tR\x06amount\x12\x1d\n" +
+	"\n" +
+	"pending_id\x18\x05 \x01(\tR\tpendingId\x12\"\n" +
+	"\ruser_data_128\x18\x06 \x01(\fR\vuserData128\x12\x1c\n" +
+	"\ttimestamp\x18\a \x01(\x04R\ttimestamp\x12 \n" +
+	"\fuser_data_64\x18\b \x01(\tR\n" +
+	"userData64\x12\x18\n" +
+	"\atimeout\x18\t \x01(\rR\atimeout\x12\x16\n" +
+	"\x06ledger\x18\n" +
+	" \x01(\tR\x06ledger\x12\x12\n" +
+	"\x04code\x18\v \x01(\tR\x04code\x12*\n" +
+	"\x05flags\x18\f \x01(\v2\x14.proto.TransferFlagsR\x05flags\x12 \n" +
+	"\fuser_data_32\x18\r \x01(\rR\n" +
+	"userData32\"\x83\x03\n" +
 	"\vTransaction\x129\n" +
 	"\n" +
 	"created_at\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
@@ -561,18 +560,19 @@ func file_rpc_transaction_model_proto_rawDescGZIP() []byte {
 var file_rpc_transaction_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_rpc_transaction_model_proto_goTypes = []any{
 	(*Uint128)(nil),               // 0: proto.Uint128
-	(*Transfer)(nil),              // 1: proto.Transfer
-	(*TransferFlags)(nil),         // 2: proto.TransferFlags
+	(*TransferFlags)(nil),         // 1: proto.TransferFlags
+	(*Transfer)(nil),              // 2: proto.Transfer
 	(*Transaction)(nil),           // 3: proto.Transaction
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_rpc_transaction_model_proto_depIdxs = []int32{
-	4, // 0: proto.Transaction.created_at:type_name -> google.protobuf.Timestamp
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 0: proto.Transfer.flags:type_name -> proto.TransferFlags
+	4, // 1: proto.Transaction.created_at:type_name -> google.protobuf.Timestamp
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_rpc_transaction_model_proto_init() }

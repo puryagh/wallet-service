@@ -12,52 +12,6 @@ message Uint128 {
   bytes value = 1; // 16 bytes, little-endian encoded
 }
 
-// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
-// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
-// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
-message Transfer {
-  // Unique identifier for this transfer (128-bit, immutable)
-  bytes id = 1; // 16 bytes
-
-  // Account from which funds are debited (128-bit account ID)
-  bytes debit_account_id = 2; // 16 bytes
-
-  // Account to which funds are credited (128-bit account ID)
-  bytes credit_account_id = 3; // 16 bytes
-
-  // Amount to transfer in the smallest unit of the asset (128-bit for precision)
-  bytes amount = 4; // 16 bytes
-
-  // Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
-  bytes pending_id = 5; // 16 bytes
-
-  // Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
-  bytes user_data_128 = 6; // 16 bytes
-
-  // Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
-  uint64 timestamp = 7; // 8 bytes
-
-  // Custom 64-bit metadata field for application-specific data (e.g., user ID)
-  uint64 user_data_64 = 8; // 8 bytes
-
-  // Timeout for pending transfers in seconds (0 for immediate transfers)
-  uint32 timeout = 9; // 4 bytes
-
-  // Ledger identifier to isolate different asset types or business domains
-  uint32 ledger = 10; // 4 bytes
-
-  // Transfer code for categorizing transaction types (e.g., 718 for payment)
-  // Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
-  uint32 code = 11; // 4 bytes
-
-  // Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
-  // Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
-  uint32 flags = 12; // 4 bytes
-
-  // Custom 32-bit metadata field for application-specific data (e.g., transaction type)
-  uint32 user_data_32 = 13; // 4 bytes
-}
-
 // TransferFlags represents the individual flag bits for Transfer.flags field.
 // These flags control transfer behavior and state in TigerBeetle.
 message TransferFlags {
@@ -87,6 +41,51 @@ message TransferFlags {
 
   // Mark this transfer as imported from an external system (audit trail)
   bool imported = 9;
+}
+
+// Transfer represents a TigerBeetle transfer (financial transaction) with exact field mapping.
+// Field ordering optimized for Go memory alignment: 8-byte → 4-byte → 2-byte → 1-byte fields.
+// This message directly maps to TigerBeetle's Transfer structure for ledger operations.
+message Transfer {
+  // Unique identifier for this transfer (128-bit, immutable)
+  string id = 1;
+
+  // Account from which funds are debited (128-bit account ID)
+  string debit_account_id = 2;
+
+  // Account to which funds are credited (128-bit account ID)
+  string credit_account_id = 3;
+
+  // Amount to transfer in the smallest unit of the asset (128-bit for precision)
+  string amount = 4;
+
+  // Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)
+  string pending_id = 5;
+
+  // Custom 128-bit metadata field for application-specific data (e.g., transaction reference)
+  bytes user_data_128 = 6;
+
+  // Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)
+  uint64 timestamp = 7;
+
+  // Custom 64-bit metadata field for application-specific data (e.g., user ID)
+  string user_data_64 = 8;
+
+  // Timeout for pending transfers in seconds (0 for immediate transfers)
+  uint32 timeout = 9;
+
+  // Ledger identifier to isolate different asset types or business domains
+  string ledger = 10;
+
+  // Transfer code for categorizing transaction types (e.g., 718 for payment)
+  string code = 11;
+
+  // flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)
+  // Note: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility
+  TransferFlags flags = 12;
+
+  // Custom 32-bit metadata field for application-specific data (e.g., transaction type)
+  uint32 user_data_32 = 13;
 }
 
 // Transaction represents a high-level financial transaction in the wallet service.

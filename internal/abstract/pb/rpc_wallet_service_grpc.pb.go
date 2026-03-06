@@ -58,7 +58,7 @@ type WalletServiceClient interface {
 	ContextUserWalletTransactions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ContextUserWalletTransactionsResponse, error)
 	// GetAccountTransfers queries TigerBeetle transfers for a specific account.
 	// This is a low-level endpoint for direct TigerBeetle transfer queries.
-	GetAccountTransfers(ctx context.Context, in *GetAccountTransfersRequest, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error)
+	GetAccountTransfers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error)
 	// QueryTransfers queries TigerBeetle transfers by metadata and filter criteria.
 	// This is a low-level endpoint for advanced transfer queries.
 	QueryTransfers(ctx context.Context, in *QueryTransfersRequest, opts ...grpc.CallOption) (*QueryTransfersResponse, error)
@@ -135,7 +135,7 @@ func (c *walletServiceClient) ContextUserWalletTransactions(ctx context.Context,
 	return out, nil
 }
 
-func (c *walletServiceClient) GetAccountTransfers(ctx context.Context, in *GetAccountTransfersRequest, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error) {
+func (c *walletServiceClient) GetAccountTransfers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAccountTransfersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetAccountTransfersResponse)
 	err := c.cc.Invoke(ctx, WalletService_GetAccountTransfers_FullMethodName, in, out, cOpts...)
@@ -192,7 +192,7 @@ type WalletServiceServer interface {
 	ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error)
 	// GetAccountTransfers queries TigerBeetle transfers for a specific account.
 	// This is a low-level endpoint for direct TigerBeetle transfer queries.
-	GetAccountTransfers(context.Context, *GetAccountTransfersRequest) (*GetAccountTransfersResponse, error)
+	GetAccountTransfers(context.Context, *emptypb.Empty) (*GetAccountTransfersResponse, error)
 	// QueryTransfers queries TigerBeetle transfers by metadata and filter criteria.
 	// This is a low-level endpoint for advanced transfer queries.
 	QueryTransfers(context.Context, *QueryTransfersRequest) (*QueryTransfersResponse, error)
@@ -227,7 +227,7 @@ func (UnimplementedWalletServiceServer) ContextUserAccounts(context.Context, *em
 func (UnimplementedWalletServiceServer) ContextUserWalletTransactions(context.Context, *emptypb.Empty) (*ContextUserWalletTransactionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ContextUserWalletTransactions not implemented")
 }
-func (UnimplementedWalletServiceServer) GetAccountTransfers(context.Context, *GetAccountTransfersRequest) (*GetAccountTransfersResponse, error) {
+func (UnimplementedWalletServiceServer) GetAccountTransfers(context.Context, *emptypb.Empty) (*GetAccountTransfersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccountTransfers not implemented")
 }
 func (UnimplementedWalletServiceServer) QueryTransfers(context.Context, *QueryTransfersRequest) (*QueryTransfersResponse, error) {
@@ -366,7 +366,7 @@ func _WalletService_ContextUserWalletTransactions_Handler(srv interface{}, ctx c
 }
 
 func _WalletService_GetAccountTransfers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAccountTransfersRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -378,7 +378,7 @@ func _WalletService_GetAccountTransfers_Handler(srv interface{}, ctx context.Con
 		FullMethod: WalletService_GetAccountTransfers_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WalletServiceServer).GetAccountTransfers(ctx, req.(*GetAccountTransfersRequest))
+		return srv.(WalletServiceServer).GetAccountTransfers(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

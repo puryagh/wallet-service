@@ -769,14 +769,18 @@ func (x *GetAccountTransfersRequest) GetReversed() bool {
 // Field ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated.
 type GetAccountTransfersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
 	// Timestamp of the next page for pagination (0 if no more results)
-	NextTimestamp uint64 `protobuf:"varint,1,opt,name=next_timestamp,json=nextTimestamp,proto3" json:"next_timestamp,omitempty"` // 8 bytes
+	NextTimestamp uint64 `protobuf:"varint,2,opt,name=next_timestamp,json=nextTimestamp,proto3" json:"next_timestamp,omitempty"` // 8 bytes
 	// Total number of transfers returned in this response
-	TotalCount uint32 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
+	TotalCount uint32 `protobuf:"varint,3,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
 	// Indicates whether more results are available beyond this page
-	HasMore bool `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
+	HasMore bool `protobuf:"varint,4,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
 	// List of transfers matching the query criteria
-	Transfers     []*Transfer `protobuf:"bytes,4,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	Transfers []*Transfer `protobuf:"bytes,5,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -811,6 +815,13 @@ func (*GetAccountTransfersResponse) Descriptor() ([]byte, []int) {
 	return file_rpc_dto_proto_rawDescGZIP(), []int{11}
 }
 
+func (x *GetAccountTransfersResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
 func (x *GetAccountTransfersResponse) GetNextTimestamp() uint64 {
 	if x != nil {
 		return x.NextTimestamp
@@ -837,6 +848,13 @@ func (x *GetAccountTransfersResponse) GetTransfers() []*Transfer {
 		return x.Transfers
 	}
 	return nil
+}
+
+func (x *GetAccountTransfersResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 // QueryTransfersRequest queries transfers by metadata and other filter criteria.
@@ -963,12 +981,16 @@ func (x *QueryTransfersRequest) GetReversed() bool {
 // Field ordering optimized for Go memory alignment: uint32 → bool → repeated.
 type QueryTransfersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
 	// Total number of transfers returned in this response
-	TotalCount uint32 `protobuf:"varint,1,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
+	TotalCount uint32 `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // 4 bytes
 	// Indicates whether more results are available beyond this page
-	HasMore bool `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
+	HasMore bool `protobuf:"varint,3,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"` // 1 byte
 	// List of transfers matching the query criteria
-	Transfers     []*Transfer `protobuf:"bytes,3,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	Transfers []*Transfer `protobuf:"bytes,4,rep,name=transfers,proto3" json:"transfers,omitempty"` // slice
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1003,6 +1025,13 @@ func (*QueryTransfersResponse) Descriptor() ([]byte, []int) {
 	return file_rpc_dto_proto_rawDescGZIP(), []int{13}
 }
 
+func (x *QueryTransfersResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
 func (x *QueryTransfersResponse) GetTotalCount() uint32 {
 	if x != nil {
 		return x.TotalCount
@@ -1022,6 +1051,13 @@ func (x *QueryTransfersResponse) GetTransfers() []*Transfer {
 		return x.Transfers
 	}
 	return nil
+}
+
+func (x *QueryTransfersResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 // LookupTransfersRequest fetches specific transfers by their IDs.
@@ -1074,8 +1110,12 @@ func (x *LookupTransfersRequest) GetIds() [][]byte {
 // LookupTransfersResponse returns the requested transfers.
 type LookupTransfersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Indicates whether an error occurred during processing
+	Error bool `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"` // 1 byte
 	// List of transfers matching the requested IDs (order may differ from request)
-	Transfers     []*Transfer `protobuf:"bytes,1,rep,name=transfers,proto3" json:"transfers,omitempty"`
+	Transfers []*Transfer `protobuf:"bytes,2,rep,name=transfers,proto3" json:"transfers,omitempty"`
+	// Human-readable message: error description if error=true, success message if error=false
+	Message       string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1110,11 +1150,25 @@ func (*LookupTransfersResponse) Descriptor() ([]byte, []int) {
 	return file_rpc_dto_proto_rawDescGZIP(), []int{15}
 }
 
+func (x *LookupTransfersResponse) GetError() bool {
+	if x != nil {
+		return x.Error
+	}
+	return false
+}
+
 func (x *LookupTransfersResponse) GetTransfers() []*Transfer {
 	if x != nil {
 		return x.Transfers
 	}
 	return nil
+}
+
+func (x *LookupTransfersResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 // AccountFilter provides advanced filtering for account-based transfer queries.
@@ -1457,13 +1511,15 @@ const file_rpc_dto_proto_rawDesc = "" +
 	"\x04code\x18\x05 \x01(\rR\x04code\x12\x16\n" +
 	"\x06debits\x18\x06 \x01(\bR\x06debits\x12\x18\n" +
 	"\acredits\x18\a \x01(\bR\acredits\x12\x1a\n" +
-	"\breversed\x18\b \x01(\bR\breversed\"\xaf\x01\n" +
-	"\x1bGetAccountTransfersResponse\x12%\n" +
-	"\x0enext_timestamp\x18\x01 \x01(\x04R\rnextTimestamp\x12\x1f\n" +
-	"\vtotal_count\x18\x02 \x01(\rR\n" +
+	"\breversed\x18\b \x01(\bR\breversed\"\xdf\x01\n" +
+	"\x1bGetAccountTransfersResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x12%\n" +
+	"\x0enext_timestamp\x18\x02 \x01(\x04R\rnextTimestamp\x12\x1f\n" +
+	"\vtotal_count\x18\x03 \x01(\rR\n" +
 	"totalCount\x12\x19\n" +
-	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12-\n" +
-	"\ttransfers\x18\x04 \x03(\v2\x0f.proto.TransferR\ttransfers\"\xa7\x02\n" +
+	"\bhas_more\x18\x04 \x01(\bR\ahasMore\x12-\n" +
+	"\ttransfers\x18\x05 \x03(\v2\x0f.proto.TransferR\ttransfers\x12\x18\n" +
+	"\amessage\x18\x06 \x01(\tR\amessage\"\xa7\x02\n" +
 	"\x15QueryTransfersRequest\x12\"\n" +
 	"\ruser_data_128\x18\x01 \x01(\fR\vuserData128\x12#\n" +
 	"\rtimestamp_min\x18\x02 \x01(\x04R\ftimestampMin\x12#\n" +
@@ -1475,16 +1531,20 @@ const file_rpc_dto_proto_rawDesc = "" +
 	"\x04code\x18\a \x01(\rR\x04code\x12 \n" +
 	"\fuser_data_32\x18\b \x01(\rR\n" +
 	"userData32\x12\x1a\n" +
-	"\breversed\x18\t \x01(\bR\breversed\"\x83\x01\n" +
-	"\x16QueryTransfersResponse\x12\x1f\n" +
-	"\vtotal_count\x18\x01 \x01(\rR\n" +
+	"\breversed\x18\t \x01(\bR\breversed\"\xb3\x01\n" +
+	"\x16QueryTransfersResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\rR\n" +
 	"totalCount\x12\x19\n" +
-	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12-\n" +
-	"\ttransfers\x18\x03 \x03(\v2\x0f.proto.TransferR\ttransfers\"*\n" +
+	"\bhas_more\x18\x03 \x01(\bR\ahasMore\x12-\n" +
+	"\ttransfers\x18\x04 \x03(\v2\x0f.proto.TransferR\ttransfers\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\"*\n" +
 	"\x16LookupTransfersRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\fR\x03ids\"H\n" +
-	"\x17LookupTransfersResponse\x12-\n" +
-	"\ttransfers\x18\x01 \x03(\v2\x0f.proto.TransferR\ttransfers\"\xa0\x02\n" +
+	"\x03ids\x18\x01 \x03(\fR\x03ids\"x\n" +
+	"\x17LookupTransfersResponse\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\bR\x05error\x12-\n" +
+	"\ttransfers\x18\x02 \x03(\v2\x0f.proto.TransferR\ttransfers\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\xa0\x02\n" +
 	"\rAccountFilter\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\fR\taccountId\x12\"\n" +

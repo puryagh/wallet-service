@@ -42,7 +42,7 @@ func (a *authorizationMiddleware) ExchangeAsset(ctx context.Context, req *pb.Exc
 }
 
 // GetAccountTransfers implements [pb.WalletServiceServer].
-func (a *authorizationMiddleware) GetAccountTransfers(ctx context.Context, req *pb.GetAccountTransfersRequest) (*pb.GetAccountTransfersResponse, error) {
+func (a *authorizationMiddleware) GetAccountTransfers(ctx context.Context, req *emptypb.Empty) (*pb.GetAccountTransfersResponse, error) {
 	return a.next.GetAccountTransfers(ctx, req)
 }
 

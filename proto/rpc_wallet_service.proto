@@ -175,10 +175,9 @@ service WalletService {
 
   // GetAccountTransfers queries TigerBeetle transfers for a specific account.
   // This is a low-level endpoint for direct TigerBeetle transfer queries.
-  rpc GetAccountTransfers(GetAccountTransfersRequest) returns (GetAccountTransfersResponse) {
+  rpc GetAccountTransfers(google.protobuf.Empty) returns (GetAccountTransfersResponse) {
     option (google.api.http) = {
-      post: "/v1/wallet/get_account_transfers"
-      body: "*"
+      get: "/v1/wallet/get_account_transfers"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary    : "Get Account Transfers";

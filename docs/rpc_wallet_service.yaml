@@ -164,7 +164,7 @@
       }
     },
     "/v1/wallet/get_account_transfers": {
-      "post": {
+      "get": {
         "summary": "Get Account Transfers",
         "description": "Query TigerBeetle transfers for a specific account with filtering options",
         "operationId": "WalletService_GetAccountTransfers",
@@ -182,17 +182,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "description": "GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.\nThis is the primary method for retrieving transaction history for an account.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool.",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/protoGetAccountTransfersRequest"
-            }
-          }
-        ],
         "tags": [
           "WalletService"
         ],
@@ -543,60 +532,14 @@
       },
       "description": "ExchangeAssetResponse returns the result of an exchange operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
     },
-    "protoGetAccountTransfersRequest": {
-      "type": "object",
-      "properties": {
-        "account_id": {
-          "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
-          "title": "TigerBeetle account ID (128-bit, 16 bytes) to query transfers for"
-        },
-        "timestamp_min": {
-          "type": "string",
-          "format": "uint64",
-          "description": "8 bytes",
-          "title": "Minimum timestamp filter (nanoseconds since epoch, inclusive, 0 = no lower bound)"
-        },
-        "timestamp_max": {
-          "type": "string",
-          "format": "uint64",
-          "description": "8 bytes",
-          "title": "Maximum timestamp filter (nanoseconds since epoch, inclusive, 0 = no upper bound)"
-        },
-        "limit": {
-          "type": "integer",
-          "format": "int64",
-          "description": "4 bytes",
-          "title": "Maximum number of results to return (default: 8190, TigerBeetle's max batch size)"
-        },
-        "code": {
-          "type": "integer",
-          "format": "int64",
-          "description": "4 bytes",
-          "title": "Optional filter by transfer code (0 = no filter)"
-        },
-        "debits": {
-          "type": "boolean",
-          "description": "1 byte",
-          "title": "Include debit transfers (money leaving the account)"
-        },
-        "credits": {
-          "type": "boolean",
-          "description": "1 byte",
-          "title": "Include credit transfers (money entering the account)"
-        },
-        "reversed": {
-          "type": "boolean",
-          "description": "1 byte",
-          "title": "Return results in reverse chronological order (newest first)"
-        }
-      },
-      "description": "GetAccountTransfersRequest queries transfers for a specific TigerBeetle account.\nThis is the primary method for retrieving transaction history for an account.\nField ordering optimized for Go memory alignment: bytes → uint64 → uint32 → bool."
-    },
     "protoGetAccountTransfersResponse": {
       "type": "object",
       "properties": {
+        "error": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
+        },
         "next_timestamp": {
           "type": "string",
           "format": "uint64",
@@ -622,6 +565,10 @@
           },
           "description": "slice",
           "title": "List of transfers matching the query criteria"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
       "description": "GetAccountTransfersResponse returns transfers matching the query criteria.\nField ordering optimized for Go memory alignment: uint64 → uint32 → bool → repeated."
@@ -643,6 +590,11 @@
     "protoLookupTransfersResponse": {
       "type": "object",
       "properties": {
+        "error": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
+        },
         "transfers": {
           "type": "array",
           "items": {
@@ -650,6 +602,10 @@
             "$ref": "#/definitions/protoTransfer"
           },
           "title": "List of transfers matching the requested IDs (order may differ from request)"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
       "description": "LookupTransfersResponse returns the requested transfers."
@@ -716,6 +672,11 @@
     "protoQueryTransfersResponse": {
       "type": "object",
       "properties": {
+        "error": {
+          "type": "boolean",
+          "description": "1 byte",
+          "title": "Indicates whether an error occurred during processing"
+        },
         "total_count": {
           "type": "integer",
           "format": "int64",
@@ -735,6 +696,10 @@
           },
           "description": "slice",
           "title": "List of transfers matching the query criteria"
+        },
+        "message": {
+          "type": "string",
+          "title": "Human-readable message: error description if error=true, success message if error=false"
         }
       },
       "description": "QueryTransfersResponse returns transfers matching the query criteria.\nField ordering optimized for Go memory alignment: uint32 → bool → repeated."
@@ -804,80 +769,58 @@
       "properties": {
         "id": {
           "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
           "title": "Unique identifier for this transfer (128-bit, immutable)"
         },
         "debit_account_id": {
           "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
           "title": "Account from which funds are debited (128-bit account ID)"
         },
         "credit_account_id": {
           "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
           "title": "Account to which funds are credited (128-bit account ID)"
         },
         "amount": {
           "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
           "title": "Amount to transfer in the smallest unit of the asset (128-bit for precision)"
         },
         "pending_id": {
           "type": "string",
-          "format": "byte",
-          "description": "16 bytes",
           "title": "Reference to a pending transfer ID for two-phase commit operations (0 if not applicable)"
         },
         "user_data_128": {
           "type": "string",
           "format": "byte",
-          "description": "16 bytes",
           "title": "Custom 128-bit metadata field for application-specific data (e.g., transaction reference)"
         },
         "timestamp": {
           "type": "string",
           "format": "uint64",
-          "description": "8 bytes",
           "title": "Timestamp when the transfer was committed in TigerBeetle (nanoseconds since epoch)"
         },
         "user_data_64": {
           "type": "string",
-          "format": "uint64",
-          "description": "8 bytes",
           "title": "Custom 64-bit metadata field for application-specific data (e.g., user ID)"
         },
         "timeout": {
           "type": "integer",
           "format": "int64",
-          "description": "4 bytes",
           "title": "Timeout for pending transfers in seconds (0 for immediate transfers)"
         },
         "ledger": {
-          "type": "integer",
-          "format": "int64",
-          "description": "4 bytes",
+          "type": "string",
           "title": "Ledger identifier to isolate different asset types or business domains"
         },
         "code": {
-          "type": "integer",
-          "format": "int64",
-          "description": "4 bytes",
-          "title": "Transfer code for categorizing transaction types (e.g., 718 for payment)\nNote: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility"
+          "type": "string",
+          "title": "Transfer code for categorizing transaction types (e.g., 718 for payment)"
         },
         "flags": {
-          "type": "integer",
-          "format": "int64",
-          "description": "4 bytes",
-          "title": "Bitfield flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)\nNote: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility"
+          "$ref": "#/definitions/protoTransferFlags",
+          "title": "flags for transfer behavior (linked, pending, post_pending, void_pending, etc.)\nNote: uint16 in TigerBeetle, but proto3 uses uint32 for compatibility"
         },
         "user_data_32": {
           "type": "integer",
           "format": "int64",
-          "description": "4 bytes",
           "title": "Custom 32-bit metadata field for application-specific data (e.g., transaction type)"
         }
       },
@@ -920,6 +863,48 @@
         }
       },
       "description": "TransferAssetResponse returns the result of a transfer operation.\nField ordering optimized for Go memory alignment: bool → Transaction (pointer) → string."
+    },
+    "protoTransferFlags": {
+      "type": "object",
+      "properties": {
+        "linked": {
+          "type": "boolean",
+          "title": "Link this transfer to the next transfer in a batch (atomic execution)"
+        },
+        "pending": {
+          "type": "boolean",
+          "title": "Mark this transfer as pending (two-phase commit)"
+        },
+        "post_pending_transfer": {
+          "type": "boolean",
+          "title": "Post (commit) a previously pending transfer"
+        },
+        "void_pending_transfer": {
+          "type": "boolean",
+          "title": "Void (rollback) a previously pending transfer"
+        },
+        "balancing_debit": {
+          "type": "boolean",
+          "title": "Automatically balance the debit side if amount exceeds available balance"
+        },
+        "balancing_credit": {
+          "type": "boolean",
+          "title": "Automatically balance the credit side if amount exceeds available balance"
+        },
+        "closing_debit": {
+          "type": "boolean",
+          "title": "Close the debit account after this transfer (final transaction)"
+        },
+        "closing_credit": {
+          "type": "boolean",
+          "title": "Close the credit account after this transfer (final transaction)"
+        },
+        "imported": {
+          "type": "boolean",
+          "title": "Mark this transfer as imported from an external system (audit trail)"
+        }
+      },
+      "description": "TransferFlags represents the individual flag bits for Transfer.flags field.\nThese flags control transfer behavior and state in TigerBeetle."
     },
     "protoWallet": {
       "type": "object",
