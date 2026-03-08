@@ -4,6 +4,13 @@ WHERE identifier::text = $1::text
 AND deleted_at IS NULL
 LIMIT 1;
 
+-- name: GetUserWalletByIdentifier :one
+SELECT * FROM wallets
+WHERE identifier::text = $1::text
+AND user_identifier = $2
+AND deleted_at IS NULL
+LIMIT 1;
+
 -- name: GetUserWallets :many
 SELECT * FROM wallets
 WHERE user_identifier = $1
@@ -19,19 +26,18 @@ LIMIT $2 OFFSET $3;
 --  3-1: selected wallet asset deleted_at IS NULL
 --  3-3: selected wallet deleted_at IS NULL
 -- name: GetUserAssetWallet :one
-SELECT * FROM wallets
-JOIN wallet_assets ON wallets.base_asset_identifier = wallet_assets.identifier
-JOIN accounts ON wallets.user_identifier = accounts.identifier
-WHERE accounts.identifier = $1
+SELECT wallets.* FROM wallets
+JOIN wallet_assets ON wallets.wallet_asset_id = wallet_assets.id
+JOIN accounts ON wallets.account_id = accounts.id
+WHERE accounts.user_identifier = $1
 AND accounts.status != 'PENDING'
 AND accounts.deleted_at IS NULL
 AND accounts.banned = FALSE
-AND accounts.expires_at > NOW()
+AND (accounts.expires_at IS NULL OR accounts.expires_at > NOW())
 AND wallet_assets.symbol = $2
 AND wallet_assets.active = TRUE
 AND wallet_assets.deleted_at IS NULL
 AND wallets.user_identifier = $1
-AND wallets.base_asset_identifier = wallet_assets.identifier
 AND wallets.deleted_at IS NULL
 LIMIT 1;
 
@@ -45,7 +51,6 @@ INSERT INTO wallets (
     meta_data,
     ledger_account_id,
     ledger_account_code,
-    primary_account_number,
     primary_account_number,
     iban,
     cvv,
@@ -71,7 +76,6 @@ INSERT INTO wallets (
     $13,
     $14,
     $15,
-    $16,
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 )

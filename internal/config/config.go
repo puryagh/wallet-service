@@ -26,4 +26,15 @@ type Configuration struct {
 	TigerbeetleReservedAccountNumber int           `json:"tigerbeetle_reserved_account_number" mapstructure:"LU_CFG_TIGERBEETLE_RESERVED_ACCOUNTS_NUMBER"`
 	AccountsInitialAssets            []string      `json:"accounts_initial_assets" mapstructure:"LU_CFG_ACCOUNTS_INITIAL_ASSETS"`
 	AccountsBaseAssetSymbol          string        `json:"accounts_base_asset_symbol" mapstructure:"LU_CFG_ACCOUNTS_BASE_ASSET_SYMBOL"`
+	CardIssuerBin                    string        `json:"card_issuer_bin" mapstructure:"LU_CFG_CARD_ISSUER_BIN"`
+	CardIssuerName                   string        `json:"card_issuer_name" mapstructure:"LU_CFG_CARD_ISSUER_NAME"`
+	CardIssuerCountryCode            string        `json:"card_issuer_country_code" mapstructure:"LU_CFG_CARD_ISSUER_COUNTRY_CODE"`
+	CardBrand                        string        `json:"card_brand" mapstructure:"LU_CFG_CARD_BRAND"`
+	CardProductName                  string        `json:"card_product_name" mapstructure:"LU_CFG_CARD_PRODUCT_NAME"`
+	CardPanLength                    int           `json:"card_pan_length" mapstructure:"LU_CFG_CARD_PAN_LENGTH"`
+	CardCvvLength                    int           `json:"card_cvv_length" mapstructure:"LU_CFG_CARD_CVV_LENGTH"`
+	CardExpiryMonths                 int           `json:"card_expiry_months" mapstructure:"LU_CFG_CARD_EXPIRY_MONTHS"`
+	CardServiceCode                  string        `json:"card_service_code" mapstructure:"LU_CFG_CARD_SERVICE_CODE"`
+	CardDiscretionaryDataLength      int           `json:"card_discretionary_data_length" mapstructure:"LU_CFG_CARD_DISCRETIONARY_DATA_LENGTH"`
+	CardHMACSecret                   string        `json:"card_hmac_secret" mapstructure:"LU_CFG_CARD_HMAC_SECRET"`
 }

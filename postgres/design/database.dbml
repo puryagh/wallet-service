@@ -95,6 +95,29 @@ Table wallets {
 
 }
 
+Enum card_network {
+  LOCAL [note: 'local or private-label card network']
+  VISA [note: 'Visa network']
+  MASTERCARD [note: 'Mastercard network']
+  AMEX [note: 'American Express network']
+}
+
+Enum wallet_card_status {
+  PENDING [note: 'card is issued but not yet active']
+  ACTIVE [note: 'card is active and can be authenticated']
+  INACTIVE [note: 'card is inactive']
+  BLOCKED [note: 'card is blocked or suspended']
+  EXPIRED [note: 'card is expired']
+  REISSUED [note: 'card has been replaced by a newer card']
+}
+
+Enum wallet_card_event_type {
+  ISSUED [note: 'card was issued']
+  AUTHENTICATED [note: 'card authentication succeeded']
+  AUTHENTICATION_FAILED [note: 'card authentication failed']
+  STATUS_CHANGED [note: 'card status was changed']
+}
+
 // wallet asset counting unit enum
 Enum wallet_asset_unit {
   NONE [note: 'wallet asset default unit that is not defined']
@@ -136,5 +159,112 @@ Table wallet_assets {
     (identifier, deleted_at)
     (identifier, active, deleted_at)
     (active)
+  }
+}
+
+Table issuer_bins {
+  id bigserial [pk, note: 'issuer bin unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for issuer bin']
+  active boolean [not null, default: true, note: 'is issuer bin active or no']
+  bin varchar(8) [unique, not null, note: 'issuer identification number / bank identification number']
+  brand card_network [not null, default: 'LOCAL', note: 'card network / brand']
+  issuer_name varchar(128) [not null, note: 'issuer display name']
+  country_code varchar(2) [not null, default: 'IR', note: 'issuer ISO country code']
+  meta_data jsonb [not null, default: '{}', note: 'issuer bin meta data']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when issuer bin was created']
+  updated_at timestamptz [note: 'when issuer bin was updated']
+  deleted_at timestamptz [note: 'when issuer bin was deleted']
+
+  Indexes {
+    identifier
+    deleted_at
+    (identifier, deleted_at)
+    (bin, deleted_at)
+    (active)
+  }
+}
+
+Table card_products {
+  id bigserial [pk, note: 'card product unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for card product']
+  issuer_bin_id bigserial [not null, ref: > issuer_bins.id, note: 'related issuer bin id for this card product']
+  name varchar(64) [unique, not null, note: 'card product name']
+  pan_length int [not null, default: 16, note: 'configured PAN length for this product']
+  cvv_length int [not null, default: 3, note: 'configured CVV/CVV2 length for this product']
+  expiry_months int [not null, default: 36, note: 'default expiry policy in months']
+  service_code varchar(3) [not null, default: '201', note: 'magnetic stripe service code']
+  allow_magnetic_stripe boolean [not null, default: true, note: 'is magnetic stripe issuance allowed']
+  meta_data jsonb [not null, default: '{}', note: 'card product meta data']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when card product was created']
+  updated_at timestamptz [note: 'when card product was updated']
+  deleted_at timestamptz [note: 'when card product was deleted']
+
+  Indexes {
+    identifier
+    deleted_at
+    (identifier, deleted_at)
+    (issuer_bin_id, deleted_at)
+    (name, deleted_at)
+  }
+}
+
+Table wallet_cards {
+  id bigserial [pk, note: 'wallet card unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for wallet card']
+  wallet_id bigserial [not null, ref: > wallets.id, note: 'related wallet id']
+  wallet_identifier varchar(32) [not null, note: 'related wallet identifier']
+  user_identifier varchar(32) [not null, note: 'related user identifier']
+  card_product_id bigserial [not null, ref: > card_products.id, note: 'related card product id']
+  issuer_bin varchar(8) [not null, note: 'issuer bin used for card generation']
+  brand card_network [not null, default: 'LOCAL', note: 'card network / brand']
+  pan_fingerprint varchar(128) [unique, not null, note: 'stable HMAC-based PAN fingerprint used for lookup']
+  masked_pan varchar(32) [not null, note: 'masked PAN for display only']
+  pan_last4 varchar(4) [not null, note: 'last 4 PAN digits']
+  expiry_month int [not null, note: 'card expiry month in MM form']
+  expiry_year int [not null, note: 'card expiry year in YYYY form']
+  cardholder_name varchar(64) [not null, note: 'normalized cardholder name for embossing/track generation']
+  service_code varchar(3) [not null, note: 'magnetic stripe service code']
+  cvv_digest varchar(128) [not null, note: 'HMAC digest of CVV verification material']
+  cvv_two_digest varchar(128) [not null, note: 'HMAC digest of CVV2 verification material']
+  track1_digest varchar(128) [note: 'HMAC digest of generated track1 data']
+  track2_digest varchar(128) [not null, note: 'HMAC digest of generated track2 data']
+  pin_digest varchar(256) [note: 'digest or delegated reference for PIN material']
+  last_authenticated_at timestamptz [note: 'when card was last authenticated successfully']
+  status wallet_card_status [not null, default: 'ACTIVE', note: 'wallet card lifecycle status']
+  meta_data jsonb [not null, default: '{}', note: 'wallet card meta data']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet card was created']
+  updated_at timestamptz [note: 'when wallet card was updated']
+  deleted_at timestamptz [note: 'when wallet card was deleted']
+
+  Indexes {
+    identifier
+    deleted_at
+    (identifier, deleted_at)
+    (wallet_identifier, deleted_at)
+    (user_identifier, deleted_at)
+    (wallet_id, deleted_at)
+    (pan_fingerprint, deleted_at)
+    (status)
+  }
+}
+
+Table wallet_card_events {
+  id bigserial [pk, note: 'wallet card event unique id']
+  identifier ulid [unique, default: `gen_monotonic_ulid()`, not null, note: 'unique external identifier for wallet card event']
+  wallet_card_id bigserial [not null, ref: > wallet_cards.id, note: 'related wallet card id']
+  wallet_card_identifier varchar(32) [not null, note: 'related wallet card identifier']
+  user_identifier varchar(32) [not null, note: 'related user identifier']
+  event_type wallet_card_event_type [not null, note: 'wallet card event type']
+  success boolean [not null, default: true, note: 'event success flag']
+  remote_ip varchar(64) [note: 'remote ip address of requester if available']
+  meta_data jsonb [not null, default: '{}', note: 'wallet card event meta data']
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`, note: 'when wallet card event was created']
+
+  Indexes {
+    identifier
+    (wallet_card_id, created_at)
+    (wallet_card_identifier, created_at)
+    (user_identifier, created_at)
+    (event_type, created_at)
   }
 }

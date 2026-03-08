@@ -56,6 +56,50 @@ func (ns NullAccountStatus) Value() (driver.Value, error) {
 	return string(ns.AccountStatus), nil
 }
 
+type CardNetwork string
+
+const (
+	CardNetworkLOCAL      CardNetwork = "LOCAL"
+	CardNetworkVISA       CardNetwork = "VISA"
+	CardNetworkMASTERCARD CardNetwork = "MASTERCARD"
+	CardNetworkAMEX       CardNetwork = "AMEX"
+)
+
+func (e *CardNetwork) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CardNetwork(s)
+	case string:
+		*e = CardNetwork(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CardNetwork: %T", src)
+	}
+	return nil
+}
+
+type NullCardNetwork struct {
+	CardNetwork CardNetwork `json:"card_network"`
+	Valid       bool        `json:"valid"` // Valid is true if CardNetwork is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCardNetwork) Scan(value interface{}) error {
+	if value == nil {
+		ns.CardNetwork, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CardNetwork.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCardNetwork) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.CardNetwork), nil
+}
+
 type WalletAccountStatus string
 
 const (
@@ -148,6 +192,96 @@ func (ns NullWalletAssetUnit) Value() (driver.Value, error) {
 	return string(ns.WalletAssetUnit), nil
 }
 
+type WalletCardEventType string
+
+const (
+	WalletCardEventTypeISSUED               WalletCardEventType = "ISSUED"
+	WalletCardEventTypeAUTHENTICATED        WalletCardEventType = "AUTHENTICATED"
+	WalletCardEventTypeAUTHENTICATIONFAILED WalletCardEventType = "AUTHENTICATION_FAILED"
+	WalletCardEventTypeSTATUSCHANGED        WalletCardEventType = "STATUS_CHANGED"
+)
+
+func (e *WalletCardEventType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WalletCardEventType(s)
+	case string:
+		*e = WalletCardEventType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WalletCardEventType: %T", src)
+	}
+	return nil
+}
+
+type NullWalletCardEventType struct {
+	WalletCardEventType WalletCardEventType `json:"wallet_card_event_type"`
+	Valid               bool                `json:"valid"` // Valid is true if WalletCardEventType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWalletCardEventType) Scan(value interface{}) error {
+	if value == nil {
+		ns.WalletCardEventType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WalletCardEventType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWalletCardEventType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WalletCardEventType), nil
+}
+
+type WalletCardStatus string
+
+const (
+	WalletCardStatusPENDING  WalletCardStatus = "PENDING"
+	WalletCardStatusACTIVE   WalletCardStatus = "ACTIVE"
+	WalletCardStatusINACTIVE WalletCardStatus = "INACTIVE"
+	WalletCardStatusBLOCKED  WalletCardStatus = "BLOCKED"
+	WalletCardStatusEXPIRED  WalletCardStatus = "EXPIRED"
+	WalletCardStatusREISSUED WalletCardStatus = "REISSUED"
+)
+
+func (e *WalletCardStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WalletCardStatus(s)
+	case string:
+		*e = WalletCardStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WalletCardStatus: %T", src)
+	}
+	return nil
+}
+
+type NullWalletCardStatus struct {
+	WalletCardStatus WalletCardStatus `json:"wallet_card_status"`
+	Valid            bool             `json:"valid"` // Valid is true if WalletCardStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWalletCardStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.WalletCardStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WalletCardStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWalletCardStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WalletCardStatus), nil
+}
+
 type Account struct {
 	// account unique id
 	ID int64 `json:"id"`
@@ -174,6 +308,60 @@ type Account struct {
 	// when account was updated
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	// when account was deleted
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type CardProduct struct {
+	// card product unique id
+	ID int64 `json:"id"`
+	// unique external identifier for card product
+	Identifier ulid.ULID `json:"identifier"`
+	// related issuer bin id for this card product
+	IssuerBinID int64 `json:"issuer_bin_id"`
+	// card product name
+	Name string `json:"name"`
+	// configured PAN length for this product
+	PanLength int32 `json:"pan_length"`
+	// configured CVV/CVV2 length for this product
+	CvvLength int32 `json:"cvv_length"`
+	// default expiry policy in months
+	ExpiryMonths int32 `json:"expiry_months"`
+	// magnetic stripe service code
+	ServiceCode string `json:"service_code"`
+	// is magnetic stripe issuance allowed
+	AllowMagneticStripe bool `json:"allow_magnetic_stripe"`
+	// card product meta data
+	MetaData []byte `json:"meta_data"`
+	// when card product was created
+	CreatedAt time.Time `json:"created_at"`
+	// when card product was updated
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	// when card product was deleted
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type IssuerBin struct {
+	// issuer bin unique id
+	ID int64 `json:"id"`
+	// unique external identifier for issuer bin
+	Identifier ulid.ULID `json:"identifier"`
+	// is issuer bin active or no
+	Active bool `json:"active"`
+	// issuer identification number / bank identification number
+	Bin string `json:"bin"`
+	// card network / brand
+	Brand CardNetwork `json:"brand"`
+	// issuer display name
+	IssuerName string `json:"issuer_name"`
+	// issuer ISO country code
+	CountryCode string `json:"country_code"`
+	// issuer bin meta data
+	MetaData []byte `json:"meta_data"`
+	// when issuer bin was created
+	CreatedAt time.Time `json:"created_at"`
+	// when issuer bin was updated
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	// when issuer bin was deleted
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
 }
 
@@ -261,4 +449,82 @@ type WalletAsset struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	// when wallet asset was deleted
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type WalletCard struct {
+	// wallet card unique id
+	ID int64 `json:"id"`
+	// unique external identifier for wallet card
+	Identifier ulid.ULID `json:"identifier"`
+	// related wallet id
+	WalletID int64 `json:"wallet_id"`
+	// related wallet identifier
+	WalletIdentifier string `json:"wallet_identifier"`
+	// related user identifier
+	UserIdentifier string `json:"user_identifier"`
+	// related card product id
+	CardProductID int64 `json:"card_product_id"`
+	// issuer bin used for card generation
+	IssuerBin string `json:"issuer_bin"`
+	// card network / brand
+	Brand CardNetwork `json:"brand"`
+	// stable HMAC-based PAN fingerprint used for lookup
+	PanFingerprint string `json:"pan_fingerprint"`
+	// masked PAN for display only
+	MaskedPan string `json:"masked_pan"`
+	// last 4 PAN digits
+	PanLast4 string `json:"pan_last4"`
+	// card expiry month in MM form
+	ExpiryMonth int32 `json:"expiry_month"`
+	// card expiry year in YYYY form
+	ExpiryYear int32 `json:"expiry_year"`
+	// normalized cardholder name for embossing/track generation
+	CardholderName string `json:"cardholder_name"`
+	// magnetic stripe service code
+	ServiceCode string `json:"service_code"`
+	// HMAC digest of CVV verification material
+	CvvDigest string `json:"cvv_digest"`
+	// HMAC digest of CVV2 verification material
+	CvvTwoDigest string `json:"cvv_two_digest"`
+	// HMAC digest of generated track1 data
+	Track1Digest pgtype.Text `json:"track1_digest"`
+	// HMAC digest of generated track2 data
+	Track2Digest string `json:"track2_digest"`
+	// digest or delegated reference for PIN material
+	PinDigest pgtype.Text `json:"pin_digest"`
+	// when card was last authenticated successfully
+	LastAuthenticatedAt pgtype.Timestamptz `json:"last_authenticated_at"`
+	// wallet card lifecycle status
+	Status WalletCardStatus `json:"status"`
+	// wallet card meta data
+	MetaData []byte `json:"meta_data"`
+	// when wallet card was created
+	CreatedAt time.Time `json:"created_at"`
+	// when wallet card was updated
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	// when wallet card was deleted
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type WalletCardEvent struct {
+	// wallet card event unique id
+	ID int64 `json:"id"`
+	// unique external identifier for wallet card event
+	Identifier ulid.ULID `json:"identifier"`
+	// related wallet card id
+	WalletCardID int64 `json:"wallet_card_id"`
+	// related wallet card identifier
+	WalletCardIdentifier string `json:"wallet_card_identifier"`
+	// related user identifier
+	UserIdentifier string `json:"user_identifier"`
+	// wallet card event type
+	EventType WalletCardEventType `json:"event_type"`
+	// event success flag
+	Success bool `json:"success"`
+	// remote ip address of requester if available
+	RemoteIp pgtype.Text `json:"remote_ip"`
+	// wallet card event meta data
+	MetaData []byte `json:"meta_data"`
+	// when wallet card event was created
+	CreatedAt time.Time `json:"created_at"`
 }

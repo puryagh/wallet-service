@@ -160,6 +160,10 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 			return nil, err
 		}
 
+		if err := s.ensureWalletCards(ctx, user.Identifier, batchCreateWalletResult.Wallets); err != nil {
+			return nil, err
+		}
+
 		for _, createWalletResult := range batchCreateWalletResult.Wallets {
 			asset, ok := assetList[createWalletResult.AssetIdentifier]
 			if !ok {
@@ -206,6 +210,10 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 		response.Message = "context user account and related wallets fetched success"
 
 		return response, nil
+	}
+
+	if err := s.ensureWalletCards(ctx, user.Identifier, wallets); err != nil {
+		return nil, err
 	}
 
 	for _, wallet := range wallets {
@@ -269,4 +277,25 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 	}
 
 	return response, nil
+}
+
+func (s *service) ensureWalletCards(ctx context.Context, userIdentifier string, wallets []repository.Wallet) error {
+	for _, wallet := range wallets {
+		_, err := s.repository.GetActiveWalletCardByWallet(ctx, repository.GetActiveWalletCardByWalletParams{
+			WalletIdentifier: wallet.Identifier.String(),
+			UserIdentifier:   userIdentifier,
+		})
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
+
+		if _, err := s.issueWalletCard(ctx, wallet.Identifier.String()); err != nil && !errors.Is(err, errActiveWalletCardAlreadyExists) {
+			return err
+		}
+	}
+
+	return nil
 }

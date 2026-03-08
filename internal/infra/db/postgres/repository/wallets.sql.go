@@ -7,10 +7,8 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	ulid "github.com/oklog/ulid/v2"
 )
 
 const createWallet = `-- name: CreateWallet :one
@@ -23,7 +21,6 @@ INSERT INTO wallets (
     meta_data,
     ledger_account_id,
     ledger_account_code,
-    primary_account_number,
     primary_account_number,
     iban,
     cvv,
@@ -49,7 +46,6 @@ INSERT INTO wallets (
     $13,
     $14,
     $15,
-    $16,
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 )
@@ -57,22 +53,21 @@ RETURNING id, identifier, user_identifier, account_identifier, account_id, asset
 `
 
 type CreateWalletParams struct {
-	UserIdentifier         string              `json:"user_identifier"`
-	AccountIdentifier      string              `json:"account_identifier"`
-	AccountID              int64               `json:"account_id"`
-	AssetIdentifier        string              `json:"asset_identifier"`
-	WalletAssetID          int64               `json:"wallet_asset_id"`
-	MetaData               []byte              `json:"meta_data"`
-	LedgerAccountID        int64               `json:"ledger_account_id"`
-	LedgerAccountCode      int32               `json:"ledger_account_code"`
-	PrimaryAccountNumber   string              `json:"primary_account_number"`
-	PrimaryAccountNumber_2 string              `json:"primary_account_number_2"`
-	Iban                   pgtype.Text         `json:"iban"`
-	Cvv                    pgtype.Text         `json:"cvv"`
-	CvvTwo                 pgtype.Text         `json:"cvv_two"`
-	ExpireDate             pgtype.Text         `json:"expire_date"`
-	PinCode                pgtype.Text         `json:"pin_code"`
-	Status                 WalletAccountStatus `json:"status"`
+	UserIdentifier       string              `json:"user_identifier"`
+	AccountIdentifier    string              `json:"account_identifier"`
+	AccountID            int64               `json:"account_id"`
+	AssetIdentifier      string              `json:"asset_identifier"`
+	WalletAssetID        int64               `json:"wallet_asset_id"`
+	MetaData             []byte              `json:"meta_data"`
+	LedgerAccountID      int64               `json:"ledger_account_id"`
+	LedgerAccountCode    int32               `json:"ledger_account_code"`
+	PrimaryAccountNumber string              `json:"primary_account_number"`
+	Iban                 pgtype.Text         `json:"iban"`
+	Cvv                  pgtype.Text         `json:"cvv"`
+	CvvTwo               pgtype.Text         `json:"cvv_two"`
+	ExpireDate           pgtype.Text         `json:"expire_date"`
+	PinCode              pgtype.Text         `json:"pin_code"`
+	Status               WalletAccountStatus `json:"status"`
 }
 
 func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wallet, error) {
@@ -86,7 +81,6 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wal
 		arg.LedgerAccountID,
 		arg.LedgerAccountCode,
 		arg.PrimaryAccountNumber,
-		arg.PrimaryAccountNumber_2,
 		arg.Iban,
 		arg.Cvv,
 		arg.CvvTwo,
@@ -123,82 +117,25 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wal
 }
 
 const getUserAssetWallet = `-- name: GetUserAssetWallet :one
-SELECT wallets.id, wallets.identifier, wallets.user_identifier, account_identifier, account_id, asset_identifier, wallet_asset_id, wallets.meta_data, ledger_account_id, ledger_account_code, primary_account_number, iban, cvv, cvv_two, expire_date, pin_code, wallets.status, transaction_totp_secret, transaction_totp_expires_at, wallets.created_at, wallets.updated_at, wallets.deleted_at, wallet_assets.id, wallet_assets.identifier, active, code, symbol, wallet_assets.title, wallet_assets.description, predefined, unit, unit_title, decimals, network, icon_url, wallet_assets.meta_data, ledger_code, wallet_assets.created_at, wallet_assets.updated_at, wallet_assets.deleted_at, accounts.id, accounts.identifier, accounts.title, accounts.description, accounts.status, banned, accounts.user_identifier, base_asset_identifier, accounts.meta_data, expires_at, accounts.created_at, accounts.updated_at, accounts.deleted_at FROM wallets
-JOIN wallet_assets ON wallets.base_asset_identifier = wallet_assets.identifier
-JOIN accounts ON wallets.user_identifier = accounts.identifier
-WHERE accounts.identifier = $1
+SELECT wallets.id, wallets.identifier, wallets.user_identifier, wallets.account_identifier, wallets.account_id, wallets.asset_identifier, wallets.wallet_asset_id, wallets.meta_data, wallets.ledger_account_id, wallets.ledger_account_code, wallets.primary_account_number, wallets.iban, wallets.cvv, wallets.cvv_two, wallets.expire_date, wallets.pin_code, wallets.status, wallets.transaction_totp_secret, wallets.transaction_totp_expires_at, wallets.created_at, wallets.updated_at, wallets.deleted_at FROM wallets
+JOIN wallet_assets ON wallets.wallet_asset_id = wallet_assets.id
+JOIN accounts ON wallets.account_id = accounts.id
+WHERE accounts.user_identifier = $1
 AND accounts.status != 'PENDING'
 AND accounts.deleted_at IS NULL
 AND accounts.banned = FALSE
-AND accounts.expires_at > NOW()
+AND (accounts.expires_at IS NULL OR accounts.expires_at > NOW())
 AND wallet_assets.symbol = $2
 AND wallet_assets.active = TRUE
 AND wallet_assets.deleted_at IS NULL
 AND wallets.user_identifier = $1
-AND wallets.base_asset_identifier = wallet_assets.identifier
 AND wallets.deleted_at IS NULL
 LIMIT 1
 `
 
 type GetUserAssetWalletParams struct {
-	Identifier ulid.ULID `json:"identifier"`
-	Symbol     string    `json:"symbol"`
-}
-
-type GetUserAssetWalletRow struct {
-	ID                       int64               `json:"id"`
-	Identifier               ulid.ULID           `json:"identifier"`
-	UserIdentifier           string              `json:"user_identifier"`
-	AccountIdentifier        string              `json:"account_identifier"`
-	AccountID                int64               `json:"account_id"`
-	AssetIdentifier          string              `json:"asset_identifier"`
-	WalletAssetID            int64               `json:"wallet_asset_id"`
-	MetaData                 []byte              `json:"meta_data"`
-	LedgerAccountID          int64               `json:"ledger_account_id"`
-	LedgerAccountCode        int32               `json:"ledger_account_code"`
-	PrimaryAccountNumber     string              `json:"primary_account_number"`
-	Iban                     pgtype.Text         `json:"iban"`
-	Cvv                      pgtype.Text         `json:"cvv"`
-	CvvTwo                   pgtype.Text         `json:"cvv_two"`
-	ExpireDate               pgtype.Text         `json:"expire_date"`
-	PinCode                  pgtype.Text         `json:"pin_code"`
-	Status                   WalletAccountStatus `json:"status"`
-	TransactionTotpSecret    pgtype.Text         `json:"transaction_totp_secret"`
-	TransactionTotpExpiresAt pgtype.Timestamptz  `json:"transaction_totp_expires_at"`
-	CreatedAt                time.Time           `json:"created_at"`
-	UpdatedAt                pgtype.Timestamptz  `json:"updated_at"`
-	DeletedAt                pgtype.Timestamptz  `json:"deleted_at"`
-	ID_2                     int64               `json:"id_2"`
-	Identifier_2             ulid.ULID           `json:"identifier_2"`
-	Active                   bool                `json:"active"`
-	Code                     string              `json:"code"`
-	Symbol                   string              `json:"symbol"`
-	Title                    string              `json:"title"`
-	Description              pgtype.Text         `json:"description"`
-	Predefined               bool                `json:"predefined"`
-	Unit                     WalletAssetUnit     `json:"unit"`
-	UnitTitle                pgtype.Text         `json:"unit_title"`
-	Decimals                 int32               `json:"decimals"`
-	Network                  pgtype.Text         `json:"network"`
-	IconUrl                  pgtype.Text         `json:"icon_url"`
-	MetaData_2               []byte              `json:"meta_data_2"`
-	LedgerCode               int32               `json:"ledger_code"`
-	CreatedAt_2              time.Time           `json:"created_at_2"`
-	UpdatedAt_2              pgtype.Timestamptz  `json:"updated_at_2"`
-	DeletedAt_2              pgtype.Timestamptz  `json:"deleted_at_2"`
-	ID_3                     int64               `json:"id_3"`
-	Identifier_3             ulid.ULID           `json:"identifier_3"`
-	Title_2                  string              `json:"title_2"`
-	Description_2            pgtype.Text         `json:"description_2"`
-	Status_2                 AccountStatus       `json:"status_2"`
-	Banned                   bool                `json:"banned"`
-	UserIdentifier_2         string              `json:"user_identifier_2"`
-	BaseAssetIdentifier      string              `json:"base_asset_identifier"`
-	MetaData_3               []byte              `json:"meta_data_3"`
-	ExpiresAt                pgtype.Timestamptz  `json:"expires_at"`
-	CreatedAt_3              time.Time           `json:"created_at_3"`
-	UpdatedAt_3              pgtype.Timestamptz  `json:"updated_at_3"`
-	DeletedAt_3              pgtype.Timestamptz  `json:"deleted_at_3"`
+	UserIdentifier string `json:"user_identifier"`
+	Symbol         string `json:"symbol"`
 }
 
 // join accounts, wallets and wallet_assets tables to get wallet and base asset information
@@ -208,9 +145,9 @@ type GetUserAssetWalletRow struct {
 //
 //	3-1: selected wallet asset deleted_at IS NULL
 //	3-3: selected wallet deleted_at IS NULL
-func (q *Queries) GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (GetUserAssetWalletRow, error) {
-	row := q.db.QueryRow(ctx, getUserAssetWallet, arg.Identifier, arg.Symbol)
-	var i GetUserAssetWalletRow
+func (q *Queries) GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (Wallet, error) {
+	row := q.db.QueryRow(ctx, getUserAssetWallet, arg.UserIdentifier, arg.Symbol)
+	var i Wallet
 	err := row.Scan(
 		&i.ID,
 		&i.Identifier,
@@ -234,37 +171,49 @@ func (q *Queries) GetUserAssetWallet(ctx context.Context, arg GetUserAssetWallet
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.ID_2,
-		&i.Identifier_2,
-		&i.Active,
-		&i.Code,
-		&i.Symbol,
-		&i.Title,
-		&i.Description,
-		&i.Predefined,
-		&i.Unit,
-		&i.UnitTitle,
-		&i.Decimals,
-		&i.Network,
-		&i.IconUrl,
-		&i.MetaData_2,
-		&i.LedgerCode,
-		&i.CreatedAt_2,
-		&i.UpdatedAt_2,
-		&i.DeletedAt_2,
-		&i.ID_3,
-		&i.Identifier_3,
-		&i.Title_2,
-		&i.Description_2,
-		&i.Status_2,
-		&i.Banned,
-		&i.UserIdentifier_2,
-		&i.BaseAssetIdentifier,
-		&i.MetaData_3,
-		&i.ExpiresAt,
-		&i.CreatedAt_3,
-		&i.UpdatedAt_3,
-		&i.DeletedAt_3,
+	)
+	return i, err
+}
+
+const getUserWalletByIdentifier = `-- name: GetUserWalletByIdentifier :one
+SELECT id, identifier, user_identifier, account_identifier, account_id, asset_identifier, wallet_asset_id, meta_data, ledger_account_id, ledger_account_code, primary_account_number, iban, cvv, cvv_two, expire_date, pin_code, status, transaction_totp_secret, transaction_totp_expires_at, created_at, updated_at, deleted_at FROM wallets
+WHERE identifier::text = $1::text
+AND user_identifier = $2
+AND deleted_at IS NULL
+LIMIT 1
+`
+
+type GetUserWalletByIdentifierParams struct {
+	Column1        string `json:"column_1"`
+	UserIdentifier string `json:"user_identifier"`
+}
+
+func (q *Queries) GetUserWalletByIdentifier(ctx context.Context, arg GetUserWalletByIdentifierParams) (Wallet, error) {
+	row := q.db.QueryRow(ctx, getUserWalletByIdentifier, arg.Column1, arg.UserIdentifier)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.Identifier,
+		&i.UserIdentifier,
+		&i.AccountIdentifier,
+		&i.AccountID,
+		&i.AssetIdentifier,
+		&i.WalletAssetID,
+		&i.MetaData,
+		&i.LedgerAccountID,
+		&i.LedgerAccountCode,
+		&i.PrimaryAccountNumber,
+		&i.Iban,
+		&i.Cvv,
+		&i.CvvTwo,
+		&i.ExpireDate,
+		&i.PinCode,
+		&i.Status,
+		&i.TransactionTotpSecret,
+		&i.TransactionTotpExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

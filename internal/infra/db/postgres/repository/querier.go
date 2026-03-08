@@ -11,7 +11,12 @@ import (
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
 	CreateWallet(ctx context.Context, arg CreateWalletParams) (Wallet, error)
+	CreateWalletCard(ctx context.Context, arg CreateWalletCardParams) (WalletCard, error)
+	CreateWalletCardEvent(ctx context.Context, arg CreateWalletCardEventParams) (WalletCardEvent, error)
+	EnsureCardProduct(ctx context.Context, arg EnsureCardProductParams) (CardProduct, error)
+	EnsureIssuerBin(ctx context.Context, arg EnsureIssuerBinParams) (IssuerBin, error)
 	GetAccountByIdentifier(ctx context.Context, dollar_1 string) (Account, error)
+	GetActiveWalletCardByWallet(ctx context.Context, arg GetActiveWalletCardByWalletParams) (WalletCard, error)
 	GetAllWalletAssets(ctx context.Context, arg GetAllWalletAssetsParams) ([]WalletAsset, error)
 	GetUserAccount(ctx context.Context, userIdentifier string) (Account, error)
 	// join accounts, wallets and wallet_assets tables to get wallet and base asset information
@@ -20,11 +25,15 @@ type Querier interface {
 	// 3 : get wallet by user identifier and base asset identifier that match with input user identifier and base asset identifier selected in step 2
 	//  3-1: selected wallet asset deleted_at IS NULL
 	//  3-3: selected wallet deleted_at IS NULL
-	GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (GetUserAssetWalletRow, error)
+	GetUserAssetWallet(ctx context.Context, arg GetUserAssetWalletParams) (Wallet, error)
+	GetUserWalletByIdentifier(ctx context.Context, arg GetUserWalletByIdentifierParams) (Wallet, error)
 	GetUserWallets(ctx context.Context, arg GetUserWalletsParams) ([]Wallet, error)
 	GetWalletAssetByIdentifier(ctx context.Context, dollar_1 string) (WalletAsset, error)
 	GetWalletAssetBySymbol(ctx context.Context, symbol string) (WalletAsset, error)
 	GetWalletByIdentifier(ctx context.Context, dollar_1 string) (Wallet, error)
+	GetWalletCardByPanFingerprint(ctx context.Context, panFingerprint string) (WalletCard, error)
+	GetWalletCardsByWallet(ctx context.Context, arg GetWalletCardsByWalletParams) ([]WalletCard, error)
+	UpdateWalletCardLastAuthenticatedAt(ctx context.Context, id int64) (WalletCard, error)
 }
 
 var _ Querier = (*Queries)(nil)
