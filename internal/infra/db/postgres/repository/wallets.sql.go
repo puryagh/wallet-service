@@ -24,6 +24,12 @@ INSERT INTO wallets (
     ledger_account_id,
     ledger_account_code,
     primary_account_number,
+    primary_account_number,
+    iban,
+    cvv,
+    cvv_two,
+    expire_date,
+    pin_code,
     status,
     created_at,
     updated_at
@@ -38,6 +44,12 @@ INSERT INTO wallets (
     $8,
     $9,
     $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 )
@@ -45,16 +57,22 @@ RETURNING id, identifier, user_identifier, account_identifier, account_id, asset
 `
 
 type CreateWalletParams struct {
-	UserIdentifier       string              `json:"user_identifier"`
-	AccountIdentifier    string              `json:"account_identifier"`
-	AccountID            int64               `json:"account_id"`
-	AssetIdentifier      string              `json:"asset_identifier"`
-	WalletAssetID        int64               `json:"wallet_asset_id"`
-	MetaData             []byte              `json:"meta_data"`
-	LedgerAccountID      int64               `json:"ledger_account_id"`
-	LedgerAccountCode    int32               `json:"ledger_account_code"`
-	PrimaryAccountNumber string              `json:"primary_account_number"`
-	Status               WalletAccountStatus `json:"status"`
+	UserIdentifier         string              `json:"user_identifier"`
+	AccountIdentifier      string              `json:"account_identifier"`
+	AccountID              int64               `json:"account_id"`
+	AssetIdentifier        string              `json:"asset_identifier"`
+	WalletAssetID          int64               `json:"wallet_asset_id"`
+	MetaData               []byte              `json:"meta_data"`
+	LedgerAccountID        int64               `json:"ledger_account_id"`
+	LedgerAccountCode      int32               `json:"ledger_account_code"`
+	PrimaryAccountNumber   string              `json:"primary_account_number"`
+	PrimaryAccountNumber_2 string              `json:"primary_account_number_2"`
+	Iban                   pgtype.Text         `json:"iban"`
+	Cvv                    pgtype.Text         `json:"cvv"`
+	CvvTwo                 pgtype.Text         `json:"cvv_two"`
+	ExpireDate             pgtype.Text         `json:"expire_date"`
+	PinCode                pgtype.Text         `json:"pin_code"`
+	Status                 WalletAccountStatus `json:"status"`
 }
 
 func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wallet, error) {
@@ -68,6 +86,12 @@ func (q *Queries) CreateWallet(ctx context.Context, arg CreateWalletParams) (Wal
 		arg.LedgerAccountID,
 		arg.LedgerAccountCode,
 		arg.PrimaryAccountNumber,
+		arg.PrimaryAccountNumber_2,
+		arg.Iban,
+		arg.Cvv,
+		arg.CvvTwo,
+		arg.ExpireDate,
+		arg.PinCode,
 		arg.Status,
 	)
 	var i Wallet

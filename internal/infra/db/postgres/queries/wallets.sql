@@ -46,6 +46,12 @@ INSERT INTO wallets (
     ledger_account_id,
     ledger_account_code,
     primary_account_number,
+    primary_account_number,
+    iban,
+    cvv,
+    cvv_two,
+    expire_date,
+    pin_code,
     status,
     created_at,
     updated_at
@@ -60,6 +66,12 @@ INSERT INTO wallets (
     $8,
     $9,
     $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
     CURRENT_TIMESTAMP, 
     CURRENT_TIMESTAMP
 )

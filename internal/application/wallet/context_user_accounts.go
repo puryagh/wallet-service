@@ -144,8 +144,13 @@ func (s *service) ContextUserAccounts(ctx context.Context, req *emptypb.Empty) (
 				WalletAssetID:        asset.ID,
 				MetaData:             metadata,
 				LedgerAccountCode:    asset.LedgerCode,
-				Status:               repository.WalletAccountStatusACTIVE,
 				PrimaryAccountNumber: ulid.Make().String()[:24],
+				Iban:                 pgtype.Text{String: "", Valid: false},
+				Cvv:                  pgtype.Text{String: "", Valid: false},
+				CvvTwo:               pgtype.Text{String: "", Valid: false},
+				ExpireDate:           pgtype.Text{String: "", Valid: false},
+				PinCode:              pgtype.Text{String: "", Valid: false},
+				Status:               repository.WalletAccountStatusACTIVE,
 				LedgerAccountID:      dbLedgerAccountId.Int64(),
 			})
 		}
